@@ -1,0 +1,884 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+
+<title>Заметки</title>
+<description>Небольшие заметки о том, что мне интересно</description>
+<link>https://tsb99x.ru/notes/</link>
+<language>ru</language>
+<generator>pandoc</generator>
+<lastBuildDate>Wed, 15 Apr 2026 20:57:58 +0300</lastBuildDate>
+
+<atom:link href="https://tsb99x.ru/notes/feed.xml" rel="self" type="application/rss+xml" />
+
+<item>
+    <title>Хитрые утки</title>
+    <description><![CDATA[Сломавшие систему]]></description>
+    <link>https://tsb99x.ru/notes/cunning-ducks.html</link>
+    <pubDate>Wed, 15 Apr 2026 20:55:34 +0300</pubDate>
+    <guid isPermaLink="false">e5c3575c-9080-44da-b2f9-f5e707d9aa93</guid>
+</item>
+<item>
+    <title>Журналирование знаний в Logseq</title>
+    <description><![CDATA[Просто отличный инструмент]]></description>
+    <link>https://tsb99x.ru/notes/journaling-in-logseq.html</link>
+    <pubDate>Tue, 14 Apr 2026 21:34:20 +0300</pubDate>
+    <guid isPermaLink="false">3f442ab0-16bd-4e80-9708-0e0de2681b94</guid>
+</item>
+<item>
+    <title>Новая идентификация доменов</title>
+    <description><![CDATA[Опять требования без пользы]]></description>
+    <link>https://tsb99x.ru/notes/additional-domain-id.html</link>
+    <pubDate>Mon, 13 Apr 2026 19:54:39 +0300</pubDate>
+    <guid isPermaLink="false">b9b9c7d8-a3e9-4555-9744-1689265f703d</guid>
+</item>
+<item>
+    <title>KOSS Porta Pro</title>
+    <description><![CDATA[Легендарные наушники]]></description>
+    <link>https://tsb99x.ru/notes/koss-porta-pro.html</link>
+    <pubDate>Sat, 23 Aug 2025 13:12:34 +0300</pubDate>
+    <guid isPermaLink="false">b609805a-bb72-449b-ad75-a2761182e160</guid>
+</item>
+<item>
+    <title>Паук для Fifine AM8</title>
+    <description><![CDATA[Решение проблемы вибраций]]></description>
+    <link>https://tsb99x.ru/notes/fifine-am8-shock-mount.html</link>
+    <pubDate>Tue, 05 Aug 2025 19:59:01 +0300</pubDate>
+    <guid isPermaLink="false">15161b80-bd88-4efd-a993-9bf5f06d5ede</guid>
+</item>
+<item>
+    <title>Open WebUI в Podman</title>
+    <description><![CDATA[Современный GUI для Ollama]]></description>
+    <link>https://tsb99x.ru/notes/open-webui-in-podman.html</link>
+    <pubDate>Mon, 21 Jul 2025 16:11:41 +0300</pubDate>
+    <guid isPermaLink="false">2320e58f-cfc9-416a-945a-a76290696562</guid>
+</item>
+<item>
+    <title>Запускаем Ollama в Podman</title>
+    <description><![CDATA[Локальная LLM на Linux]]></description>
+    <link>https://tsb99x.ru/notes/ollama-in-podman.html</link>
+    <pubDate>Sun, 20 Jul 2025 10:37:42 +0300</pubDate>
+    <guid isPermaLink="false">288caebd-d8fd-47a5-96bc-64224596aaeb</guid>
+</item>
+<item>
+    <title>BTRFS и свободное место</title>
+    <description><![CDATA[Где место, Лебовски?]]></description>
+    <link>https://tsb99x.ru/notes/btrfs-free-space.html</link>
+    <pubDate>Wed, 02 Jul 2025 17:00:34 +0300</pubDate>
+    <guid isPermaLink="false">b28d655b-3e11-4e1a-960c-687deccc776c</guid>
+</item>
+<item>
+    <title>Гипер-специализация</title>
+    <description><![CDATA[Бич современности]]></description>
+    <link>https://tsb99x.ru/notes/hyperspecialization.html</link>
+    <pubDate>Tue, 01 Jul 2025 15:26:51 +0300</pubDate>
+    <guid isPermaLink="false">658d2119-9664-4af9-b80d-d374b5280f30</guid>
+</item>
+<item>
+    <title>Дедупликация BTRFS</title>
+    <description><![CDATA[С помощью BEES]]></description>
+    <link>https://tsb99x.ru/notes/btrfs-bees-dedup.html</link>
+    <pubDate>Fri, 27 Jun 2025 16:09:20 +0300</pubDate>
+    <guid isPermaLink="false">81c038ff-6a1c-4b00-96d7-c1dea41439f6</guid>
+</item>
+<item>
+    <title>KZ EDX PRO X</title>
+    <description><![CDATA[Дешёвые IEM]]></description>
+    <link>https://tsb99x.ru/notes/kz-edx-pro-x.html</link>
+    <pubDate>Thu, 26 Jun 2025 13:10:11 +0300</pubDate>
+    <guid isPermaLink="false">d4eb76d9-12f8-4eb4-ad82-c15d6f15e27b</guid>
+</item>
+<item>
+    <title>Облегчаем Git-репы</title>
+    <description><![CDATA[Про garbage collection]]></description>
+    <link>https://tsb99x.ru/notes/git-garbage-collection.html</link>
+    <pubDate>Tue, 24 Jun 2025 14:57:20 +0300</pubDate>
+    <guid isPermaLink="false">9fb21be1-566c-4e2c-a471-44108d6453f4</guid>
+</item>
+<item>
+    <title>Амбушюры для JBL T450BT</title>
+    <description><![CDATA[Теперь как новенькие!]]></description>
+    <link>https://tsb99x.ru/notes/jbl-t450bt-replacement-pads.html</link>
+    <pubDate>Mon, 23 Jun 2025 14:51:04 +0300</pubDate>
+    <guid isPermaLink="false">45ffebe6-b69d-4c11-9ed7-d68b65dba17b</guid>
+</item>
+<item>
+    <title>Синхронизация с Telegram</title>
+    <description><![CDATA[Сделал копию постов на сайт]]></description>
+    <link>https://tsb99x.ru/notes/sync-with-telegram.html</link>
+    <pubDate>Sun, 22 Jun 2025 17:55:07 +0300</pubDate>
+    <guid isPermaLink="false">03789426-1839-4fa7-b12f-3c17c5859f0e</guid>
+</item>
+<item>
+    <title>The Call of Cthulhu</title>
+    <description><![CDATA[Cthulhu fhtagn!]]></description>
+    <link>https://tsb99x.ru/notes/book-the-call-of-cthulhu.html</link>
+    <pubDate>Thu, 19 Jun 2025 15:58:07 +0300</pubDate>
+    <guid isPermaLink="false">48f2af2b-d60a-45ff-8ee2-6fe0ddf36b90</guid>
+</item>
+<item>
+    <title>Как пользоваться Memtest86+</title>
+    <description><![CDATA[На Windows и Linux]]></description>
+    <link>https://tsb99x.ru/notes/memtest.html</link>
+    <pubDate>Wed, 18 Jun 2025 21:15:23 +0300</pubDate>
+    <guid isPermaLink="false">b211253e-7b5e-458d-ac7f-5397b9ff2502</guid>
+</item>
+<item>
+    <title>Формат видео</title>
+    <description><![CDATA[Съедает много времени]]></description>
+    <link>https://tsb99x.ru/notes/video-format.html</link>
+    <pubDate>Tue, 17 Jun 2025 14:21:53 +0300</pubDate>
+    <guid isPermaLink="false">93dc3096-497a-4a51-b8fe-83394f5ac95f</guid>
+</item>
+<item>
+    <title>Поддержка SBC-XQ в Linux</title>
+    <description><![CDATA[А что, так можно было?!]]></description>
+    <link>https://tsb99x.ru/notes/sbc-xq-in-linux.html</link>
+    <pubDate>Sat, 14 Jun 2025 19:24:29 +0300</pubDate>
+    <guid isPermaLink="false">ff17c8c9-8444-4ba8-b8f2-1cee4a8f6a1c</guid>
+</item>
+<item>
+    <title>CD-диски и аудио-техника</title>
+    <description><![CDATA[Новое старое увлечение]]></description>
+    <link>https://tsb99x.ru/notes/cd-disks-and-audio-tech.html</link>
+    <pubDate>Mon, 09 Jun 2025 19:39:11 +0300</pubDate>
+    <guid isPermaLink="false">4b9a5e54-bb91-41e8-8c83-e22a261f48ae</guid>
+</item>
+<item>
+    <title>I, Robot</title>
+    <description><![CDATA[Рассказы от Азимова]]></description>
+    <link>https://tsb99x.ru/notes/book-i-robot.html</link>
+    <pubDate>Sat, 07 Jun 2025 19:41:03 +0300</pubDate>
+    <guid isPermaLink="false">b98d9890-8bc5-4d4a-b158-d672a9e7c4cc</guid>
+</item>
+<item>
+    <title>LLM на подборе вместо HR’ов</title>
+    <description><![CDATA[… или вместе с HR’ами?]]></description>
+    <link>https://tsb99x.ru/notes/llm-in-recruiting.html</link>
+    <pubDate>Tue, 20 May 2025 15:46:06 +0300</pubDate>
+    <guid isPermaLink="false">083ea21b-226c-4877-8629-8093ec50ca67</guid>
+</item>
+<item>
+    <title>Program in C!</title>
+    <description><![CDATA[SEGFAULT]]></description>
+    <link>https://tsb99x.ru/notes/program-in-c-joke.html</link>
+    <pubDate>Mon, 19 May 2025 17:48:46 +0300</pubDate>
+    <guid isPermaLink="false">4688c2cb-ab4f-4d9c-9511-56a50c5430c6</guid>
+</item>
+<item>
+    <title>BTRFS. Чексумминг</title>
+    <description><![CDATA[Эксперимент с фото]]></description>
+    <link>https://tsb99x.ru/notes/btrfs-checksumming.html</link>
+    <pubDate>Sat, 17 May 2025 13:56:16 +0300</pubDate>
+    <guid isPermaLink="false">f13513b1-c79e-4f68-9cda-57808372ad5d</guid>
+</item>
+<item>
+    <title>LLM и ревью сценария</title>
+    <description><![CDATA[Да-да хозяин, всё окей]]></description>
+    <link>https://tsb99x.ru/notes/llm-and-script-review.html</link>
+    <pubDate>Wed, 14 May 2025 20:42:45 +0300</pubDate>
+    <guid isPermaLink="false">27de4d3c-5ce0-4f49-874b-2a115e06a3d5</guid>
+</item>
+<item>
+    <title>Дикий Запад на заре Dual Core</title>
+    <description><![CDATA[Да уж, были интересные времена…]]></description>
+    <link>https://tsb99x.ru/notes/bioshock-insert.html</link>
+    <pubDate>Sun, 11 May 2025 17:31:41 +0300</pubDate>
+    <guid isPermaLink="false">2afa241f-1ad2-4b14-a14e-63ba957acede</guid>
+</item>
+<item>
+    <title>Проф. выгорание и квас</title>
+    <description><![CDATA[Как индикатор усталости]]></description>
+    <link>https://tsb99x.ru/notes/burnout-and-kvass.html</link>
+    <pubDate>Fri, 09 May 2025 19:41:43 +0300</pubDate>
+    <guid isPermaLink="false">688dbf0b-4a83-45c9-b66b-768fa77df653</guid>
+</item>
+<item>
+    <title>HTML5 video и субтитры</title>
+    <description><![CDATA[Поддержка WebVTT в деле]]></description>
+    <link>https://tsb99x.ru/notes/html5-video-and-subtitles.html</link>
+    <pubDate>Thu, 08 May 2025 16:29:18 +0300</pubDate>
+    <guid isPermaLink="false">43d8f976-d24e-4e12-b93a-a064a553bd0b</guid>
+</item>
+<item>
+    <title>Установка DLC от GOG в Lutris</title>
+    <description><![CDATA[Запуск EXE в префиксе]]></description>
+    <link>https://tsb99x.ru/notes/install-gog-dlc.html</link>
+    <pubDate>Wed, 07 May 2025 22:12:47 +0300</pubDate>
+    <guid isPermaLink="false">ca8e8800-a8cc-46fa-9f09-ffa60d3e5e9b</guid>
+</item>
+<item>
+    <title>Ubuntu заменит sudo на sudo-rs</title>
+    <description><![CDATA[Странный случай оксидирования 2]]></description>
+    <link>https://tsb99x.ru/notes/ubuntu-sudo-in-rs.html</link>
+    <pubDate>Tue, 06 May 2025 17:44:21 +0300</pubDate>
+    <guid isPermaLink="false">c3d71bc6-4626-42e8-9015-f6271b99ddd5</guid>
+</item>
+<item>
+    <title>Прощай, Skype…</title>
+    <description><![CDATA[Забытый старичок]]></description>
+    <link>https://tsb99x.ru/notes/goodbye-skype.html</link>
+    <pubDate>Mon, 05 May 2025 21:26:12 +0300</pubDate>
+    <guid isPermaLink="false">1b3c86ce-7bff-4a1b-9a16-819d5532172f</guid>
+</item>
+<item>
+    <title>Зачем много портов USB 3.0</title>
+    <description><![CDATA[Особенно на фронт-панели]]></description>
+    <link>https://tsb99x.ru/notes/debian-dlbd-recording.html</link>
+    <pubDate>Sat, 03 May 2025 12:09:32 +0300</pubDate>
+    <guid isPermaLink="false">1922e1e6-67a9-4391-ba4f-b63c2cf133b1</guid>
+</item>
+<item>
+    <title>Оффлайн установщики GOG в Lutris</title>
+    <description><![CDATA[Устанавливаем Windows-игры]]></description>
+    <link>https://tsb99x.ru/notes/gog-offline-installers-in-lutris.html</link>
+    <pubDate>Fri, 02 May 2025 21:05:31 +0300</pubDate>
+    <guid isPermaLink="false">2d51d1e4-d8bb-4712-b43b-a29741dba810</guid>
+</item>
+<item>
+    <title>Star Wars: Episode III в кино</title>
+    <description><![CDATA[Какие же мы старые. Дубль 2]]></description>
+    <link>https://tsb99x.ru/notes/sw-episode-iii-in-theaters.html</link>
+    <pubDate>Wed, 30 Apr 2025 21:54:30 +0300</pubDate>
+    <guid isPermaLink="false">52fda681-3301-4542-9c13-7024d862d587</guid>
+</item>
+<item>
+    <title>Установка Lutris как Flatpak</title>
+    <description><![CDATA[На Debian с KDE]]></description>
+    <link>https://tsb99x.ru/notes/install-lutris-in-flatpak.html</link>
+    <pubDate>Mon, 28 Apr 2025 17:29:09 +0300</pubDate>
+    <guid isPermaLink="false">e6c8d2f3-e7e4-48d2-9554-6669097d55e7</guid>
+</item>
+<item>
+    <title>Oblivion спустя 19 лет</title>
+    <description><![CDATA[Какие же мы старые]]></description>
+    <link>https://tsb99x.ru/notes/tes-oblivion-remaster-after-19-years.html</link>
+    <pubDate>Tue, 22 Apr 2025 21:28:40 +0300</pubDate>
+    <guid isPermaLink="false">b2eb821c-6d5b-4c31-8be2-723b6ca18f93</guid>
+</item>
+<item>
+    <title>DOOM (2016) на GOG</title>
+    <description><![CDATA[DOOM без DRM]]></description>
+    <link>https://tsb99x.ru/notes/doom-2016-on-gog.html</link>
+    <pubDate>Sat, 19 Apr 2025 21:54:55 +0300</pubDate>
+    <guid isPermaLink="false">f60df6b4-66cb-4b7b-adff-a42147436023</guid>
+</item>
+<item>
+    <title>Таймлапс Car Mechanic Simulator</title>
+    <description><![CDATA[Выкладываем старый геймплей]]></description>
+    <link>https://tsb99x.ru/notes/car-mechanic-simulator-timelapse.html</link>
+    <pubDate>Wed, 16 Apr 2025 15:32:07 +0300</pubDate>
+    <guid isPermaLink="false">b7128f87-3099-432a-beb0-bfcff620e06c</guid>
+</item>
+<item>
+    <title>Altair Basic в Open Source!</title>
+    <description><![CDATA[Оригинальный код от Microsoft]]></description>
+    <link>https://tsb99x.ru/notes/altair-basic-in-open-source.html</link>
+    <pubDate>Thu, 10 Apr 2025 12:56:29 +0300</pubDate>
+    <guid isPermaLink="false">a18eacab-6b20-4bfe-8050-a0d9b2a98a52</guid>
+</item>
+<item>
+    <title>Advent of Code 2015, день 5</title>
+    <description><![CDATA[Санта фильтрует слова]]></description>
+    <link>https://tsb99x.ru/notes/advent-of-code-2015-day-05.html</link>
+    <pubDate>Sat, 29 Mar 2025 16:22:23 +0300</pubDate>
+    <guid isPermaLink="false">cf92f082-0617-494e-84a8-d8ca0561fe0a</guid>
+</item>
+<item>
+    <title>Коты и вертикальные системники</title>
+    <description><![CDATA[Любимая замена домашней печи]]></description>
+    <link>https://tsb99x.ru/notes/cat-on-pc.html</link>
+    <pubDate>Wed, 26 Mar 2025 19:09:42 +0300</pubDate>
+    <guid isPermaLink="false">cd3e18c1-d4a4-42c1-ad46-3f7149828044</guid>
+</item>
+<item>
+    <title>Ubuntu заменят Core Utilities…</title>
+    <description><![CDATA[Странный случай оксидирования]]></description>
+    <link>https://tsb99x.ru/notes/ubuntu-core-utilities-in-rs.html</link>
+    <pubDate>Wed, 19 Mar 2025 20:56:42 +0300</pubDate>
+    <guid isPermaLink="false">0065bcdd-6a4f-4a73-83fd-5ec1a0ca5391</guid>
+</item>
+<item>
+    <title>Brave + Ollama</title>
+    <description><![CDATA[Концепт BYOM]]></description>
+    <link>https://tsb99x.ru/notes/brave-byom.html</link>
+    <pubDate>Mon, 17 Mar 2025 20:39:18 +0300</pubDate>
+    <guid isPermaLink="false">b0d39a13-954f-4f41-a4aa-8a14f8ef5e1a</guid>
+</item>
+<item>
+    <title>Podman, Ollama и DeepSeek R1</title>
+    <description><![CDATA[Учимся грееть космос]]></description>
+    <link>https://tsb99x.ru/notes/podman-ollama-deepseek-r1.html</link>
+    <pubDate>Sat, 15 Mar 2025 17:02:47 +0300</pubDate>
+    <guid isPermaLink="false">f5db0ef8-55b6-43d7-855b-2768021a64e1</guid>
+</item>
+<item>
+    <title>Advent of Code 2015, день 4</title>
+    <description><![CDATA[Санта майнит AdventCoin]]></description>
+    <link>https://tsb99x.ru/notes/advent-of-code-2015-day-04.html</link>
+    <pubDate>Thu, 13 Mar 2025 15:31:47 +0300</pubDate>
+    <guid isPermaLink="false">6b3a3909-6087-465d-a0c1-8ed5c5aaceca</guid>
+</item>
+<item>
+    <title>Advent of Code 2015, день 3</title>
+    <description><![CDATA[Санта ходит-бродит по домам]]></description>
+    <link>https://tsb99x.ru/notes/advent-of-code-2015-day-03.html</link>
+    <pubDate>Wed, 12 Mar 2025 19:47:59 +0300</pubDate>
+    <guid isPermaLink="false">0b699b8d-5923-4442-9606-004b8323bb08</guid>
+</item>
+<item>
+    <title>Advent of Code 2015, день 2</title>
+    <description><![CDATA[Эльфы упаковывают подарки]]></description>
+    <link>https://tsb99x.ru/notes/advent-of-code-2015-day-02.html</link>
+    <pubDate>Mon, 10 Mar 2025 14:34:05 +0300</pubDate>
+    <guid isPermaLink="false">fc614f58-0676-491f-b566-6d0201e908dc</guid>
+</item>
+<item>
+    <title>Отслеживаем переполнение int</title>
+    <description><![CDATA[Флаги санитизации для Си]]></description>
+    <link>https://tsb99x.ru/notes/c-integer-overflow-and-compile-flags.html</link>
+    <pubDate>Fri, 07 Mar 2025 14:03:40 +0300</pubDate>
+    <guid isPermaLink="false">fb61cdad-9a6b-45f3-a564-f5428ad152ff</guid>
+</item>
+<item>
+    <title>Bash скрипт для тестов</title>
+    <description><![CDATA[Автоматизация проверки решений]]></description>
+    <link>https://tsb99x.ru/notes/bash-script-for-solutions.html</link>
+    <pubDate>Thu, 06 Mar 2025 15:42:57 +0300</pubDate>
+    <guid isPermaLink="false">ad3efed0-fd0c-44ae-87a9-b49d82d5a13a</guid>
+</item>
+<item>
+    <title>Advent of Code 2015, день 1</title>
+    <description><![CDATA[Санта путешествует по Гигахрущу]]></description>
+    <link>https://tsb99x.ru/notes/advent-of-code-2015-day-01.html</link>
+    <pubDate>Wed, 05 Mar 2025 15:25:17 +0300</pubDate>
+    <guid isPermaLink="false">d20fae3e-57e7-4765-a681-00ace63435c7</guid>
+</item>
+<item>
+    <title>Command &amp; Conquer в Open Source!</title>
+    <description><![CDATA[Прекрасные новости]]></description>
+    <link>https://tsb99x.ru/notes/command-and-conquer-in-open-source.html</link>
+    <pubDate>Fri, 28 Feb 2025 11:58:26 +0300</pubDate>
+    <guid isPermaLink="false">ee9e7cdd-cb89-4a8e-8efc-5ee6aad13da5</guid>
+</item>
+<item>
+    <title>QMK на ATmega328P</title>
+    <description><![CDATA[Потенциал старого AVR]]></description>
+    <link>https://tsb99x.ru/notes/qmk-on-atmega328p.html</link>
+    <pubDate>Thu, 27 Feb 2025 18:59:58 +0300</pubDate>
+    <guid isPermaLink="false">aaac5ea0-d793-412e-ac79-6eee71bcf53c</guid>
+</item>
+<item>
+    <title>Power of Ten, JPL, MISRA-C</title>
+    <description><![CDATA[Статический анализ для Си]]></description>
+    <link>https://tsb99x.ru/notes/misra-c-static-analysis.html</link>
+    <pubDate>Wed, 26 Feb 2025 20:45:21 +0300</pubDate>
+    <guid isPermaLink="false">6c8f18d7-272e-44b4-8d0a-6ba390fb6db8</guid>
+</item>
+<item>
+    <title>Hypermedia Systems</title>
+    <description><![CDATA[Книга по HTMX и HATEOAS]]></description>
+    <link>https://tsb99x.ru/notes/hypermedia-systems.html</link>
+    <pubDate>Sat, 22 Feb 2025 21:24:33 +0300</pubDate>
+    <guid isPermaLink="false">0414d185-b5b5-4bef-b75e-7b3e3ce73ba2</guid>
+</item>
+<item>
+    <title>Game of Life</title>
+    <description><![CDATA[Ещё один архивный проект]]></description>
+    <link>https://tsb99x.ru/notes/glider.html</link>
+    <pubDate>Fri, 21 Feb 2025 17:24:45 +0300</pubDate>
+    <guid isPermaLink="false">f0539500-6717-4336-a5b7-f000b179dc98</guid>
+</item>
+<item>
+    <title>Catppuccin пробирается на сайт…</title>
+    <description><![CDATA[Замечательная тема оформления]]></description>
+    <link>https://tsb99x.ru/notes/catppuccin-on-site.html</link>
+    <pubDate>Tue, 18 Feb 2025 20:01:49 +0300</pubDate>
+    <guid isPermaLink="false">a57a136f-e29e-4a3e-ae2d-7adc5fdaab29</guid>
+</item>
+<item>
+    <title>Книга Pro Git</title>
+    <description><![CDATA[От Скотта Чакона и Бена Страуба]]></description>
+    <link>https://tsb99x.ru/notes/pro-git.html</link>
+    <pubDate>Mon, 17 Feb 2025 20:14:56 +0300</pubDate>
+    <guid isPermaLink="false">9b3cd335-85bb-425c-890d-90daf6bb8972</guid>
+</item>
+<item>
+    <title>Прошивка ESP32 через NodeMCU</title>
+    <description><![CDATA[Адаптируем дефективный DevKit]]></description>
+    <link>https://tsb99x.ru/notes/programming-esp32-through-nodemcu.html</link>
+    <pubDate>Fri, 14 Feb 2025 20:33:49 +0300</pubDate>
+    <guid isPermaLink="false">bde87089-2177-4333-a003-77ab1ef40f00</guid>
+</item>
+<item>
+    <title>Судоку из 2015 года</title>
+    <description><![CDATA[Стряхиваем пыль с архивов]]></description>
+    <link>https://tsb99x.ru/notes/sudoku.html</link>
+    <pubDate>Wed, 12 Feb 2025 20:31:06 +0300</pubDate>
+    <guid isPermaLink="false">48f50c40-1c3e-4a60-b400-89b232c7d285</guid>
+</item>
+<item>
+    <title>Lazygit</title>
+    <description><![CDATA[TUI для Git]]></description>
+    <link>https://tsb99x.ru/notes/lazygit.html</link>
+    <pubDate>Tue, 11 Feb 2025 20:59:17 +0300</pubDate>
+    <guid isPermaLink="false">d5bf266e-de7c-41dd-a0fb-a15eb6d6ebb1</guid>
+</item>
+<item>
+    <title>Работа над ошибками</title>
+    <description><![CDATA[Обновляем проекты на Си]]></description>
+    <link>https://tsb99x.ru/notes/work-on-mistakes.html</link>
+    <pubDate>Mon, 10 Feb 2025 21:12:41 +0300</pubDate>
+    <guid isPermaLink="false">99d8decd-0549-4bc3-93bf-e8e67283aa08</guid>
+</item>
+<item>
+    <title>Rust против Си</title>
+    <description><![CDATA[В Linux и Curl]]></description>
+    <link>https://tsb99x.ru/notes/rust-vs-c.html</link>
+    <pubDate>Sun, 09 Feb 2025 21:27:27 +0300</pubDate>
+    <guid isPermaLink="false">3bb12d83-e8f0-4ba7-abbb-fbbeb727245c</guid>
+</item>
+<item>
+    <title>UTF-8 Everywhere</title>
+    <description><![CDATA[Универсальное решение]]></description>
+    <link>https://tsb99x.ru/notes/utf8-everywhere.html</link>
+    <pubDate>Fri, 07 Feb 2025 21:28:58 +0300</pubDate>
+    <guid isPermaLink="false">e948b9be-d6bd-4408-833f-619b2c961649</guid>
+</item>
+<item>
+    <title>Go To Statement Considered Harmful</title>
+    <description><![CDATA[Легендарная статья Эдсгера Дейкстры]]></description>
+    <link>https://tsb99x.ru/notes/go-to-statement-considered-harmful.html</link>
+    <pubDate>Thu, 06 Feb 2025 22:25:40 +0300</pubDate>
+    <guid isPermaLink="false">5df53fcf-fec0-444e-825c-cab60e9f7a64</guid>
+</item>
+<item>
+    <title>Книга Modern C</title>
+    <description><![CDATA[От Дженса Густеда]]></description>
+    <link>https://tsb99x.ru/notes/modern-c.html</link>
+    <pubDate>Wed, 05 Feb 2025 21:30:02 +0300</pubDate>
+    <guid isPermaLink="false">21d70bf4-1e9a-48d3-99b7-8718bfd9fac0</guid>
+</item>
+<item>
+    <title>Что нужно знать про Unicode</title>
+    <description><![CDATA[Статья от Джоэла Спольски]]></description>
+    <link>https://tsb99x.ru/notes/absolute-minimum-about-utf8.html</link>
+    <pubDate>Tue, 04 Feb 2025 21:04:57 +0300</pubDate>
+    <guid isPermaLink="false">991eeeaa-2abe-4159-a6b0-f2eadc2ccfdb</guid>
+</item>
+<item>
+    <title>Тестовый фреймворк для Си</title>
+    <description><![CDATA[От Джона Брюера]]></description>
+    <link>https://tsb99x.ru/notes/minunit.html</link>
+    <pubDate>Mon, 03 Feb 2025 20:19:07 +0300</pubDate>
+    <guid isPermaLink="false">bd12b793-df06-49ae-8f01-7a61dc60d83c</guid>
+</item>
+<item>
+    <title>Про The Clean Architecture</title>
+    <description><![CDATA[Статья от Роберта Мартина]]></description>
+    <link>https://tsb99x.ru/notes/clean-architecture-article.html</link>
+    <pubDate>Thu, 30 Jan 2025 21:57:26 +0300</pubDate>
+    <guid isPermaLink="false">36d09ad7-ef22-46ff-a0f4-35c748972f17</guid>
+</item>
+<item>
+    <title>Статьи по DDD</title>
+    <description><![CDATA[От Уди Дахана]]></description>
+    <link>https://tsb99x.ru/notes/udi-dahan-ddd-articles.html</link>
+    <pubDate>Wed, 29 Jan 2025 21:03:44 +0300</pubDate>
+    <guid isPermaLink="false">fa2ed872-97ec-4cbf-bba6-a602cb97f8e0</guid>
+</item>
+<item>
+    <title>Багованный Skyrim</title>
+    <description><![CDATA[На любой операционке]]></description>
+    <link>https://tsb99x.ru/notes/bugged-skyrim.html</link>
+    <pubDate>Tue, 28 Jan 2025 21:18:38 +0300</pubDate>
+    <guid isPermaLink="false">d53087b9-6430-41ed-8202-3cd8630f2da3</guid>
+</item>
+<item>
+    <title>Про Null References</title>
+    <description><![CDATA[Откровения Тони Хоара]]></description>
+    <link>https://tsb99x.ru/notes/null-references-mistake.html</link>
+    <pubDate>Mon, 27 Jan 2025 21:03:57 +0300</pubDate>
+    <guid isPermaLink="false">1d9bc41a-10ad-449b-af66-4afe957bba43</guid>
+</item>
+<item>
+    <title>A Micro-Manual for LISP</title>
+    <description><![CDATA[Статья Джона Маккарти]]></description>
+    <link>https://tsb99x.ru/notes/micro-manual-for-lisp.html</link>
+    <pubDate>Sun, 26 Jan 2025 20:06:52 +0300</pubDate>
+    <guid isPermaLink="false">be6783c8-f5b0-463d-aa5e-244f39e5cdbc</guid>
+</item>
+<item>
+    <title>Btop</title>
+    <description><![CDATA[Монитор ресурсов]]></description>
+    <link>https://tsb99x.ru/notes/btop.html</link>
+    <pubDate>Sat, 25 Jan 2025 20:22:54 +0300</pubDate>
+    <guid isPermaLink="false">4e48a571-005d-4dc6-bdf8-025b3ee35476</guid>
+</item>
+<item>
+    <title>When to Make a Type</title>
+    <description><![CDATA[Статья Мартина Фаулера]]></description>
+    <link>https://tsb99x.ru/notes/when-to-make-a-type.html</link>
+    <pubDate>Thu, 23 Jan 2025 21:31:54 +0300</pubDate>
+    <guid isPermaLink="false">ece3cb49-3507-46ea-942a-4be2399376cc</guid>
+</item>
+<item>
+    <title>Обновление ядра в stable-backports</title>
+    <description><![CDATA[Linux 6.12 на Debian 12]]></description>
+    <link>https://tsb99x.ru/notes/debian-linux-6.12-in-backports.html</link>
+    <pubDate>Thu, 23 Jan 2025 21:31:22 +0300</pubDate>
+    <guid isPermaLink="false">b5e3736f-8037-45ca-b9b3-92d17676aea3</guid>
+</item>
+<item>
+    <title>Интерактивность в разработке</title>
+    <description><![CDATA[Презентация от Брэта Виктора]]></description>
+    <link>https://tsb99x.ru/notes/interactivity-in-development.html</link>
+    <pubDate>Wed, 22 Jan 2025 21:14:29 +0300</pubDate>
+    <guid isPermaLink="false">69946b73-52fe-4084-bd40-58a5820034df</guid>
+</item>
+<item>
+    <title>Демо Smalltalk-76</title>
+    <description><![CDATA[От Дэна Инголлса]]></description>
+    <link>https://tsb99x.ru/notes/xerox-alto-smalltalk-76-demo.html</link>
+    <pubDate>Tue, 21 Jan 2025 20:23:02 +0300</pubDate>
+    <guid isPermaLink="false">92c184d8-7ff8-42dc-9a73-3b9443cc4414</guid>
+</item>
+<item>
+    <title>Подключение JBL T450BT</title>
+    <description><![CDATA[Настройка Bluetooth стека]]></description>
+    <link>https://tsb99x.ru/notes/jbl-t450bt-libspa.html</link>
+    <pubDate>Wed, 27 Nov 2024 20:25:01 +0300</pubDate>
+    <guid isPermaLink="false">110c4b29-8076-4879-a0bc-0088d43580d9</guid>
+</item>
+<item>
+    <title>Gamemode не переключает governor</title>
+    <description><![CDATA[Исправляем отсутствие <code>pkexec</code>]]></description>
+    <link>https://tsb99x.ru/notes/gamemode-pkexec.html</link>
+    <pubDate>Mon, 25 Nov 2024 17:34:59 +0300</pubDate>
+    <guid isPermaLink="false">97093765-f97b-42ba-988d-ccf3bec5583b</guid>
+</item>
+<item>
+    <title>Утилита UTF8 Range Checker</title>
+    <description><![CDATA[Проверка для <code>unicode-range</code>]]></description>
+    <link>https://tsb99x.ru/notes/utf8-range-checker.html</link>
+    <pubDate>Wed, 06 Nov 2024 13:58:52 +0300</pubDate>
+    <guid isPermaLink="false">9795b2a4-260c-472e-bdce-7684778c8ea4</guid>
+</item>
+<item>
+    <title>Монтируем tmpfs в /tmp</title>
+    <description><![CDATA[Как сделать RAM-диск]]></description>
+    <link>https://tsb99x.ru/notes/tmpfs-for-tmp.html</link>
+    <pubDate>Mon, 14 Oct 2024 19:57:41 +0300</pubDate>
+    <guid isPermaLink="false">a3c87ec7-540f-4abd-9184-b33f538d1472</guid>
+</item>
+<item>
+    <title>Макросы в NeoVim</title>
+    <description><![CDATA[Базовое использование]]></description>
+    <link>https://tsb99x.ru/notes/neovim-macros.html</link>
+    <pubDate>Tue, 08 Oct 2024 21:19:53 +0300</pubDate>
+    <guid isPermaLink="false">83f17c95-2111-4262-b219-5a6c584f7aaa</guid>
+</item>
+<item>
+    <title>Прибиваем игру к ядрам CPU</title>
+    <description><![CDATA[Настройка <code>WINE_CPU_TOPOLOGY</code>]]></description>
+    <link>https://tsb99x.ru/notes/game-cpu-pinning.html</link>
+    <pubDate>Mon, 07 Oct 2024 21:18:36 +0300</pubDate>
+    <guid isPermaLink="false">049f1b5d-5ffc-4bd3-9c22-3b2c852c1812</guid>
+</item>
+<item>
+    <title>Вытаскиваем данные из VDI</title>
+    <description><![CDATA[Монтирование образов с <code>offset</code>]]></description>
+    <link>https://tsb99x.ru/notes/vdi-data-extraction.html</link>
+    <pubDate>Fri, 04 Oct 2024 17:34:40 +0300</pubDate>
+    <guid isPermaLink="false">4a652ca4-919c-45dd-b634-82a1d64c4f45</guid>
+</item>
+<item>
+    <title>Добавление пользователя в Debian</title>
+    <description><![CDATA[Программы <code>useradd</code> и <code>usermod</code>]]></description>
+    <link>https://tsb99x.ru/notes/debian-add-new-user.html</link>
+    <pubDate>Thu, 03 Oct 2024 21:01:42 +0300</pubDate>
+    <guid isPermaLink="false">23510639-8125-4afd-85a5-479b9c675dd4</guid>
+</item>
+<item>
+    <title>Русская раскладка в NeoVim</title>
+    <description><![CDATA[Настраиваем <code>keymap</code>]]></description>
+    <link>https://tsb99x.ru/notes/neovim-russian-layout.html</link>
+    <pubDate>Wed, 02 Oct 2024 20:29:15 +0300</pubDate>
+    <guid isPermaLink="false">c265ef3a-fe80-4244-92d8-e6b2a72a4839</guid>
+</item>
+<item>
+    <title>Проверка правописания в NeoVim</title>
+    <description><![CDATA[Добавляем русские словари]]></description>
+    <link>https://tsb99x.ru/notes/neovim-spellchecking.html</link>
+    <pubDate>Tue, 01 Oct 2024 19:58:20 +0300</pubDate>
+    <guid isPermaLink="false">1515dcd2-5387-4b82-84b5-9a5677c9cbc0</guid>
+</item>
+<item>
+    <title>Дисковые репозитории Debian</title>
+    <description><![CDATA[Используем <code>apt-cdrom</code>]]></description>
+    <link>https://tsb99x.ru/notes/debian-disk-repos.html</link>
+    <pubDate>Mon, 30 Sep 2024 17:39:40 +0300</pubDate>
+    <guid isPermaLink="false">4e4e1410-ecfa-47f7-8f43-2e03ae4a054c</guid>
+</item>
+<item>
+    <title>Стандартные сетевые репозитории</title>
+    <description><![CDATA[Где взять <code>sources.list</code>]]></description>
+    <link>https://tsb99x.ru/notes/standard-network-repos.html</link>
+    <pubDate>Wed, 18 Sep 2024 19:53:22 +0300</pubDate>
+    <guid isPermaLink="false">5fd73a51-3260-44c9-bdb3-466c4eb0a36b</guid>
+</item>
+<item>
+    <title>Устанавливаем LC переменные</title>
+    <description><![CDATA[Настройка региональных форматов]]></description>
+    <link>https://tsb99x.ru/notes/setting-lc-vars.html</link>
+    <pubDate>Wed, 11 Sep 2024 18:50:35 +0300</pubDate>
+    <guid isPermaLink="false">114ed07f-c1a7-4286-a62a-48623259fc92</guid>
+</item>
+<item>
+    <title>Генерация локали ru</title>
+    <description><![CDATA[Артефакты при работе с SSH]]></description>
+    <link>https://tsb99x.ru/notes/generating-ru-locale.html</link>
+    <pubDate>Tue, 10 Sep 2024 19:15:20 +0300</pubDate>
+    <guid isPermaLink="false">ce7344b6-f9a6-496e-b6e8-16300fb274b5</guid>
+</item>
+<item>
+    <title>Кириллица в виртуальной консоли</title>
+    <description><![CDATA[Настраиваем отображение и раскладку]]></description>
+    <link>https://tsb99x.ru/notes/cyrillic-in-virtual-console.html</link>
+    <pubDate>Mon, 09 Sep 2024 18:34:14 +0300</pubDate>
+    <guid isPermaLink="false">fe3fb771-44ea-4543-8bca-b31355a55788</guid>
+</item>
+<item>
+    <title>Утилита Access Log Tabulator</title>
+    <description><![CDATA[Перегоняем Access Log в TSV]]></description>
+    <link>https://tsb99x.ru/notes/access-log-tabulator.html</link>
+    <pubDate>Tue, 03 Sep 2024 20:11:41 +0300</pubDate>
+    <guid isPermaLink="false">a2318fb5-865e-4ea4-9817-fb13e3488752</guid>
+</item>
+<item>
+    <title>Отключаем resume в initramfs</title>
+    <description><![CDATA[Решаем проблему после удаления swap]]></description>
+    <link>https://tsb99x.ru/notes/disable-resume-in-initramfs.html</link>
+    <pubDate>Fri, 23 Aug 2024 20:28:07 +0300</pubDate>
+    <guid isPermaLink="false">6ddc7a61-75d4-4a3d-a555-34d8a37af955</guid>
+</item>
+<item>
+    <title>Brother DCP-T420W на Debian 12</title>
+    <description><![CDATA[Подключаем новый МФУ]]></description>
+    <link>https://tsb99x.ru/notes/brother-dcp-t420w-on-debian-12.html</link>
+    <pubDate>Thu, 22 Aug 2024 18:53:59 +0300</pubDate>
+    <guid isPermaLink="false">1a222d6a-a8cf-4378-bd3f-fa845fb6d3d2</guid>
+</item>
+<item>
+    <title>Отключаем функции UMIP</title>
+    <description><![CDATA[Применяем опцию <code>clearcpuid</code>]]></description>
+    <link>https://tsb99x.ru/notes/disable-umip.html</link>
+    <pubDate>Wed, 21 Aug 2024 18:55:24 +0300</pubDate>
+    <guid isPermaLink="false">c0508cbe-c8e3-45e3-90c8-727e80a9e9f0</guid>
+</item>
+<item>
+    <title>Включаем ASPM</title>
+    <description><![CDATA[Снижаем энергопотребление PCIe]]></description>
+    <link>https://tsb99x.ru/notes/enable-aspm.html</link>
+    <pubDate>Tue, 20 Aug 2024 19:37:21 +0300</pubDate>
+    <guid isPermaLink="false">432e592e-251d-4bce-a410-0a46235f3484</guid>
+</item>
+<item>
+    <title>Функция strlcpy не найдена</title>
+    <description><![CDATA[Собираем backport вручную]]></description>
+    <link>https://tsb99x.ru/notes/building-your-own-backport.html</link>
+    <pubDate>Sun, 28 Jul 2024 11:41:10 +0300</pubDate>
+    <guid isPermaLink="false">b8ccfeae-b329-4669-9f36-f1b1054a80fb</guid>
+</item>
+<item>
+    <title>Работа с SSH ключами</title>
+    <description><![CDATA[Генерация и передача публичного ключа]]></description>
+    <link>https://tsb99x.ru/notes/working-with-ssh-keys.html</link>
+    <pubDate>Fri, 14 Jun 2024 11:12:29 +0300</pubDate>
+    <guid isPermaLink="false">adc3ee4c-3bdd-4312-b202-4869ce599e16</guid>
+</item>
+<item>
+    <title>UFW или Uncomplicated Firewall</title>
+    <description><![CDATA[Базовые сценарии использования]]></description>
+    <link>https://tsb99x.ru/notes/uncomplicated-firewall.html</link>
+    <pubDate>Mon, 10 Jun 2024 09:28:44 +0300</pubDate>
+    <guid isPermaLink="false">af97aad5-80eb-4174-b7d2-8f2c9d482273</guid>
+</item>
+<item>
+    <title>Canon LBP-1120 на Debian Bookworm</title>
+    <description><![CDATA[Устанавливаем и настраиваем CAPT]]></description>
+    <link>https://tsb99x.ru/notes/canon-lbp-1120-on-debian-12.html</link>
+    <pubDate>Sat, 08 Jun 2024 14:49:25 +0300</pubDate>
+    <guid isPermaLink="false">78614fc2-bc9e-43b2-afbb-26d12b186389</guid>
+</item>
+<item>
+    <title>Подключаем DualShock 3 к Debian 12</title>
+    <description><![CDATA[Решение проблем с Bluetooth]]></description>
+    <link>https://tsb99x.ru/notes/ps3-controller-bluez.html</link>
+    <pubDate>Mon, 06 May 2024 17:39:32 +0300</pubDate>
+    <guid isPermaLink="false">9604d323-d636-42e5-a445-054eb5c37f46</guid>
+</item>
+<item>
+    <title>Протокол shim_lock не найден</title>
+    <description><![CDATA[Проблема в Grub после обновления BIOS]]></description>
+    <link>https://tsb99x.ru/notes/shim_lock-protocol-not-found.html</link>
+    <pubDate>Sun, 21 Apr 2024 19:38:17 +0300</pubDate>
+    <guid isPermaLink="false">3696d6d2-7131-4ce0-be09-1ab8dfe83752</guid>
+</item>
+<item>
+    <title>Linux, AMD и артефакты с DXVK</title>
+    <description><![CDATA[Фикс через параметры окружения Mesa]]></description>
+    <link>https://tsb99x.ru/notes/amd-dxvk-glitter-bug.html</link>
+    <pubDate>Sat, 20 Apr 2024 21:11:06 +0300</pubDate>
+    <guid isPermaLink="false">972184a0-dfe5-4d49-94d6-24f1a41e2d44</guid>
+</item>
+<item>
+    <title>Wine и RLIMIT_NICE</title>
+    <description><![CDATA[Даём права на управление приоритетом]]></description>
+    <link>https://tsb99x.ru/notes/wine-adjust-rlimit-nice.html</link>
+    <pubDate>Wed, 17 Apr 2024 19:48:33 +0300</pubDate>
+    <guid isPermaLink="false">6f8a1390-596f-4a60-8ea8-f4efc91d6d51</guid>
+</item>
+<item>
+    <title>Отключение “быстрого запуска”</title>
+    <description><![CDATA[Неоднозначная функция Windows 10+]]></description>
+    <link>https://tsb99x.ru/notes/turn-off-fast-startup.html</link>
+    <pubDate>Mon, 25 Mar 2024 11:57:20 +0300</pubDate>
+    <guid isPermaLink="false">4568fb2c-49f3-4151-8d12-753ba93ffaed</guid>
+</item>
+<item>
+    <title>Каждому диску по корзине</title>
+    <description><![CDATA[Про особенности <code>trash-cli</code> и Dolphin]]></description>
+    <link>https://tsb99x.ru/notes/trash-can-for-each-disk.html</link>
+    <pubDate>Sun, 17 Mar 2024 20:37:54 +0300</pubDate>
+    <guid isPermaLink="false">1186e85e-a614-41ec-b44d-07e9459beff1</guid>
+</item>
+<item>
+    <title>Минималистичный KDE на Debian</title>
+    <description><![CDATA[Установка обезжиренного мета-пакета]]></description>
+    <link>https://tsb99x.ru/notes/minimalistic-kde-on-debian.html</link>
+    <pubDate>Sun, 10 Mar 2024 19:12:22 +0300</pubDate>
+    <guid isPermaLink="false">dffe1910-caa4-4b3a-8524-dd5d9d3e6a49</guid>
+</item>
+<item>
+    <title>Вакансия на позицию “Архитектор”</title>
+    <description><![CDATA[Проблема выделенной из команды роли]]></description>
+    <link>https://tsb99x.ru/notes/why-architect-is-a-role.html</link>
+    <pubDate>Sun, 03 Mar 2024 20:20:50 +0300</pubDate>
+    <guid isPermaLink="false">e085a5d2-df74-4ae8-a05b-a98620fdd9ff</guid>
+</item>
+<item>
+    <title>Проблемы JPA в DDD-приложениях</title>
+    <description><![CDATA[Ошибка совмещения JPA и Domain Entity]]></description>
+    <link>https://tsb99x.ru/notes/ddd-and-jpa-entities.html</link>
+    <pubDate>Sat, 24 Feb 2024 20:08:08 +0300</pubDate>
+    <guid isPermaLink="false">7f02c8d9-c599-4bd2-8c53-34d5e1b9c8c1</guid>
+</item>
+<item>
+    <title>Восстанавливаем битые GZIP архивы</title>
+    <description><![CDATA[Лечим загруженные по FTP бинарники]]></description>
+    <link>https://tsb99x.ru/notes/fixgz-for-ascii-mode.html</link>
+    <pubDate>Sun, 18 Feb 2024 17:19:48 +0300</pubDate>
+    <guid isPermaLink="false">4178af47-5250-4f66-aee6-28e0ab702a25</guid>
+</item>
+<item>
+    <title>Testcontainers, Podman и Debian</title>
+    <description><![CDATA[Интеграционные тесты без Docker]]></description>
+    <link>https://tsb99x.ru/notes/podman-testcontainers.html</link>
+    <pubDate>Sat, 10 Feb 2024 21:27:02 +0300</pubDate>
+    <guid isPermaLink="false">5a9d5d74-3264-49a3-8e22-a3cb98200989</guid>
+</item>
+<item>
+    <title>Установка Backports в Debian</title>
+    <description><![CDATA[Свежие пакеты в стабильном релизе]]></description>
+    <link>https://tsb99x.ru/notes/debian-backports.html</link>
+    <pubDate>Sun, 04 Feb 2024 16:15:17 +0300</pubDate>
+    <guid isPermaLink="false">7b599314-ce7c-414e-9ca6-8bb02c3c3643</guid>
+</item>
+<item>
+    <title>Превращаем VDI в QCOW2</title>
+    <description><![CDATA[Используем образы из VBox в QEMU]]></description>
+    <link>https://tsb99x.ru/notes/vdi-to-qcow2.html</link>
+    <pubDate>Sat, 27 Jan 2024 21:40:21 +0300</pubDate>
+    <guid isPermaLink="false">391a26fe-7628-4e86-baea-eb6d8a26ed13</guid>
+</item>
+<item>
+    <title>Полезность утилиты find</title>
+    <description><![CDATA[Наглядные примеры использования]]></description>
+    <link>https://tsb99x.ru/notes/usefulness-of-find.html</link>
+    <pubDate>Sun, 21 Jan 2024 20:52:00 +0300</pubDate>
+    <guid isPermaLink="false">7d5518ce-2369-43cc-93c3-3f3ea73b8887</guid>
+</item>
+<item>
+    <title>Загрузка Debian с помощью jigdo</title>
+    <description><![CDATA[Эффективное обновление релизных ISO]]></description>
+    <link>https://tsb99x.ru/notes/debian-jigdo.html</link>
+    <pubDate>Sun, 14 Jan 2024 14:12:00 +0300</pubDate>
+    <guid isPermaLink="false">81bb94cd-115e-414c-955e-4f2ef20d07ab</guid>
+</item>
+<item>
+    <title>Увеличиваем vm.max_map_count</title>
+    <description><![CDATA[Решаем проблемы с памятью в играх]]></description>
+    <link>https://tsb99x.ru/notes/increase-vm_max_map_count.html</link>
+    <pubDate>Mon, 08 Jan 2024 18:17:00 +0300</pubDate>
+    <guid isPermaLink="false">9842a343-7bac-47ae-a7db-b3945fee5745</guid>
+</item>
+<item>
+    <title>Делаем жёсткие диски тихими</title>
+    <description><![CDATA[Авто-перевод в режим ожидания]]></description>
+    <link>https://tsb99x.ru/notes/make-hdd-quiet.html</link>
+    <pubDate>Sat, 18 Nov 2023 12:29:00 +0300</pubDate>
+    <guid isPermaLink="false">4e059b2d-be96-4f55-a4d0-580568d2b93d</guid>
+</item>
+<item>
+    <title>Linux 6.5 на Debian Bookworm</title>
+    <description><![CDATA[Драйверы Zen 2+, патчи для RX 6000+]]></description>
+    <link>https://tsb99x.ru/notes/debian-bookworm-linux-6.5-update.html</link>
+    <pubDate>Sat, 11 Nov 2023 14:10:00 +0300</pubDate>
+    <guid isPermaLink="false">fec82173-9b31-42a7-81a8-e56d11b403f5</guid>
+</item>
+<item>
+    <title>Как раздать файлы в домашней сети</title>
+    <description><![CDATA[Копируем файлы по HTTP в домашней LAN]]></description>
+    <link>https://tsb99x.ru/notes/how-to-share-files-in-home-net-by-http.html</link>
+    <pubDate>Thu, 12 May 2022 21:21:00 +0300</pubDate>
+    <guid isPermaLink="false">c5f41e1a-0499-46ae-859e-3b1ad318eca4</guid>
+</item>
+<item>
+    <title>Привет, мир блогов!</title>
+    <description><![CDATA[Зачем блог на собственном ресурсе]]></description>
+    <link>https://tsb99x.ru/notes/hello-blog-world.html</link>
+    <pubDate>Fri, 30 Apr 2021 21:00:00 +0300</pubDate>
+    <guid isPermaLink="false">4ec80765-64a9-48d1-a204-29a701c225c3</guid>
+</item>
+<item>
+    <title>Про пользу E2E тестирования</title>
+    <description><![CDATA[Нужно ли использовать что-то ещё?]]></description>
+    <link>https://tsb99x.ru/notes/about-e2e-profits.html</link>
+    <pubDate>Sat, 31 Oct 2020 15:28:00 +0300</pubDate>
+    <guid isPermaLink="false">56d3a974-9b90-41f1-b784-6d57de39c95d</guid>
+</item>
+<item>
+    <title>Микросервисы: шаг назад</title>
+    <description><![CDATA[Нужны ли микросервисы любому проекту?]]></description>
+    <link>https://tsb99x.ru/notes/microservices-a-step-back.html</link>
+    <pubDate>Wed, 01 Jul 2020 15:25:00 +0300</pubDate>
+    <guid isPermaLink="false">872b8d53-071b-4485-b424-c4e470badd63</guid>
+</item>
+<item>
+    <title>Включаем Hyper-V через PowerShell</title>
+    <description><![CDATA[Никакого GUI, только PS в Windows 10]]></description>
+    <link>https://tsb99x.ru/notes/powershell-to-enable-hyper-v.html</link>
+    <pubDate>Wed, 25 Dec 2019 19:30:36 +0300</pubDate>
+    <guid isPermaLink="false">5041b014-1a0e-4eee-944c-b8ba0771c66a</guid>
+</item>
+<item>
+    <title>Чем плохи аннотации Java</title>
+    <description><![CDATA[О чрезмерно используемом инструменте]]></description>
+    <link>https://tsb99x.ru/notes/why-java-annotations-are-bad.html</link>
+    <pubDate>Mon, 23 Dec 2019 21:00:00 +0300</pubDate>
+    <guid isPermaLink="false">202aff95-6d23-4116-ab39-16e6e5af63b1</guid>
+</item>
+
+</channel>
+</rss>

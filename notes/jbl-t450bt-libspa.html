@@ -1,0 +1,61 @@
+<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2024-11-27T20:25:01+03:00><meta name=description content="Настройка Bluetooth стека"><meta property=og:url content=https://tsb99x.ru/notes/jbl-t450bt-libspa.html><meta property=og:type content=article><meta property=og:title content="Подключение JBL T450BT"><meta property=og:description content="Настройка Bluetooth стека"><meta property=og:image content=https://tsb99x.ru/res/avatar-512x512.png><title>Подключение JBL T450BT</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.ru/notes/jbl-t450bt-libspa.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> <a href=/projects/ >Проекты</a> </nav> <article> <header id=title-block-header> <h1 class=title>Подключение JBL T450BT</h1> </header> <p>Подключая свои старые Bluetooth-наушники JBL T450BT, я столкнулся с проблемой. GUI в KDE для pairing “подвисал”. Перезагрузка <code>bluetooth.service</code> и системы ничем не помогала…</p> <p>Такая ситуация для меня в новинку. Другие, более новые Bluetooth-наушники, у меня работают без-каких либо проблем. Хорошо, будем разбираться, что не так.</p> <p>Опробовал пару вариантов в <code>bluetoothctl</code>. Чего удалось добиться – появления ошибки “Protocol not available”. Явного ответа, что это за проблема, не было, но я попробовал почитать журналы сервиса <code>bluetooth</code>.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>systemctl<span class=w> </span>status<span class=w> </span>bluetooth
+
+<span class=go>● bluetooth.service - Bluetooth service</span>
+<span class=go>     Loaded: loaded (/lib/systemd/system/bluetooth.service; enabled; preset: enabled)</span>
+<span class=go>    Drop-In: /etc/systemd/system/bluetooth.service.d</span>
+<span class=go>             └─override.conf</span>
+<span class=go>     Active: active (running) since Wed 2024-11-27 18:57:10 MSK; 1min 25s ago</span>
+<span class=go>       Docs: man:bluetoothd(8)</span>
+<span class=go>   Main PID: 23759 (bluetoothd)</span>
+<span class=go>     Status: &quot;Running&quot;</span>
+<span class=go>      Tasks: 1 (limit: 154386)</span>
+<span class=go>     Memory: 1.3M</span>
+<span class=go>        CPU: 35ms</span>
+<span class=go>     CGroup: /system.slice/bluetooth.service</span>
+<span class=go>             └─23759 /usr/libexec/bluetooth/bluetoothd</span>
+
+<span class=go>bluetoothd[23759]: profiles/audio/vcp.c:vcp_init() D-Bus experimental not enabled</span>
+<span class=go>bluetoothd[23759]: src/plugin.c:plugin_init() Failed to init vcp plugin</span>
+<span class=go>bluetoothd[23759]: profiles/audio/mcp.c:mcp_init() D-Bus experimental not enabled</span>
+<span class=go>bluetoothd[23759]: src/plugin.c:plugin_init() Failed to init mcp plugin</span>
+<span class=go>bluetoothd[23759]: profiles/audio/bap.c:bap_init() D-Bus experimental not enabled</span>
+<span class=go>bluetoothd[23759]: src/plugin.c:plugin_init() Failed to init bap plugin</span>
+<span class=go>bluetoothd[23759]: Bluetooth management interface 1.22 initialized</span>
+<span class=go>bluetoothd[23759]: src/service.c:btd_service_connect() a2dp-sink profile connect failed for 71:04:64:5A:09:F2: Protocol not available</span>
+</code></pre></div> <p>Значит, проблема в A2DP профиле. Странно. К сообщениям о “D-Bus experimental” мы ещё вернёмся чуть позже, они решаются настройкой параметров запуска сервиса.</p> <p>Большинство результатов поиска было для Ubuntu и в рекомендациях отмечали необходимость установки <code>pulseaudio-module-bluetooth</code>. Пробую установить.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>apt<span class=w> </span>install<span class=w> </span>pulseaudio-module-bluetooth
+
+<span class=go>Reading package lists... Done</span>
+<span class=go>Building dependency tree... Done</span>
+<span class=go>Reading state information... Done</span>
+<span class=go>pulseaudio-module-bluetooth is already the newest version (16.1+dfsg1-2+b1).</span>
+<span class=go>pulseaudio-module-bluetooth set to manually installed.</span>
+<span class=go>0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.</span>
+</code></pre></div> <p>Хах, он уже был установлен. Пометим его обратно как авто-установку.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>apt-mark<span class=w> </span>auto<span class=w> </span>pulseaudio-module-bluetooth
+
+<span class=go>pulseaudio-module-bluetooth set to automatically installed.</span>
+</code></pre></div> <p>Очередной поиск привёл к одному замечательному <a href=https://askubuntu.com/questions/1172000/a2dp-sink-profile-connect-failed>вопросу на AskUbuntu</a>. Он описывает ситуацию в точности как у меня. Один из советов касался установки <code>libspa-0.2-bluetooth</code>. Попробуем установить:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>apt<span class=w> </span>install<span class=w> </span>libspa-0.2-bluetooth
+
+<span class=go>Reading package lists... Done</span>
+<span class=go>Building dependency tree... Done</span>
+<span class=go>Reading state information... Done</span>
+<span class=go>The following additional packages will be installed:</span>
+<span class=go>  liblc3-0 libldacbt-abr2</span>
+<span class=go>The following NEW packages will be installed:</span>
+<span class=go>  liblc3-0 libldacbt-abr2 libspa-0.2-bluetooth</span>
+<span class=go>0 upgraded, 3 newly installed, 0 to remove and 0 not upgraded.</span>
+<span class=go>Need to get 401 kB of archives.</span>
+<span class=go>After this operation, 1 453 kB of additional disk space will be used.</span>
+
+<span class=go>[...]</span>
+</code></pre></div> <p>Надо не забыть перезапустить Wireplumber, это его модуль работы с Bluetooth.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>systemctl<span class=w> </span>--user<span class=w> </span>restart<span class=w> </span>wireplumber
+</code></pre></div> <p>После этого наушники подключились и стали видимы как устройство вывода аудио.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>apt-cache<span class=w> </span>show<span class=w> </span>wireplumber<span class=w> </span><span class=p>|</span><span class=w> </span>grep<span class=w> </span>Suggests
+
+<span class=go>Suggests: libspa-0.2-bluetooth, libspa-0.2-libcamera, wireplumber-doc</span>
+<span class=go>Suggests: libspa-0.2-bluetooth, wireplumber-doc</span>
+</code></pre></div> <p>Дополнительно проверил зависимости и рекомендованные пакеты. Как видно, пакет <code>libspa-0.2-bluetooth</code> предлагается к установке вместе с wireplumber, но не как обязательная зависимость… Но да ладно, начинаю к этому привыкать…</p> <p>Кроме того, в конфигурации по умолчанию, Bluetooth-стек в Debian 12 не даёт информации о заряде устройства. На телефоне индикатор заряда наушников присутствует и очень хочется получить его и на компьютере.</p> <p>К счастью, коллеги с ArchWiki, как и в других случаях, уже <a href=https://wiki.archlinux.org/title/Bluetooth>описали решение</a> для этой задачи. Достаточно отредактировать параметры конфигурации. Или установить флаг <code>--experimental</code> для <code>bluetoothd</code>. Пойдём вторым путём.</p> <p>Открываем редактирование override для <code>bluetooth.service</code>.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>systemctl<span class=w> </span>edit<span class=w> </span>bluetooth.service
+</code></pre></div> <p>Находим в самом начале строчки <code>ExecStart</code> и добавляем флаг <code>--experimental</code>. Добавленный флаг выделен в примере ниже.</p> <pre>
+[Service]
+ExecStart=
+ExecStart=/usr/libexec/bluetooth/bluetoothd --noplugin=sap <b>--experimental</b>
+</pre> <p>Сохраняем файл и перезапускаем <code>bluetooth.service</code>.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>systemctl<span class=w> </span>restart<span class=w> </span>bluetooth.service
+</code></pre></div> <p>После перезапуска и подключения, я сразу увидел процент зарядки наушников.</p> <p>Отдельно отмечу, что MPD упорно не хотел отдавать аудио на наушники. Эту проблему решил для меня только классический метод перезапуска компьютера.</p> <time datetime=2024-11-27T20:25:01+03:00>27 ноября 2024 г.</time> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 

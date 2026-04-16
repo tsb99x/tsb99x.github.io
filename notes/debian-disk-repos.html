@@ -1,0 +1,91 @@
+<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2024-09-30T17:39:40+03:00><meta name=description content="Используем apt-cdrom"><meta property=og:url content=https://tsb99x.ru/notes/debian-disk-repos.html><meta property=og:type content=article><meta property=og:title content="Дисковые репозитории Debian"><meta property=og:description content="Используем apt-cdrom"><meta property=og:image content=https://tsb99x.ru/res/avatar-512x512.png><title>Дисковые репозитории Debian</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.ru/notes/debian-disk-repos.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> <a href=/projects/ >Проекты</a> </nav> <article> <header id=title-block-header> <h1 class=title>Дисковые репозитории Debian</h1> </header> <p>После установки Debian с диска есть два пути установки программ. Первый – это установка и <a href=/notes/standard-network-repos.html>настройка стандартных сетевых репозиториев</a>. Второй подразумевает использование дисков как репозиториев. В этой заметке рассмотрю второй вариант.</p> <p>Например, хочу установить пакет <code>btop</code> на свежей системе, установленной с DLBD:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>apt<span class=w> </span>install<span class=w> </span>btop
+
+<span class=go>Reading package lists... Done</span>
+<span class=go>Building dependency tree... Done</span>
+<span class=go>Reading state information... Done</span>
+<span class=go>The following NEW packages will be installed:</span>
+<span class=go>  btop</span>
+<span class=go>0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.</span>
+<span class=go>Need to get 0 B/465 kB of archives.</span>
+<span class=go>After this operation, 1 416 kB of additional disk space will be used.</span>
+<span class=go>Media change: please insert the disc labeled</span>
+<span class=go> &#39;Debian GNU/Linux 12.7.0 _Bookworm_ - Official amd64 DLBD Binary-1 with firmware 20240831-10:40&#39;</span>
+<span class=go>in the drive &#39;/media/cdrom/&#39; and press [Enter]</span>
+</code></pre></div> <p>APT по-умолчанию настроен на использование диска и просит вставить в дисковод конкретный диск. В данном случае, DLBD-1. Если у Вас есть дисковод, который позволит читать оптические Blu-Ray диски, то всё становится предельно просто. Нужно только вставить диск и нажать <kbd>Enter</kbd>.</p> <p>А вот с USB-дисками всё чуть сложнее, их надо сначала смонтировать. Если это первое монтирование, то создадим папку <code>/media/cdrom</code>. Это общепринятая точка монтирования для оптических дисков, USB-флешек и даже ISO-образов.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>mkdir<span class=w> </span>-p<span class=w> </span>/media/cdrom
+</code></pre></div> <p>Теперь подключаю флешку и монтирую её в <code>/media/cdrom</code>. Чтобы не заморачиваться с поиском диска, монтирую его по названию. Это позволяет избежать ошибки. И да, <code>\x20</code>, то есть пробелы, именно так и кодированы в <code>/by-label</code>.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>mount<span class=w> </span>-o<span class=w> </span>ro<span class=w> </span><span class=se>\</span>
+<span class=w>    </span>/dev/disk/by-label/Debian<span class=se>\\</span>x2012.7.0<span class=se>\\</span>x20amd64<span class=se>\\</span>x201<span class=w> </span><span class=se>\</span>
+<span class=w>    </span>/media/cdrom
+</code></pre></div> <p>После монтирования просто выполняю ту же операцию <code>apt install</code>.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>apt<span class=w> </span>install<span class=w> </span>btop
+
+<span class=go>Reading package lists... Done</span>
+<span class=go>Building dependency tree... Done</span>
+<span class=go>Reading state information... Done</span>
+<span class=go>The following NEW packages will be installed:</span>
+<span class=go>  btop</span>
+<span class=go>0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.</span>
+<span class=go>Need to get 0 B/465 kB of archives.</span>
+<span class=go>After this operation, 1 416 kB of additional disk space will be used.</span>
+<span class=go>Get:1 cdrom://[Debian GNU/Linux 12.7.0 _Bookworm_ - Official amd64 DLBD Binary-1 with firmware 20240831-10:40] bookworm/main amd64 btop amd64 1.2.13-1 [465 kB]</span>
+<span class=go>Selecting previously unselected package btop.</span>
+<span class="gp gp-VirtualEnv">(Reading database ... 28402 files and directories currently installed.)</span>
+<span class=go>Preparing to unpack .../b/btop/btop_1.2.13-1_amd64.deb ...</span>
+<span class=go>Unpacking btop (1.2.13-1) ...</span>
+<span class=go>Setting up btop (1.2.13-1) ...</span>
+<span class=go>Processing triggers for mailcap (3.70+nmu1) ...</span>
+<span class=go>Processing triggers for man-db (2.11.2-2) ...</span>
+</code></pre></div> <p>Установка успешна. А теперь установим, например, <code>apkverifier</code>. Сама утилита не играет роли, но я точно знаю, что она находится на 2-м диске из набора DLBD.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>apt<span class=w> </span>install<span class=w> </span>apkverifier
+
+<span class=go>Reading package lists... Done</span>
+<span class=go>Building dependency tree... Done</span>
+<span class=go>Reading state information... Done</span>
+<span class=go>E: Unable to locate package apkverifier</span>
+</code></pre></div> <p>Ожидаемо, пакет не найден. Если заглянуть в <code>source.list</code>, то там будет только первый диск DLBD:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>cat<span class=w> </span>/etc/apt/sources.list
+
+<span class=go>deb cdrom:[Debian GNU/Linux 12.7.0 _Bookworm_ - Official amd64 DLBD Binary-1 with firmware 20240831-10:40]/ bookworm contrib main non-free-firmware</span>
+</code></pre></div> <p>Ага, только <code>DLBD Binary-1</code>, т.е. DLBD-1. Чтобы устанавливать пакеты с DLBD-2, нужно добавить его как репозиторий. Для этого поможет <code>apt-cdrom</code>, но сначала размонтирую DLBD-1 и смонтирую DLBD-2.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>umount<span class=w> </span>/media/cdrom
+<span class=gp>$ </span>sudo<span class=w> </span>mount<span class=w> </span>-o<span class=w> </span>ro<span class=w> </span><span class=se>\</span>
+<span class=w>    </span>/dev/disk/by-label/Debian<span class=se>\\</span>x2012.7.0<span class=se>\\</span>x20amd64<span class=se>\\</span>x202<span class=w> </span><span class=se>\</span>
+<span class=w>    </span>/media/cdrom
+</code></pre></div> <p>Отдельно отмечу цифру 2 в конце строки <code>/dev/disk/by-label</code>. Это точно 2-й диск.</p> <p>Теперь воспользуемся <code>apt-cdrom</code> для добавления информации о репозитории.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>apt-cdrom<span class=w> </span>add<span class=w> </span>-m
+
+<span class=go>Using CD-ROM mount point /media/cdrom/</span>
+<span class=go>Identifying... [c41cb969b7649d0341d77b739680f305-2]</span>
+<span class=go>Scanning disc for index files...</span>
+<span class=go>Found 3 package indexes, 0 source indexes, 0 translation indexes and 0 signatures</span>
+<span class=go>Found label &#39;Debian GNU/Linux 12.7.0 _Bookworm_ - Official amd64 DLBD Binary-2 with firmware 20240831-10:40&#39;</span>
+<span class=go>This disc is called:</span>
+<span class=go>&#39;Debian GNU/Linux 12.7.0 _Bookworm_ - Official amd64 DLBD Binary-2 with firmware 20240831-10:40&#39;</span>
+<span class=go>Reading Package Indexes... Done</span>
+<span class=go>Writing new source list</span>
+<span class=go>Source list entries for this disc are:</span>
+<span class=go>deb cdrom:[Debian GNU/Linux 12.7.0 _Bookworm_ - Official amd64 DLBD Binary-2 with firmware 20240831-10:40]/ bookworm contrib main non-free-firmware</span>
+<span class=go>Repeat this process for the rest of the CDs in your set.</span>
+</code></pre></div> <p>Диск добавлен! Флаг <code>-m</code> нужен для того, чтобы <code>apt-cdrom</code> не (раз)монтировал диски по своей прихоти. Мне удобнее работать именно с ним. Дополнительную информацию о флагах, как и всегда, можно найти в <a href=https://manpages.debian.org/bookworm/apt/apt-cdrom.8.en.html>man apt-cdrom</a>.</p> <p>Проверяю, что теперь <code>apkverifier</code> устанавливается.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>apt<span class=w> </span>install<span class=w> </span>apkverifier
+
+<span class=go>Reading package lists... Done</span>
+<span class=go>Building dependency tree... Done</span>
+<span class=go>Reading state information... Done</span>
+<span class=go>The following NEW packages will be installed:</span>
+<span class=go>  apkverifier</span>
+<span class=go>0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.</span>
+<span class=go>Need to get 0 B/1 122 kB of archives.</span>
+<span class=go>After this operation, 3 151 kB of additional disk space will be used.</span>
+<span class=go>Get:1 cdrom://[Debian GNU/Linux 12.7.0 _Bookworm_ - Official amd64 DLBD Binary-2 with firmware 20240831-10:40] bookworm/main amd64 apkverifier amd64 0.0~git20191015.7330a51-11+b4 [1 122 kB]</span>
+<span class=go>Selecting previously unselected package apkverifier.</span>
+<span class="gp gp-VirtualEnv">(Reading database ... 28440 files and directories currently installed.)</span>
+<span class=go>Preparing to unpack .../apkverifier_0.0~git20191015.7330a51-11+b4_amd64.deb ...</span>
+<span class=go>Unpacking apkverifier (0.0~git20191015.7330a51-11+b4) ...</span>
+<span class=go>Setting up apkverifier (0.0~git20191015.7330a51-11+b4) ...</span>
+<span class=go>Processing triggers for man-db (2.11.2-2) ...</span>
+</code></pre></div> <p>Всё получилось. Чтобы не гадать, где именно на дисках располагается пакет, можно прибегнуть, опять же, к 2-м путям. Первый – добавить все 3 диска релиза с помощью <code>apt-cdrom</code>. Тогда <code>apt</code> сам подскажет, какой диск нужно смонтировать.</p> <p>Второй более мудрёный. Если Вы уверены, что нужный пакет где-то на дисках, то проверить где он поможет <a href=https://cdimage-search.debian.org>онлайн-утилита для поиска пакетов</a>. У меня эта утилита работает через раз, поэтому покажу альтернативной подход.</p> <p>Вот <a href=https://cdimage.debian.org/debian-cd/current/amd64/list-dlbd/ >список пакетов на дисках DLBD</a>. Скачаем все списки и проверим, где именно находится пакет <code>apkverifier</code>:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>wget<span class=w> </span>-q<span class=w> </span>--show-progress<span class=w> </span><span class=se>\</span>
+<span class=w>    </span>https://cdimage.debian.org/debian-cd/current/amd64/list-dlbd/debian-12.7.0-amd64-DLBD-<span class=o>{</span><span class=m>1</span>,2,3<span class=o>}</span>.list.gz
+
+<span class=go>debian-12.7.0-amd64 100%[===================&gt;] 233,65K  --.-KB/s    in 0,1s</span>
+<span class=go>debian-12.7.0-amd64 100%[===================&gt;] 334,60K  --.-KB/s    in 0,04s</span>
+<span class=go>debian-12.7.0-amd64 100%[===================&gt;]   1,79K  --.-KB/s    in 0s</span>
+
+<span class=gp>$ </span>zgrep<span class=w> </span>apkverifier<span class=w> </span>*.gz
+
+<span class=go>debian-12.7.0-amd64-DLBD-2.list.gz:apkverifier_0.0~git20191015.7330a51-11+b4_amd64.deb</span>
+<span class=go>debian-12.7.0-amd64-DLBD-2.list.gz:golang-github-avast-apkverifier-dev_0.0~git20191015.7330a51-11_all.deb</span>
+</code></pre></div> <p>Таким образом подтверждаем, что он есть на DLBD-2.</p> <time datetime=2024-09-30T17:39:40+03:00>30 сентября 2024 г.</time> <div class=changelog> <h4>Журнал изменений</h4> <p><b>1 октября 2024 г.</b>: добавил <code>--show-progress</code> для <code>wget</code> вместо последующего <code>ls -1</code>.</p> </div> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 

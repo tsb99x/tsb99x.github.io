@@ -1,0 +1,68 @@
+<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2025-06-24T14:57:20+03:00><meta name=description content="Про garbage collection"><meta property=og:url content=https://tsb99x.ru/notes/git-garbage-collection.html><meta property=og:type content=article><meta property=og:title content="Облегчаем Git-репы"><meta property=og:description content="Про garbage collection"><meta property=og:image content=https://tsb99x.ru/res/avatar-512x512.png><title>Облегчаем Git-репы</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.ru/notes/git-garbage-collection.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> <a href=/projects/ >Проекты</a> </nav> <article> <header id=title-block-header> <h1 class=title>Облегчаем Git-репы</h1> </header> <p>Мой локальный Git репозиторий, в котором я храню этот сайт, стал пухнуть. Особенно явно это стало после добавления постов из Telegram с картинками. Это логично, бинарники – не сильная сторона Git. Для них есть <a href=https://git-lfs.com/ >Git LFS</a>.</p> <p>LFS требует пары манипуляций. И вот, вычитывая доку, наткнулся на <a href=https://github.com/git-lfs/git-lfs/wiki/Tutorial#migrating-existing-repository-data-to-lfs>замечание</a> о том, как лучше мигрировать существующие репы. В частности, об очистке репы после <code>git lfs migrate</code>. Процедура простая и не сильно деструктивная. Тут я задумался.</p> <p>В целом, Git прилично справляется с задачами garbage collection, это отлаженная годами задача. Но вот загвоздка – происходит <a href=https://git-scm.com/docs/git-gc>GC</a> в фоне при выполнении других команд Git. У меня же есть много накопившихся Git репозиториев, над которыми я не работаю. Хочется сэкономить место, при этом не потерять историю коммитов.</p> <blockquote class=warning> <p> <p>Все команды ниже являются <strong>деструктивными</strong>. Пути назад без полных бэкапов не будет. Если Вы не уверены, что такое reflog в Git и что его очистка значит, рекомендую либо не использовать подходы ниже, либо сначала сделать бэкапы!</p> <p>Все команды ниже подразумевают: Git репозиторий в этот момент используется эксклюзивно <strong>только</strong> Вами. Параллельное использование Git может привести к безвозвратной порче директории <code>.git</code>. Будьте предельно осторожны!</p> </p> </blockquote> <p>Каждый заход эксперимента я буду производить в <code>/tmp</code>, предварительно скопировав туда интересующий Git-репозиторий. Первый подход к снаряду – простой <code>git gc</code>. Это предельно явный пинок для Git, императив вида “сделай GC в foreground!”</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>du<span class=w> </span>-sh<span class=w> </span>.git
+
+<span class=go>1,2G    .git</span>
+
+<span class=gp>$ </span><span class=nb>time</span><span class=w> </span>git<span class=w> </span>gc
+
+<span class=go>Enumerating objects: 7717, done.</span>
+<span class=go>Counting objects: 100% (7717/7717), done.</span>
+<span class=go>Delta compression using up to 32 threads</span>
+<span class=go>Compressing objects: 100% (1262/1262), done.</span>
+<span class=go>Writing objects: 100% (7717/7717), done.</span>
+<span class=go>Total 7717 (delta 6334), reused 7653 (delta 6301), pack-reused 0</span>
+
+<span class=go>________________________________________________________</span>
+<span class=go>Executed in   11.45 secs    fish           external</span>
+<span class=go>   usr time   10.99 secs  309.00 micros   10.99 secs</span>
+<span class=go>   sys time    0.56 secs  227.00 micros    0.56 secs</span>
+
+<span class=gp>$ </span>du<span class=w> </span>-sh<span class=w> </span>.git
+
+<span class=go>1,2G    .git</span>
+</code></pre></div> <p>Это простейший способ, он почистит лишь самые старые репозитории. Те, в которых давно не производилось никаких активных действий. И те, в которых явно много мусора. И сделает он это, к слову, не слишком эффективно. Нужно больше GC!</p> <p>Более продвинутый способ – удалить <a href=https://git-scm.com/docs/git-reflog>ссылочную историю</a> (reflog) для недоступных объектов и явно передать флаги для очистки неиспользуемого мусора из <code>.git</code>.</p> <p>Недоступные объекты появляются, например, в процессе переписывания истории коммитов и именно поэтому такой подход рекомендуется в гайде у Git LFS. Команда <code>git lfs migrate</code> переписывает историю, заменяя определённые бинарники на ссылки. Старые объекты с бинарниками останутся в <code>.git</code> как недоступные.</p> <p>Я LFS ещё не подключал, но всё равно стало интересно.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>du<span class=w> </span>-sh<span class=w> </span>.git
+
+<span class=go>1,2G    .git</span>
+
+<span class=gp>$ </span>git<span class=w> </span>reflog<span class=w> </span>expire<span class=w> </span>--expire-unreachable<span class=o>=</span>now<span class=w> </span>--all
+
+<span class=gp>$ </span><span class=nb>time</span><span class=w> </span>git<span class=w> </span>gc<span class=w> </span>--prune<span class=o>=</span>now
+
+<span class=go>Enumerating objects: 7717, done.</span>
+<span class=go>Counting objects: 100% (7717/7717), done.</span>
+<span class=go>Delta compression using up to 32 threads</span>
+<span class=go>Compressing objects: 100% (1262/1262), done.</span>
+<span class=go>Writing objects: 100% (7717/7717), done.</span>
+<span class=go>Total 7717 (delta 6334), reused 7653 (delta 6301), pack-reused 0</span>
+
+<span class=go>________________________________________________________</span>
+<span class=go>Executed in    2.02 secs    fish           external</span>
+<span class=go>   usr time    1.78 secs  310.00 micros    1.78 secs</span>
+<span class=go>   sys time    0.34 secs  242.00 micros    0.34 secs</span>
+
+<span class=gp>$ </span>du<span class=w> </span>-sh<span class=w> </span>.git
+
+<span class=go>507M    .git</span>
+</code></pre></div> <p>Ого! Вот это уже приятный результат. Интересная опция <code>--expire-unreachable=now</code> для <code>reflog expire</code> явно требует пометить все недоступные объекты как протухшие. А опция <code>--prune=now</code> намекнёт <code>gc</code> выкинуть все протухшие объекты уже <em>сейчас</em>.</p> <p>В такой конфигурации, кстати, GC отработал быстрее, чем по умолчанию.</p> <p>Это уже отличный результат, который не затрагивает <strong>весь</strong> актуальный reflog и не делает агрессивное сжатие. Подходит даже для рабочих реп, если они, как и репа для моего сайта, стали расти как на дрожжах. Работает довольно шустро.</p> <p>А что делать с архивными репозиториями? К тому же, у меня есть много Git реп, которые я время от времени обновляю с помощью <code>fetch</code>, делаю <code>checkout</code> нужного тега и сам собираю софт…</p> <p>Там мне совсем не нужен reflog, да и куда больше интересует вопрос долгосрочной упаковки данных. Без оглядки на то, сколько времени займёт обработка сейчас.</p> <p>Если заменить <code>--expire-unreachable</code> на <code>--expire</code>, то Git удалит reflog полностью. Это не очень подходит для рабочих реп, но самое оно для архивных. Использование <code>--aggressive</code> позволяет Git пере-паковать объекты с большей эффективностью. Метод является самым долгим по времени исполнения.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>du<span class=w> </span>-sh<span class=w> </span>.git
+
+<span class=go>1,2G    .git</span>
+
+<span class=gp>$ </span>git<span class=w> </span>reflog<span class=w> </span>expire<span class=w> </span>--expire<span class=o>=</span>now<span class=w> </span>--all
+
+<span class=gp>$ </span><span class=nb>time</span><span class=w> </span>git<span class=w> </span>gc<span class=w> </span>--prune<span class=o>=</span>now<span class=w> </span>--aggressive
+
+<span class=go>Enumerating objects: 7717, done.</span>
+<span class=go>Counting objects: 100% (7717/7717), done.</span>
+<span class=go>Delta compression using up to 32 threads</span>
+<span class=go>Compressing objects: 100% (7563/7563), done.</span>
+<span class=go>Writing objects: 100% (7717/7717), done.</span>
+<span class=go>Total 7717 (delta 6494), reused 1179 (delta 0), pack-reused 0</span>
+
+<span class=go>________________________________________________________</span>
+<span class=go>Executed in   22.80 secs    fish           external</span>
+<span class=go>   usr time   42.59 secs  375.00 micros   42.59 secs</span>
+<span class=go>   sys time    0.65 secs  278.00 micros    0.65 secs</span>
+
+<span class=gp>$ </span>du<span class=w> </span>-sh<span class=w> </span>.git
+
+<span class=go>502M    .git</span>
+</code></pre></div> <p>В данном случае эффект совсем небольшой и не стоит свеч. Терять reflog за 5M? Нет уж спасибо! Другие репы, как например <code>linux-firmware</code>, выигрывают уже около 300 мегов. Намного более весомо и практично, в <code>linux-firmware</code> я не коммичу.</p> <p>Получается вот так. Без причины, я лично, не стану использовать ни один из этих методов. Но при необходимости теперь буду знать, что и как можно подчистить :)</p> <time datetime=2025-06-24T14:57:20+03:00>24 июня 2025 г.</time> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 

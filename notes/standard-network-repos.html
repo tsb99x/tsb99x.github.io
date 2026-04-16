@@ -1,0 +1,58 @@
+<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2024-09-18T19:53:22+03:00><meta name=description content="Где взять sources.list"><meta property=og:url content=https://tsb99x.ru/notes/standard-network-repos.html><meta property=og:type content=article><meta property=og:title content="Стандартные сетевые репозитории"><meta property=og:description content="Где взять sources.list"><meta property=og:image content=https://tsb99x.ru/res/avatar-512x512.png><title>Стандартные сетевые репозитории</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.ru/notes/standard-network-repos.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> <a href=/projects/ >Проекты</a> </nav> <article> <header id=title-block-header> <h1 class=title>Стандартные сетевые репозитории</h1> </header> <p>Если Debian был установлен <em>не</em> с диска netinst или live версии, то <code>apt</code> будет работать только с тем самым установочным диском. Другими словами, <code>apt</code> не будет использовать репозитории в интернете, а часто нужно использование именно сетевых репозиториев для получения самых свежих обновлений. В том числе и безопасности.</p> <p>Индикатором проблемы с <code>sources.list</code> станет ошибка при попытке обновления:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>apt<span class=w> </span>update
+
+<span class=go>Ign:1 cdrom://[Debian GNU/Linux 12.7.0 _Bookworm_ - Official amd64 DLBD Binary-1 with firmware 20240831-10:40] bookworm InRelease</span>
+<span class=go>Err:2 cdrom://[Debian GNU/Linux 12.7.0 _Bookworm_ - Official amd64 DLBD Binary-1 with firmware 20240831-10:40] bookworm Release</span>
+<span class=go>  Please use apt-cdrom to make this CD-ROM recognized by APT. apt-get update cannot be used to add new CD-ROMs</span>
+<span class=go>Reading package lists... Done</span>
+<span class=go>E: The repository &#39;cdrom://[Debian GNU/Linux 12.7.0 _Bookworm_ - Official amd64 DLBD Binary-1 with firmware 20240831-10:40] bookworm Release&#39; does not have a Release file.</span>
+<span class=go>N: Updating from such a repository can&#39;t be done securely, and is therefore disabled by default.</span>
+<span class=go>N: See apt-secure(8) manpage for repository creation and user configuration details.</span>
+</code></pre></div> <p>Видно, что при обновлении списка доступных пакетов игнорируются диски. Причина для этого проста – на дисках не обновляется список пакетов. Т.е., <code>apt update</code> не имеет смысла выполнять на системах, которые обновляются с дисков. Сетевых репозиториев в выводе нет. Чтобы проверить, какие репозитории используются, достаточно посмотреть в файл <code>sources.list</code>, находящийся в <code>/etc/apt/</code>:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>cat<span class=w> </span>/etc/apt/sources.list
+
+<span class=go>deb cdrom:[Debian GNU/Linux 12.7.0 _Bookworm_ - Official amd64 DLBD Binary-1 with firmware 20240831-10:40]/ bookworm contrib main non-free-firmware</span>
+</code></pre></div> <p>Видим один единственный <code>cdrom://</code>. Это установочный диск, а больше ничего нет.</p> <p>В качестве документации к <code>sources.list</code> можно почитать <a href=https://manpages.debian.org/bookworm/apt/sources.list.5.en.html>man sources.list</a>. Искать и добавлять каждый репозиторий можно вручную, но есть более удачный способ получить готовый список, аналогичный netinst и live установке.</p> <p>Этот способ разобран в ответе на <a href=https://unix.stackexchange.com/questions/671655/how-do-i-restore-the-default-sources-list-file-on-debian-11-bullseye>вопрос на StackExchange</a>. Парафразирую: достаточно скопировать один файл, который уже есть в стандартной установке.</p> <p>Это файл <code>sources.list</code>, находится в <code>/usr/share/doc/apt/examples</code>. Посмотрим:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>cat<span class=w> </span>/usr/share/doc/apt/examples/sources.list
+
+<span class=gp># </span>See<span class=w> </span>sources.list<span class=o>(</span><span class=m>5</span><span class=o>)</span><span class=w> </span>manpage<span class=w> </span><span class=k>for</span><span class=w> </span>more<span class=w> </span>information
+<span class=gp># </span>Remember<span class=w> </span>that<span class=w> </span>CD-ROMs,<span class=w> </span>DVDs<span class=w> </span>and<span class=w> </span>such<span class=w> </span>are<span class=w> </span>managed<span class=w> </span>through<span class=w> </span>the<span class=w> </span>apt-cdrom<span class=w> </span>tool.
+<span class=go>deb http://deb.debian.org/debian bookworm main contrib non-free non-free-firmware</span>
+<span class=go>deb http://deb.debian.org/debian bookworm-updates main contrib non-free non-free-firmware</span>
+<span class=go>deb http://deb.debian.org/debian-security bookworm-security main contrib non-free non-free-firmware</span>
+
+<span class=gp># </span>Uncomment<span class=w> </span><span class=k>if</span><span class=w> </span>you<span class=w> </span>want<span class=w> </span>the<span class=w> </span>apt-get<span class=w> </span><span class=nb>source</span><span class=w> </span><span class=k>function</span><span class=w> </span>to<span class=w> </span>work
+<span class=gp>#</span>deb-src<span class=w> </span>http://deb.debian.org/debian<span class=w> </span>bookworm<span class=w> </span>main<span class=w> </span>contrib<span class=w> </span>non-free
+<span class=gp>#</span>deb-src<span class=w> </span>http://deb.debian.org/debian<span class=w> </span>bookworm-updates<span class=w> </span>main<span class=w> </span>contrib<span class=w> </span>non-free
+<span class=gp>#</span>deb-src<span class=w> </span>http://deb.debian.org/debian-security<span class=w> </span>bookworm-security<span class=w> </span>main<span class=w> </span>contrib<span class=w> </span>non-free
+</code></pre></div> <p>Отлично, как видим, включены все нужные по-умолчанию репозитории. И релизный, и updates, и security. Просто копирую файл в <code>/etc/apt/</code> и делаю <code>update</code>:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>cp<span class=w> </span>/usr/share/doc/apt/examples/sources.list<span class=w> </span>/etc/apt/
+<span class=gp>$ </span>sudo<span class=w> </span>apt<span class=w> </span>update
+
+<span class=go>Get:1 http://deb.debian.org/debian bookworm InRelease [151 kB]</span>
+<span class=go>Get:2 http://deb.debian.org/debian bookworm-updates InRelease [55,4 kB]</span>
+<span class=go>Get:3 http://deb.debian.org/debian-security bookworm-security InRelease [48,0 kB]</span>
+<span class=go>Get:4 http://deb.debian.org/debian bookworm/main amd64 Packages [8 787 kB]</span>
+<span class=go>Get:5 http://deb.debian.org/debian bookworm/main Translation-en [6 109 kB]</span>
+<span class=go>Get:6 http://deb.debian.org/debian bookworm/contrib amd64 Packages [54,1 kB]</span>
+<span class=go>Get:7 http://deb.debian.org/debian bookworm/contrib Translation-en [48,8 kB]</span>
+<span class=go>Get:8 http://deb.debian.org/debian bookworm/non-free amd64 Packages [97,3 kB]</span>
+<span class=go>Get:9 http://deb.debian.org/debian bookworm/non-free Translation-en [67,0 kB]</span>
+<span class=go>Get:10 http://deb.debian.org/debian bookworm/non-free-firmware amd64 Packages [6 236 B]</span>
+<span class=go>Get:11 http://deb.debian.org/debian bookworm/non-free-firmware Translation-en [20,9 kB]</span>
+<span class=go>Get:12 http://deb.debian.org/debian bookworm-updates/main amd64 Packages [2 468 B]</span>
+<span class=go>Get:13 http://deb.debian.org/debian bookworm-updates/main Translation-en [2 928 B]</span>
+<span class=go>Get:14 http://deb.debian.org/debian bookworm-updates/contrib amd64 Packages [768 B]</span>
+<span class=go>Get:15 http://deb.debian.org/debian bookworm-updates/contrib Translation-en [408 B]</span>
+<span class=go>Get:16 http://deb.debian.org/debian bookworm-updates/non-free amd64 Packages [12,8 kB]</span>
+<span class=go>Get:17 http://deb.debian.org/debian bookworm-updates/non-free Translation-en [7 744 B]</span>
+<span class=go>Get:18 http://deb.debian.org/debian bookworm-updates/non-free-firmware amd64 Packages [616 B]</span>
+<span class=go>Get:19 http://deb.debian.org/debian bookworm-updates/non-free-firmware Translation-en [384 B]</span>
+<span class=go>Get:20 http://deb.debian.org/debian-security bookworm-security/main amd64 Packages [182 kB]</span>
+<span class=go>Get:21 http://deb.debian.org/debian-security bookworm-security/main Translation-en [110 kB]</span>
+<span class=go>Get:22 http://deb.debian.org/debian-security bookworm-security/contrib amd64 Packages [644 B]</span>
+<span class=go>Get:23 http://deb.debian.org/debian-security bookworm-security/contrib Translation-en [372 B]</span>
+<span class=go>Get:24 http://deb.debian.org/debian-security bookworm-security/non-free-firmware amd64 Packages [688 B]</span>
+<span class=go>Get:25 http://deb.debian.org/debian-security bookworm-security/non-free-firmware Translation-en [472 B]</span>
+<span class=go>Fetched 15,8 MB in 7s (2 173 kB/s)</span>
+<span class=go>Reading package lists... Done</span>
+<span class=go>Building dependency tree... Done</span>
+<span class=go>Reading state information... Done</span>
+<span class=go>7 packages can be upgraded. Run &#39;apt list --upgradable&#39; to see them.</span>
+</code></pre></div> <p>На этот раз список пакетов успешно обновился из сетевых репозиториев, как нужно. К слову, eсли у Вас Ubuntu, то аналогичный подход <a href=https://askubuntu.com/questions/701732/how-do-i-revert-my-source-list-from-the-source-list-backup>применим и к Ubuntu</a>.</p> <time datetime=2024-09-18T19:53:22+03:00>18 сентября 2024 г.</time> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 

@@ -1,0 +1,44 @@
+<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2024-09-11T18:50:35+03:00><meta name=description content="Настройка региональных форматов"><meta property=og:url content=https://tsb99x.ru/notes/setting-lc-vars.html><meta property=og:type content=article><meta property=og:title content="Устанавливаем LC переменные"><meta property=og:description content="Настройка региональных форматов"><meta property=og:image content=https://tsb99x.ru/res/avatar-512x512.png><title>Устанавливаем LC переменные</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.ru/notes/setting-lc-vars.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> <a href=/projects/ >Проекты</a> </nav> <article> <header id=title-block-header> <h1 class=title>Устанавливаем <code>LC</code> переменные</h1> </header> <p>После <a href=/notes/generating-ru-locale.html>генерации локали <code>ru</code></a>, я делаю настройку региональных параметров. Такие параметры включают ряд <code>LC</code> переменных. Они нужны, чтобы программы могли понять по каким правилам, как пример, выводить дату или форматировать десятичные числа. Поскольку даты являются самым ярким примером, то приведу именно его:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>date
+
+<span class=go>Wed Sep 11 06:03:48 PM MSK 2024</span>
+
+<span class=gp>$ </span><span class=nv>LC_TIME</span><span class=o>=</span>ru_RU.UTF-8<span class=w> </span>date
+
+<span class=go>Ср 11 сен 2024 18:03:27 MSK</span>
+</code></pre></div> <p>Разница в форматах очевидна. В данном случае играет роль переменная окружения <code>LC_TIME</code>, но есть и некоторые другие. Информацию по установленным сейчас <code>LC</code> переменным можно узнать с помощью команды <code>localectl</code>:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>localectl
+
+<span class=go>System Locale: LANG=en_US.UTF-8</span>
+<span class=go>               LANGUAGE=en_US:en</span>
+<span class=go>    VC Keymap: (unset)</span>
+<span class=go>   X11 Layout: us,ru</span>
+<span class=go>    X11 Model: pc105</span>
+<span class=go>  X11 Variant: ,</span>
+<span class=go>  X11 Options: grp:win_space_toggle</span>
+</code></pre></div> <p>Как видно, сейчас ни одна <code>LC</code> переменная не установлена, установлены только переменные <code>LANG</code> и <code>LANGUAGE</code>. Установлены они по-умолчанию в <code>en_US</code>.</p> <p>Релевантную документацию по локалям и переменным окружения <code>LC</code> можно найти в <a href=https://manpages.debian.org/bookworm/manpages/locale.1.en.html>man locale</a>. Разбирать всё переменные я не буду, отмечу только, что для меня оптимальным вариантом стало форматирование всего в <code>ru_RU</code>. Исключение только для сообщений и интерфейса программ, их я оставляю в <code>en_US</code>.</p> <p>Хорошая локализация иногда отсутствует вовсе. Наличие локализации также мешает нагуглить какие кнопки надо нажимать в интерфейсе. Большинство информации можно найти, к сожалению, только на англоязычных ресурсах.</p> <p>Чтобы установить параметры, я пользуюсь <code>update-locale</code>:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>update-locale<span class=w> </span><span class=se>\</span>
+<span class=w>    </span><span class=nv>LC_ADDRESS</span><span class=o>=</span>ru_RU.UTF-8<span class=w> </span><span class=se>\</span>
+<span class=w>    </span><span class=nv>LC_IDENTIFICATION</span><span class=o>=</span>ru_RU.UTF-8<span class=w> </span><span class=se>\</span>
+<span class=w>    </span><span class=nv>LC_MEASUREMENT</span><span class=o>=</span>ru_RU.UTF-8<span class=w> </span><span class=se>\</span>
+<span class=w>    </span><span class=nv>LC_MONETARY</span><span class=o>=</span>ru_RU.UTF-8<span class=w> </span><span class=se>\</span>
+<span class=w>    </span><span class=nv>LC_NAME</span><span class=o>=</span>ru_RU.UTF-8<span class=w> </span><span class=se>\</span>
+<span class=w>    </span><span class=nv>LC_NUMERIC</span><span class=o>=</span>ru_RU.UTF-8<span class=w> </span><span class=se>\</span>
+<span class=w>    </span><span class=nv>LC_PAPER</span><span class=o>=</span>ru_RU.UTF-8<span class=w> </span><span class=se>\</span>
+<span class=w>    </span><span class=nv>LC_TELEPHONE</span><span class=o>=</span>ru_RU.UTF-8<span class=w> </span><span class=se>\</span>
+<span class=w>    </span><span class=nv>LC_TIME</span><span class=o>=</span>ru_RU.UTF-8
+</code></pre></div> <p>Проверить, что настройки применились, можно в упомянутом <code>localectl</code> или заглянув в файл <code>locale</code>, который найдётся в директории <code>/etc/default/</code>:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>cat<span class=w> </span>/etc/default/locale
+
+<span class=gp>#  </span>File<span class=w> </span>generated<span class=w> </span>by<span class=w> </span>update-locale
+<span class=go>LANG=&quot;en_US.UTF-8&quot;</span>
+<span class=go>LANGUAGE=&quot;en_US:en&quot;</span>
+<span class=go>LC_NUMERIC=ru_RU.UTF-8</span>
+<span class=go>LC_MONETARY=ru_RU.UTF-8</span>
+<span class=go>LC_TELEPHONE=ru_RU.UTF-8</span>
+<span class=go>LC_PAPER=ru_RU.UTF-8</span>
+<span class=go>LC_MEASUREMENT=ru_RU.UTF-8</span>
+<span class=go>LC_TIME=ru_RU.UTF-8</span>
+<span class=go>LC_IDENTIFICATION=ru_RU.UTF-8</span>
+<span class=go>LC_NAME=ru_RU.UTF-8</span>
+<span class=go>LC_ADDRESS=ru_RU.UTF-8</span>
+</code></pre></div> <p>Единственный оставшийся элемент, который доставляет проблемы – размер бумаги. Например, в LibreOffice и ряде других программ он устанавливается как letter, когда нужен A4. Исправить ситуацию можно, записав <code>a4</code> в <code>/etc/papersize</code>:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span><span class=nb>echo</span><span class=w> </span><span class=s1>&#39;a4&#39;</span><span class=w> </span><span class=p>|</span><span class=w> </span>sudo<span class=w> </span>tee<span class=w> </span>/etc/papersize
+
+<span class=go>a4</span>
+</code></pre></div> <p>На этом настройку локализации системы я завершаю.</p> <time datetime=2024-09-11T18:50:35+03:00>11 сентября 2024 г.</time> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 

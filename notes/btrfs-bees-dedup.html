@@ -1,0 +1,95 @@
+<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2025-06-27T16:09:20+03:00><meta name=description content="С помощью BEES"><meta property=og:url content=https://tsb99x.ru/notes/btrfs-bees-dedup.html><meta property=og:type content=article><meta property=og:title content="Дедупликация BTRFS"><meta property=og:description content="С помощью BEES"><meta property=og:image content=https://tsb99x.ru/res/avatar-512x512.png><title>Дедупликация BTRFS</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.ru/notes/btrfs-bees-dedup.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> <a href=/projects/ >Проекты</a> </nav> <article> <header id=title-block-header> <h1 class=title>Дедупликация BTRFS</h1> </header> <p>Несколько недель назад я начал новый эксперимент по работе с BTRFS. На этот раз целью стала оффлайн-дедупликация – довольно сложный и неоднозначный процесс для файловых систем на основе COW. Ближайший конкурент BTRFS, ZFS, имеет онлайн-вид дедупликации, встроенный в ФС. В таком случае по умолчанию требуются большие объёмы RAM. Также дедуп в онлайне увеличивает задержку при записи данных.</p> <p>В BTRFS изначально было принято решение отказаться от идеи онлайн дедупликации и надеяться на лучшее. А задачу выявления дубликатов отдать на откуп внешним инструментам, которые пользователи буду сами использовать по необходимости.</p> <p>Поработал я с двумя такими инструментами: <a href=https://github.com/markfasheh/duperemove>duperemove</a> и <a href=https://github.com/Zygo/bees>BEES</a>. Сегодня коротко расскажу про работу с BEES, т.к. он выглядит для меня куда более интересным и (концептуально) чуть более простым инструментом, нежели duperemove.</p> <p>Мой опыт с BEES был на версии 0.10. На днях (22 июня) вышла версия 0.11. Теперь BEES опирается на более свежие ядра Linux, минимальное рекомендуемая версия ядра – 5.7. Из LTS это будет версия 6.1, как и стандартная у Debian Bookworm.</p> <p>Не буду останавливаться на деталях того, как BEES работает, это замечательно расписано разработчиком в файле <a href=https://github.com/Zygo/bees/blob/master/docs/how-it-works.md>docs/how-it-works.md</a> в репозитории на GitHub. Я же продолжу коротким практическом гайдом: как запускать и что смотреть.</p> <p>Первым делом нужно выкачать репу с GitHub и перейти в новую папку.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>git<span class=w> </span>clone<span class=w> </span>https://github.com/Zygo/bees.git
+
+<span class=go>Cloning into &#39;bees&#39;...</span>
+<span class=go>remote: Enumerating objects: 4594, done.</span>
+<span class=go>remote: Counting objects: 100% (1203/1203), done.</span>
+<span class=go>remote: Compressing objects: 100% (575/575), done.</span>
+<span class=go>remote: Total 4594 (delta 689), reused 754 (delta 610), pack-reused 3391 (from 2)</span>
+<span class=go>Receiving objects: 100% (4594/4594), 1.37 MiB | 4.41 MiB/s, done.</span>
+<span class=go>Resolving deltas: 100% (3134/3134), done.</span>
+
+<span class=gp>$ </span><span class=nb>cd</span><span class=w> </span>bees/
+</code></pre></div> <p>Коммиты в основной ветке не являются релизными, поэтому смотрим на теги.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>git<span class=w> </span>tag<span class=w> </span><span class=p>|</span><span class=w> </span>sort<span class=w> </span>-rV<span class=w> </span><span class=p>|</span><span class=w> </span>head
+
+<span class=go>v0.11-rc4</span>
+<span class=go>v0.11-rc3</span>
+<span class=go>v0.11-rc2</span>
+<span class=go>v0.11-rc1</span>
+<span class=go>v0.11</span>
+<span class=go>v0.10</span>
+<span class=go>v0.9.3</span>
+<span class=go>v0.9.2</span>
+<span class=go>v0.9.1</span>
+<span class=go>v0.9</span>
+</code></pre></div> <p>Версия 0.11 – последняя, переходим на неё, собираем программу и устанавливаем.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>git<span class=w> </span>checkout<span class=w> </span>v0.11
+
+<span class=go>[...]</span>
+
+<span class=gp>$ </span>sudo<span class=w> </span>apt<span class=w> </span>install<span class=w> </span>-y<span class=w> </span><span class=se>\</span>
+<span class=w>    </span>build-essential<span class=w> </span><span class=se>\</span>
+<span class=w>    </span>btrfs-progs<span class=w> </span><span class=se>\</span>
+<span class=w>    </span>markdown<span class=w> </span><span class=se>\</span>
+<span class=w>    </span>pkg-config<span class=w> </span><span class=se>\</span>
+<span class=w>    </span>systemd-dev
+
+<span class=go>[...]</span>
+
+<span class=gp>$ </span>make
+
+<span class=go>[...]</span>
+
+<span class=gp>$ </span>sudo<span class=w> </span>make<span class=w> </span>install
+
+<span class=go>[...]</span>
+<span class=go>install -Dm755 bin/bees /usr/lib/bees/bees</span>
+<span class=go>install -Dm755 scripts/beesd /usr/sbin/beesd</span>
+<span class=go>install -Dm644 scripts/beesd.conf.sample /etc/bees/beesd.conf.sample</span>
+<span class=go>install -Dm644 scripts/beesd@.service /lib/systemd/system/beesd@.service</span>
+</code></pre></div> <p>Как видно, BEES установил бинарник <code>bees</code>, скрипт <code>beesd</code> и конфиг сервиса. На этом этапе нужно сформировать конфигурацию для ФС. Пример конфига с базовыми комментариями BEES положил в <code>/etc/bees/beesd.conf.sample</code>. Он полезный, но многословный, я приведу пример своего <code>.conf</code>. Конфиги можно называть как захочется, у меня он называется <code>data.conf</code>, как и BTRFS раздел.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>cat<span class=w> </span>/etc/bees/data.conf
+
+<span class=go>UUID=bc574c75-0f22-45d1-b43d-13fdb423450e</span>
+<span class=go>OPTIONS=&quot;--strip-paths --verbose 7 --thread-count 4&quot;</span>
+<span class=go>DB_SIZE=$((1*1024*1024*1024)) # 1G in bytes</span>
+</code></pre></div> <p>Мне потребовалось установить всего 3 параметра (больше в <a href=https://github.com/Zygo/bees/blob/master/docs/options.md>docs/options.md</a>):</p> <ul> <li><code>UUID</code> – UUID раздела BTRFS из <code>sudo btrfs filesystem show</code>.</li> <li><code>OPTIONS</code> – опции работы BEES: <ul> <li><code>--strip-paths</code> – для настоящих имён файлов в ФС</li> <li><code>--verbose 7</code> – выводить в логах всё, исключая дебаг (уровень 8)</li> <li><code>--thread-count 4</code> – ограничить работу 4-я потоками процессора.</li> </ul></li> <li><code>DB_SIZE</code> – размер файла с хэшами, оптимальный рассчитывается как 128M на 1T данных. У меня раздел на 8Т, я установил 1G (1024M) = 128M * (8T / 1T).</li> </ul> <p>Можно указать любой объём <code>DB_SIZE</code>, нужно только учитывать, что файл этого объёма будет постоянно находится в оперативной памяти при работе BEES.</p> <blockquote class=warning> <p> <p>Изменение <code>DB_SIZE</code> после того, как BEES уже начал сканировать ФС, приведут к новому сканированию <strong>с нуля</strong>! Будьте внимательны!</p> </p> </blockquote> <p>После того, как Вы собрали свой <code>.conf</code> и положили в <code>/etc/bees/</code>, запустить BEES можно через <code>systemctl</code>, а наблюдать за работой через <code>journalctl</code>. Интересная особенность – для сервиса требуется указывать UUID раздела BTRFS.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>systemctl<span class=w> </span>start<span class=w> </span>beesd@bc574c75-0f22-45d1-b43d-13fdb423450e
+
+<span class=gp>$ </span>sudo<span class=w> </span>journalctl<span class=w> </span>-o<span class=w> </span>cat<span class=w> </span>-f<span class=w> </span>-u<span class=w> </span>beesd@bc574c75-0f22-45d1-b43d-13fdb423450e
+
+<span class=go>2025-06-27 15:23:12 18211.18211&lt;7&gt; bees: context constructed</span>
+<span class=go>2025-06-27 15:23:12 18211.18211&lt;7&gt; bees: Parsing option &#39;no-timestamps&#39;</span>
+<span class=go>2025-06-27 15:23:12 18211.18211&lt;7&gt; bees: Parsing option &#39;strip-paths&#39;</span>
+<span class=go>2025-06-27 15:23:12 18211.18211&lt;7&gt; bees: Parsing option &#39;verbose&#39;</span>
+<span class=go>2025-06-27 15:23:12 18211.18211&lt;5&gt; bees: log level set to 7</span>
+<span class=go>bees[18211]: setting worker thread pool maximum size to 4</span>
+<span class=go>bees[18211]: setting throttle factor to 0</span>
+<span class=go>bees[18211]: setting root path to &#39;/run/bees/mnt/bc574c75-0f22-45d1-b43d-13fdb423450e&#39;</span>
+<span class=go>bees[18211]: Starting bees main loop...</span>
+<span class=go>crawl_writeback[18243]: Using fsync on btrfs because kernel version is 6.12</span>
+<span class=go>[...]</span>
+</code></pre></div> <p>В логах можно получать статус по состоянию, но проще смотреть в <code>.status</code> файл. BEES обновляет этот файл в директории <code>/run/bees</code>. В <code>.status</code> есть очень много информации и читать её тяжело. Для упрощения задачи нас интересует таблица в самом конце файла, после строки с <code>PROGRESS:</code>. <code>sed</code>, как и всегда, выручит.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>sed<span class=w> </span>-n<span class=w> </span><span class=s1>&#39;/PROGRESS:/,$ p&#39;</span><span class=w> </span><span class=se>\</span>
+<span class=w>    </span>/run/bees/bc574c75-0f22-45d1-b43d-13fdb423450e.status
+
+<span class=go>PROGRESS:</span>
+<span class=go>extsz   datasz  point gen_min gen_max this cycle start tm_left   next cycle ETA</span>
+<span class=go>----- -------- ------ ------- ------- ---------------- ------- ----------------</span>
+<span class=go>  max   5.039T 004263       0  556061 2025-06-27 16:54  7h 47m 2025-06-28 00:43</span>
+<span class=go>  32M    1.53T 002409       0  556061 2025-06-27 16:54 13h 48m 2025-06-28 06:44</span>
+<span class=go>   8M 368.251G 003183       0  556061 2025-06-27 16:54 10h 26m 2025-06-28 03:22</span>
+<span class=go>   2M  84.163G 001566       0  556061 2025-06-27 16:54 21h 15m 2025-06-28 14:11</span>
+<span class=go> 512K  89.955G 000899       0  556061 2025-06-27 16:54  1d 13h 2025-06-29 05:58</span>
+<span class=go> 128K   1.671G 002137       0  556061 2025-06-27 16:54 15h 33m 2025-06-28 08:30</span>
+<span class=go>total   7.101T        gen_now  556066                  updated 2025-06-27 16:56</span>
+</code></pre></div> <p>Цель здесь – чтобы значения <code>gen_max</code> во всех строках сошлись со значением в строке <code>total</code>, а в колонке <code>point</code> на всех строках было <code>idle</code> вместо цифр. Соблюдение этих условий означает, что раздел ФС был полностью обработан BEES.</p> <p>Вот так, для сравнения, выглядит <code>.status</code> для полностью просканированной ФС.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>sed<span class=w> </span>-n<span class=w> </span><span class=s1>&#39;/PROGRESS:/,$ p&#39;</span><span class=w> </span><span class=se>\</span>
+<span class=w>    </span>/run/bees/bc574c75-0f22-45d1-b43d-13fdb423450e.status
+
+<span class=go>PROGRESS:</span>
+<span class=go>extsz  datasz point gen_min gen_max this cycle start tm_left   next cycle ETA</span>
+<span class=go>----- ------- ----- ------- ------- ---------------- ------- ----------------</span>
+<span class=go>  max   5.69T  idle  555955  555957 2025-06-27 15:59       -                -</span>
+<span class=go>  32M  1.011T  idle  555955  555957 2025-06-27 15:59       -                -</span>
+<span class=go>   8M 307.66G  idle  555955  555957 2025-06-27 15:59       -                -</span>
+<span class=go>   2M 55.148G  idle  555955  555957 2025-06-27 15:59       -                -</span>
+<span class=go> 512K   37.6G  idle  555955  555957 2025-06-27 15:59       -                -</span>
+<span class=go> 128K  8.969G  idle  555955  555957 2025-06-27 15:59       -                -</span>
+<span class=go>total  7.101T       gen_now  555957                  updated 2025-06-27 15:59</span>
+</code></pre></div> <p>Выключается BEES как и обычный сервис в <code>systemctl</code>.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>systemctl<span class=w> </span>stop<span class=w> </span>beesd@bc574c75-0f22-45d1-b43d-13fdb423450e
+</code></pre></div> <p>На этом основные элементы работы с BEES заканчиваются.</p> <p>В целом, я не скажу, что дедупликация высвободила мне огромное количество места. Нет, скорее наоборот – дедуп привёл к росту метаданных, а на первых этапах BEES и вовсе съел несколько сотен гигабайт, часть которых высвободил только подходя к финалу полного сканирования раздела BTRFS. Такая себе оптимизация…</p> <p>Основной эффект от BEES, судя по всему, должен наблюдаться, если использовать его постоянно и <strong>перед</strong> созданием read-only снимков BTRFS. Подтвердить это объективными данными мне сложно. Но над экспериментом стоит подумать :)</p> <time datetime=2025-06-27T16:09:20+03:00>27 июня 2025 г.</time> <div class=changelog> <h4>Журнал изменений</h4> <p><b>26 января 2026 г.</b>: добавил <code>pkg-config</code> и <code>systemd-dev</code> в список пакетов для установки.</p> </div> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 

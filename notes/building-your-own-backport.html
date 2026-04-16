@@ -1,0 +1,78 @@
+<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2024-07-28T11:41:10+03:00><meta name=description content="Собираем backport вручную"><meta property=og:url content=https://tsb99x.ru/notes/building-your-own-backport.html><meta property=og:type content=article><meta property=og:title content="Функция strlcpy не найдена"><meta property=og:description content="Собираем backport вручную"><meta property=og:image content=https://tsb99x.ru/res/avatar-512x512.png><title>Функция strlcpy не найдена</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.ru/notes/building-your-own-backport.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> <a href=/projects/ >Проекты</a> </nav> <article> <header id=title-block-header> <h1 class=title>Функция <code>strlcpy</code> не найдена</h1> </header> <p>Debian – стабильная ОС. Но стабильность версий пакетов иногда необходимо нарушить. К примеру, при использовании нового железа, имеет смысл использовать <a href=/notes/debian-backports.html>backport ядра Linux</a>. Я так и делаю.</p> <p>На днях я столкнулся с новой проблемой. При обновлении ядра до версии 6.9, я увидел ошибки DKMS. В частности, ошибки у модуля <code>v4l2loopback</code>.</p> <p>Оказывается, Linux 6.8 больше не имеет функции <code>strlcpy</code>, как и ряда других. В <a href=https://github.com/umlaeute/v4l2loopback/issues/575>обсуждении проблемы на GitHub</a> однозначно озвучивают требование версии ≥13 для <code>v4l2loopback</code>. Но такой версии в bookworm (stable) нет, там версия 12.</p> <p>Нужная версия имеется у Debian только в trixie и sid, но не в backports для stable. Значит, имеет смысл собрать пакет для stable самостоятельно.</p> <p>Первым шагом устанавливаем необходимый тулинг.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>apt<span class=w> </span>install<span class=w> </span>build-essential<span class=w> </span>devscripts
+</code></pre></div> <p>Теперь создаём рабочую папку для нового пакета.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>mkdir<span class=w> </span>v4l2loopback-backport
+<span class=gp>$ </span><span class=nb>cd</span><span class=w> </span>v4l2loopback-backport/
+</code></pre></div> <p>Идём на страницу пакета <a href=https://packages.debian.org/ru/source/trixie/v4l2loopback>v4l2loopback для trixie</a>. Там есть ссылки на файлы <code>.dsc</code>, <code>.orig.tar.gz</code> и <code>.debian.tar.xz</code>. Нас интересует именно <code>.dsc</code> файл. Достаточно скопировать ссылку и скормить её инструменту <code>dget</code>.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>dget<span class=w> </span>http://deb.debian.org/debian/pool/main/v/v4l2loopback/v4l2loopback_0.13.2-1.dsc
+
+<span class=go>dget: retrieving http://deb.debian.org/debian/pool/main/v/v4l2loopback/v4l2loopback_0.13.2-1.dsc</span>
+<span class=gp>  % </span>Total<span class=w>    </span>%<span class=w> </span>Received<span class=w> </span>%<span class=w> </span>Xferd<span class=w>  </span>Average<span class=w> </span>Speed<span class=w>   </span>Time<span class=w>    </span>Time<span class=w>     </span>Time<span class=w>  </span>Current
+<span class=go>                                 Dload  Upload   Total   Spent    Left  Speed</span>
+<span class=go>100  2375  100  2375    0     0  38990      0 --:--:-- --:--:-- --:--:-- 39583</span>
+<span class=go>dget: retrieving http://deb.debian.org/debian/pool/main/v/v4l2loopback/v4l2loopback_0.13.2.orig.tar.gz</span>
+<span class=gp>  % </span>Total<span class=w>    </span>%<span class=w> </span>Received<span class=w> </span>%<span class=w> </span>Xferd<span class=w>  </span>Average<span class=w> </span>Speed<span class=w>   </span>Time<span class=w>    </span>Time<span class=w>     </span>Time<span class=w>  </span>Current
+<span class=go>                                 Dload  Upload   Total   Spent    Left  Speed</span>
+<span class=go>100 84819  100 84819    0     0  1030k      0 --:--:-- --:--:-- --:--:-- 1035k</span>
+<span class=go>dget: retrieving http://deb.debian.org/debian/pool/main/v/v4l2loopback/v4l2loopback_0.13.2-1.debian.tar.xz</span>
+<span class=gp>  % </span>Total<span class=w>    </span>%<span class=w> </span>Received<span class=w> </span>%<span class=w> </span>Xferd<span class=w>  </span>Average<span class=w> </span>Speed<span class=w>   </span>Time<span class=w>    </span>Time<span class=w>     </span>Time<span class=w>  </span>Current
+<span class=go>                                 Dload  Upload   Total   Spent    Left  Speed</span>
+<span class=go>100  9396  100  9396    0     0   186k      0 --:--:-- --:--:-- --:--:--  187k</span>
+<span class=go>v4l2loopback_0.13.2-1.dsc:</span>
+<span class=go>      Good signature found</span>
+<span class=go>   validating v4l2loopback_0.13.2.orig.tar.gz</span>
+<span class=go>   validating v4l2loopback_0.13.2-1.debian.tar.xz</span>
+<span class=go>All files validated successfully.</span>
+<span class=go>gpg: no valid OpenPGP data found.</span>
+<span class=go>dpkg-source: info: extracting v4l2loopback in v4l2loopback-0.13.2</span>
+<span class=go>dpkg-source: info: unpacking v4l2loopback_0.13.2.orig.tar.gz</span>
+<span class=go>dpkg-source: info: unpacking v4l2loopback_0.13.2-1.debian.tar.xz</span>
+</code></pre></div> <p>Инструмент <code>dget</code> – это не более, чем скрипт, который загружает <code>.dsc</code>, <code>.orig.tar.gz</code> и <code>.debian.tar.xz</code>, проверяет их и распаковывает.</p> <p>В общем смысле, можно то же самое сделать с помощью <code>wget</code> и <code>dpkg-source -x</code>, но проще воспользоваться <code>dget</code>.</p> <p>Переходим в новую папку, в которую <code>dget</code> распаковал исходный код.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span><span class=nb>cd</span><span class=w> </span>v4l2loopback-0.13.2/
+</code></pre></div> <p>И запускаем сборку с помощью <code>debuild</code>:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>debuild<span class=w> </span>-b<span class=w> </span>-uc<span class=w> </span>-us
+
+<span class=go> dpkg-buildpackage -us -uc -ui -b</span>
+<span class=go>dpkg-buildpackage: info: source package v4l2loopback</span>
+<span class=go>dpkg-buildpackage: info: source version 0.13.2-1</span>
+<span class=go>dpkg-buildpackage: info: source distribution unstable</span>
+<span class=go>dpkg-buildpackage: info: source changed by IOhannes m zmölnig (Debian/GNU) &lt;umlaeute@debian.org&gt;</span>
+<span class=go> dpkg-source --before-build .</span>
+<span class=go>dpkg-buildpackage: info: host architecture amd64</span>
+<span class=go>dpkg-checkbuilddeps: error: Unmet build dependencies: help2man</span>
+<span class=go>dpkg-buildpackage: warning: build dependencies/conflicts unsatisfied; aborting</span>
+<span class=go>dpkg-buildpackage: warning: (Use -d flag to override.)</span>
+<span class=go>debuild: fatal error at line 1182:</span>
+<span class=go>dpkg-buildpackage -us -uc -ui -b failed</span>
+</code></pre></div> <p>Как видим, не хватает зависимостей (<code>help2man</code>). Не проблема. Есть возможность автоматически установить все необходимые зависимости с помощью <code>apt</code>.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>apt<span class=w> </span>build-dep<span class=w> </span>.
+
+<span class=go>Note, using directory &#39;.&#39; to get the build dependencies</span>
+<span class=go>Reading package lists... Done</span>
+<span class=go>Building dependency tree... Done</span>
+<span class=go>Reading state information... Done</span>
+<span class=go>The following NEW packages will be installed:</span>
+<span class=go>  help2man</span>
+<span class=go>0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.</span>
+<span class=go>Need to get 198 kB of archives.</span>
+<span class=go>After this operation, 555 kB of additional disk space will be used.</span>
+<span class=go>Do you want to continue? [Y/n] Y</span>
+<span class=go>Get:1 http://deb.debian.org/debian bookworm/main amd64 help2man amd64 1.49.3 [198 kB]</span>
+<span class=go>Fetched 198 kB in 0s (1 517 kB/s)</span>
+<span class=go>Selecting previously unselected package help2man.</span>
+<span class="gp gp-VirtualEnv">(Reading database ... 376690 files and directories currently installed.)</span>
+<span class=go>Preparing to unpack .../help2man_1.49.3_amd64.deb ...</span>
+<span class=go>Unpacking help2man (1.49.3) ...</span>
+<span class=go>Setting up help2man (1.49.3) ...</span>
+<span class=go>Processing triggers for man-db (2.11.2-2) ...</span>
+<span class=go>Processing triggers for install-info (6.8-6+b1) ...</span>
+</code></pre></div> <p>Зависимости успешно установились, запускаем сборку заново. Вывод компилятора опускаю, т.к. он не представляет интереса.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>debuild<span class=w> </span>-b<span class=w> </span>-uc<span class=w> </span>-us
+</code></pre></div> <p>Опять же, <code>debuild</code> – не более, чем удобный скрипт, как и <code>dget</code>. Они призваны упростить работу по сборке пакетов. При особом желании можно воспользоваться напрямую <code>dpkg-buildpackage</code>.</p> <p>Выходим из папки с исходным кодом после успешной компиляции и проверяем наличие <code>.deb</code> пакетов.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span><span class=nb>cd</span><span class=w> </span>..
+<span class=gp>$ </span>ls<span class=w> </span>-1<span class=w> </span>*.deb
+
+<span class=go>v4l2loopback-dkms_0.13.2-1_all.deb</span>
+<span class=go>v4l2loopback-source_0.13.2-1_all.deb</span>
+<span class=go>v4l2loopback-utils_0.13.2-1_amd64.deb</span>
+<span class=go>v4l2loopback-utils-dbgsym_0.13.2-1_amd64.deb</span>
+</code></pre></div> <p>Из получившихся пакетов нас интересует только <code>v4l2loopback-dkms</code> и <code>v4l2loopback-utils</code>. Устанавливаем их.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>apt<span class=w> </span>install<span class=w> </span><span class=se>\</span>
+<span class=w>    </span>./v4l2loopback-dkms_0.13.2-1_all.deb<span class=w> </span><span class=se>\</span>
+<span class=w>    </span>./v4l2loopback-utils_0.13.2-1_amd64.deb
+</code></pre></div> <p>Вот и всё, пакет из trixie теперь и на stable!</p> <hr> <p>Стоит отдельно отметить, что, в моём случае с <code>v4l2loopback</code>, модуль потребовал ещё пары действий.</p> <p>Первое – требование переустановки модуля, иначе я получал ошибки вида <code>WARNING! Diff between built and installed module!</code> в <code>dkms status</code>.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>dkms<span class=w> </span>install<span class=w> </span>v4l2loopback/0.13.2<span class=w> </span>--force
+</code></pre></div> <p>Второе – пришлось явно включить загрузку модуля <code>v4l2loopback</code>, создав файл <code>.conf</code> в <code>modules-load.d</code>.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span><span class=nb>echo</span><span class=w> </span><span class=s1>&#39;v4l2loopback&#39;</span><span class=w> </span><span class=p>|</span><span class=w> </span>sudo<span class=w> </span>tee<span class=w> </span>/etc/modules-load.d/v4l2loopback.conf
+
+<span class=go>v4l2loopback</span>
+</code></pre></div> <p>После этого <code>v4l2loopback</code> работает как предполагается “из коробки”.</p> <time datetime=2024-07-28T11:41:10+03:00>28 июля 2024 г.</time> <div class=changelog> <h4>Журнал изменений</h4> <p><b>21 августа 2024 г.</b>: убрал бесполезное упоминание <code>fakeroot</code>.</p> <p><b>9 октября 2024 г.</b>: заменил <code>ls -l</code> на <code>ls -1</code>, поправил форматирование.</p> <p><b>9 ноября 2024 г.</b>: добавил <code>cd</code> для перехода в рабочую папку.</p> </div> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 

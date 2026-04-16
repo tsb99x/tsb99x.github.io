@@ -1,0 +1,180 @@
+<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2024-01-14T14:12:00+03:00><meta name=description content="Эффективное обновление релизных ISO"><meta property=og:url content=https://tsb99x.ru/notes/debian-jigdo.html><meta property=og:type content=article><meta property=og:title content="Загрузка Debian с помощью jigdo"><meta property=og:description content="Эффективное обновление релизных ISO"><meta property=og:image content=https://tsb99x.ru/res/avatar-512x512.png><title>Загрузка Debian с помощью jigdo</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.ru/notes/debian-jigdo.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> <a href=/projects/ >Проекты</a> </nav> <article> <header id=title-block-header> <h1 class=title>Загрузка Debian с помощью jigdo</h1> </header> <iframe class=rutube-player src=https://rutube.ru/play/embed/38c011ea691c51f8c8d3e59323cb05a3/ frameborder=0 allow="clipboard-write; autoplay" webkitallowfullscreen mozallowfullscreen allowfullscreen> </iframe> <p>Один из самых привлекательных аспектов Debian для меня – возможность загрузить полноценный снимок <code>main</code> репозитория как ISO образ. Подход с использованием утилиты <code>jigdo</code> позволяет это сделать максимально просто и эффективно.</p> <p>Официальные <a href=https://cdimage.debian.org/debian-cd/current/amd64/jigdo-dlbd/ >образы Debian DLBD</a> – это простые ISO образы, предназначенные для записи на <a href=https://ru.wikipedia.org/wiki/Blu-ray_Disc>Dual-Layer Blu-ray Disk (DLBD)</a> или устройство соответствующего размера. 3 образа ISO суммарно занимают чуть больше 90G на момент релиза 12.11.</p> <p>Наличие такого бекапа значит, что Вы всегда сможете достать конкретную версию определённого пакета из нужного релиза. И, вишенка на торте, обновлять релизные образы можно без полного выкачивания их снова.</p> <p>Идея <code>jigdo</code> крайне простая – вместо размещения готового образа размещается список всех пакетов, которые есть в релизе. В таком случае, всё, что нужно – скачать к себе пакеты и собрать ISO, чем <code>jigdo</code> и занимается.</p> <p>Одна из мотиваций для использования <code>jigdo</code> у самого проекта Debian в том, чтобы сократить место на серверах проекта Debian. Другая – сокращение онлайн-трафика и использование уже существующих у клиентов образов.</p> <p>Ключевая метрика такова: от релиза к релизу набор пакетов меняется не на все 100%… Это особенно актуально для минорных обновлений, как мы и увидим далее.</p> <p>Приведу наглядный пример работы с <code>jigdo</code>, когда появился новый релиз 12.11.</p> <p>В первую очередь, устанавливаю пакет <code>jigdo-file</code>, он содержит <code>jigdo-lite</code>, и <code>wget</code>, он пригодится для загрузи самих Jigdo файлов:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>apt<span class=w> </span>install<span class=w> </span>jigdo-file<span class=w> </span>wget
+</code></pre></div> <p>Создаю рабочую папку для нового релиза и перехожу туда.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>mkdir<span class=w> </span>debian-12.11.0-amd64-DLBD/
+<span class=gp>$ </span><span class=nb>cd</span><span class=w> </span>debian-12.11.0-amd64-DLBD/
+</code></pre></div> <p>Загружаю все актуальные файлы для образов и чек-суммы к ним вместе с подписями:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>wget<span class=w> </span>-q<span class=w> </span>--show-progress<span class=w> </span><span class=se>\</span>
+<span class=w>    </span>https://cdimage.debian.org/debian-cd/current/amd64/jigdo-dlbd/SHA<span class=o>{</span><span class=m>256</span>,512<span class=o>}</span>SUMS<span class=o>{</span>,.sign<span class=o>}</span>
+
+<span class=go>SHA256SUMS                  100%[=========================================&gt;]     903  --.-KB/s    in 0s</span>
+<span class=go>SHA256SUMS.sign             100%[=========================================&gt;]     833  --.-KB/s    in 0s</span>
+<span class=go>SHA512SUMS                  100%[=========================================&gt;]   1,44K  --.-KB/s    in 0s</span>
+<span class=go>SHA512SUMS.sign             100%[=========================================&gt;]     833  --.-KB/s    in 0s</span>
+
+<span class=gp>$ </span>wget<span class=w> </span>-q<span class=w> </span>--show-progress<span class=w> </span><span class=se>\</span>
+<span class=w>    </span>https://cdimage.debian.org/debian-cd/current/amd64/jigdo-dlbd/debian-12.11.0-amd64-DLBD-<span class=o>{</span><span class=m>1</span>,2,3<span class=o>}</span>.<span class=o>{</span>jigdo,template<span class=o>}</span>
+
+<span class=go>debian-12.11.0-amd64-DLBD-1 100%[=========================================&gt;] 800,01K  2,18MB/s    in 0,4s</span>
+<span class=go>debian-12.11.0-amd64-DLBD-1 100%[=========================================&gt;] 114,87M  11,1MB/s    in 11s</span>
+<span class=go>debian-12.11.0-amd64-DLBD-2 100%[=========================================&gt;]   1,06M  2,76MB/s    in 0,4s</span>
+<span class=go>debian-12.11.0-amd64-DLBD-2 100%[=========================================&gt;]  26,79M  9,74MB/s    in 2,8s</span>
+<span class=go>debian-12.11.0-amd64-DLBD-3 100%[=========================================&gt;]  10,38K  --.-KB/s    in 0,005s</span>
+<span class=go>debian-12.11.0-amd64-DLBD-3 100%[=========================================&gt;] 372,48K  1,38MB/s    in 0,3s</span>
+</code></pre></div> <p>Монтирую образ первого диска (DLBD-1) от старого 12.10:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span><span class=nb>cd</span><span class=w> </span>../debian-12.10.0-amd64-DLBD/
+
+<span class=gp>$ </span>udisksctl<span class=w> </span>loop-setup<span class=w> </span>-f<span class=w> </span>debian-12.10.0-amd64-DLBD-1.iso
+
+<span class=go>Mapped file debian-12.10.0-amd64-DLBD-1.iso as /dev/loop0.</span>
+
+<span class=gp>$ </span>lsblk<span class=w> </span>-f<span class=w> </span>/dev/loop0
+
+<span class=go>NAME      FSTYPE FSVER  LABEL                  UUID                                 FSAVAIL FSUSE% MOUNTPOINTS</span>
+<span class=go>loop0     iso966 Joliet Debian 12.10.0 amd64 1 2025-03-15-11-22-52-00</span>
+<span class=go>├─loop0p1 iso966 Joliet Debian 12.10.0 amd64 1 2025-03-15-11-22-52-00</span>
+<span class=go>└─loop0p2 vfat   FAT16                         DEB0-0001</span>
+
+<span class=gp>$ </span>udisksctl<span class=w> </span>mount<span class=w> </span>-b<span class=w> </span>/dev/loop0p1
+
+<span class=go>Mounted /dev/loop0p1 at /media/tsb99x/Debian 12.10.0 amd64 1</span>
+
+<span class=gp>$ </span><span class=nb>cd</span><span class=w> </span>-
+
+<span class=go>/home/tsb99x/Projects/debian-jigdo/debian-12.11.0-amd64-DLBD</span>
+</code></pre></div> <p>Далее нужно запускать <code>jigdo-lite</code>. Сделать это можно в 2-ух режимах: интерактивном и полностью автоматическом. В первый раз рекомендую интерактивный режим.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>jigdo-lite<span class=w> </span>debian-12.11.0-amd64-DLBD-1.jigdo
+
+<span class=go>[...]</span>
+
+<span class=go>Files to scan: /media/tsb99x/Debian 12.10.0 amd64 1</span>
+
+<span class=go>Not downloading .template file - `debian-12.11.0-amd64-DLBD-1.template&#39; already present</span>
+<span class=go>Found 26138 of the 27192 files required by the template</span>
+<span class=go>Copied input files to temporary file `debian-12.11.0-amd64-DLBD-1.iso.tmp&#39; - repeat command and supply more files to continue</span>
+</code></pre></div> <p>Jigdo спросит, нужно ли просканировать какие-либо файлы. Поскольку у меня есть образ старого релиза и он смонтирован в <code>/media/tsb99x/Debian 12.10.0 amd64 1</code>, то я даю этот путь. Большая часть пакетов уже имеется. Нужно загрузить только 1054 пакета, чтобы получить ISO первого диска для нового релиза 12.11.</p> <p>При следующем предложении просканировать файлы просто ввожу пустую строку. То же делаю и при выборе зеркала для загрузки, это оставит его по умолчанию.</p> <div class=highlight><pre><span></span><code><span class=go>[...]</span>
+
+<span class=go>Files to scan:</span>
+
+<span class=go>-----------------------------------------------------------------</span>
+<span class=go>The jigdo file refers to files stored on Debian mirrors. Please</span>
+<span class=go>choose a Debian mirror as follows: Either enter a complete URL</span>
+<span class=go>pointing to a mirror (in the form</span>
+<span class=go>`ftp://ftp.debian.org/debian/&#39;), or enter any regular expression</span>
+<span class=go>for searching through the list of mirrors: Try a two-letter</span>
+<span class=go>country code such as `de&#39;, or a country name like `United</span>
+<span class=go>States&#39;, or a server name like `sunsite&#39;.</span>
+<span class=go>Debian mirror [http://deb.debian.org/debian]:</span>
+</code></pre></div> <p>Теперь <code>jigdo-lite</code> начнёт загрузку. Он будет подгружать пакеты группами, а затем соберёт диск релиза и сверит MD5-суммы.</p> <div class=highlight><pre><span></span><code><span class=go>[...]</span>
+
+<span class=go>FINISHED --2025-05-23 15:57:23--</span>
+<span class=go>Total wall clock time: 0,8s</span>
+<span class=go>Downloaded: 4 files, 2,5M in 0,5s (4,61 MB/s)</span>
+<span class=go>Found 4 of the 4 files required by the template</span>
+<span class=go>Successfully created `debian-12.11.0-amd64-DLBD-1.iso&#39;</span>
+
+<span class=go>-----------------------------------------------------------------</span>
+<span class=go>Finished!</span>
+<span class=go>The fact that you got this far is a strong indication that `debian-12.11.0-amd64-DLBD-1.iso&#39;</span>
+<span class=go>was generated correctly. I will perform an additional, final check,</span>
+<span class=go>which you can interrupt safely with Ctrl-C if you do not want to wait.</span>
+
+<span class=go>MD5 from template: iypLbkvUqW91WpgoqJsjWw</span>
+<span class=go>MD5 from image:    iypLbkvUqW91WpgoqJsjWw</span>
+<span class=go>OK: MD5 Checksums match, image is good!</span>
+<span class=go>WARNING: MD5 is not considered a secure hash!</span>
+<span class=go>WARNING: It is recommended to verify your image in other ways too!</span>
+</code></pre></div> <p>Вот, у нас есть DLBD-1 от нового релиза.</p> <p>Второй и третий диск давайте обновим уже в полностью автоматическом режиме. Предварительно размонтируем DLBD-1 от релиза 12.10, а место него смонтируем DLBD-2.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span><span class=nb>cd</span><span class=w> </span>../debian-12.10.0-amd64-DLBD/
+
+<span class=gp>$ </span>udisksctl<span class=w> </span>unmount<span class=w> </span>-b<span class=w> </span>/dev/loop0p1
+
+<span class=go>Unmounted /dev/loop0p1.</span>
+
+<span class=gp>$ </span>udisksctl<span class=w> </span>loop-delete<span class=w> </span>-b<span class=w> </span>/dev/loop0
+
+<span class=gp>$ </span>udisksctl<span class=w> </span>loop-setup<span class=w> </span>-f<span class=w> </span>debian-12.10.0-amd64-DLBD-2.iso
+
+<span class=go>Mapped file debian-12.10.0-amd64-DLBD-2.iso as /dev/loop0.</span>
+
+<span class=gp>$ </span>lsblk<span class=w> </span>-f<span class=w> </span>/dev/loop0
+
+<span class=go>NAME  FSTYPE FSVER      LABEL                  UUID                                 FSAVAIL FSUSE% MOUNTPOINTS</span>
+<span class=go>loop0 iso966 Joliet Ext Debian 12.10.0 amd64 2 2025-03-15-11-22-51-00</span>
+
+<span class=gp>$ </span>udisksctl<span class=w> </span>mount<span class=w> </span>-b<span class=w> </span>/dev/loop0
+
+<span class=go>Mounted /dev/loop0 at /media/tsb99x/Debian 12.10.0 amd64 2</span>
+
+<span class=gp>$ </span><span class=nb>cd</span><span class=w> </span>-
+
+<span class=go>/home/tsb99x/Projects/debian-jigdo/debian-12.11.0-amd64-DLBD</span>
+
+<span class=gp>$ </span>jigdo-lite<span class=w> </span>--noask<span class=w> </span><span class=se>\</span>
+<span class=w>    </span>--scan<span class=w> </span>/media/tsb99x/Debian<span class=se>\ </span><span class=m>12</span>.10.0<span class=se>\ </span>amd64<span class=se>\ </span><span class=m>2</span>/<span class=w> </span><span class=se>\</span>
+<span class=w>    </span>debian-12.11.0-amd64-DLBD-2.jigdo
+
+<span class=go>[...]</span>
+
+<span class=go>FINISHED --2025-05-23 16:36:57--</span>
+<span class=go>Total wall clock time: 15s</span>
+<span class=go>Downloaded: 25 files, 51M in 14s (3,65 MB/s)</span>
+<span class=go>Found 25 of the 25 files required by the template</span>
+<span class=go>Successfully created `debian-12.11.0-amd64-DLBD-2.iso&#39;</span>
+
+<span class=go>-----------------------------------------------------------------</span>
+<span class=go>Finished!</span>
+<span class=go>The fact that you got this far is a strong indication that `debian-12.11.0-amd64-DLBD-2.iso&#39;</span>
+<span class=go>was generated correctly. I will perform an additional, final check,</span>
+<span class=go>which you can interrupt safely with Ctrl-C if you do not want to wait.</span>
+
+<span class=go>MD5 from template: AhK4piK-XmOBnzrDLrV_KA</span>
+<span class=go>MD5 from image:    AhK4piK-XmOBnzrDLrV_KA</span>
+<span class=go>OK: MD5 Checksums match, image is good!</span>
+<span class=go>WARNING: MD5 is not considered a secure hash!</span>
+<span class=go>WARNING: It is recommended to verify your image in other ways too!</span>
+</code></pre></div> <p>На этот раз <code>jigdo-lite</code> не спросит вопросов, опции <code>--noask</code> и <code>--scan</code> позволяют передать ответы при запуске программы.</p> <p>Обновление третьего диска производиться по примеру второго.</p> <p>После формирования новых ISO удаляем <code>/dev/loop0</code> и оставшийся файл с кешами:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>udisksctl<span class=w> </span>unmount<span class=w> </span>-b<span class=w> </span>/dev/loop0
+
+<span class=go>Unmounted /dev/loop0.</span>
+
+<span class=gp>$ </span>udisksctl<span class=w> </span>loop-delete<span class=w> </span>-b<span class=w> </span>/dev/loop0
+
+<span class=gp>$ </span>rm<span class=w> </span>jigdo-file-cache.db
+</code></pre></div> <p>Вот и всё, опционально рекомендую проверить SHA-256 и SHA-512 суммы. По желанию можно верифицировать подлинность с помощью <code>gpg --verify</code>:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sha256sum<span class=w> </span>-c<span class=w> </span>SHA256SUMS
+
+<span class=go>debian-12.11.0-amd64-DLBD-1.iso: OK</span>
+<span class=go>debian-12.11.0-amd64-DLBD-1.jigdo: OK</span>
+<span class=go>debian-12.11.0-amd64-DLBD-1.template: OK</span>
+<span class=go>debian-12.11.0-amd64-DLBD-2.iso: OK</span>
+<span class=go>debian-12.11.0-amd64-DLBD-2.jigdo: OK</span>
+<span class=go>debian-12.11.0-amd64-DLBD-2.template: OK</span>
+<span class=go>debian-12.11.0-amd64-DLBD-3.iso: OK</span>
+<span class=go>debian-12.11.0-amd64-DLBD-3.jigdo: OK</span>
+<span class=go>debian-12.11.0-amd64-DLBD-3.template: OK</span>
+
+<span class=gp>$ </span>sha512sum<span class=w> </span>-c<span class=w> </span>SHA512SUMS
+
+<span class=go>debian-12.11.0-amd64-DLBD-1.iso: OK</span>
+<span class=go>debian-12.11.0-amd64-DLBD-1.jigdo: OK</span>
+<span class=go>debian-12.11.0-amd64-DLBD-1.template: OK</span>
+<span class=go>debian-12.11.0-amd64-DLBD-2.iso: OK</span>
+<span class=go>debian-12.11.0-amd64-DLBD-2.jigdo: OK</span>
+<span class=go>debian-12.11.0-amd64-DLBD-2.template: OK</span>
+<span class=go>debian-12.11.0-amd64-DLBD-3.iso: OK</span>
+<span class=go>debian-12.11.0-amd64-DLBD-3.jigdo: OK</span>
+<span class=go>debian-12.11.0-amd64-DLBD-3.template: OK</span>
+
+<span class=gp>$ </span>gpg<span class=w> </span>--verify<span class=w> </span>SHA256SUMS.sign
+
+<span class=go>gpg: assuming signed data in &#39;SHA256SUMS&#39;</span>
+<span class=go>gpg: Signature made Сб 17 мая 2025 20:55:57 MSK</span>
+<span class=go>gpg:                using RSA key DF9B9C49EAA9298432589D76DA87E80D6294BE9B</span>
+<span class=go>gpg: Good signature from &quot;Debian CD signing key &lt;debian-cd@lists.debian.org&gt;&quot; [full]</span>
+
+<span class=gp>$ </span>gpg<span class=w> </span>--verify<span class=w> </span>SHA512SUMS.sign
+
+<span class=go>gpg: assuming signed data in &#39;SHA512SUMS&#39;</span>
+<span class=go>gpg: Signature made Сб 17 мая 2025 20:55:57 MSK</span>
+<span class=go>gpg:                using RSA key DF9B9C49EAA9298432589D76DA87E80D6294BE9B</span>
+<span class=go>gpg: Good signature from &quot;Debian CD signing key &lt;debian-cd@lists.debian.org&gt;&quot; [full]</span>
+</code></pre></div> <p>Если у Вас ещё нет публичного ключа Debian, то загрузить его можно так:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>gpg<span class=w> </span>--keyserver<span class=w> </span>keyring.debian.org<span class=w> </span><span class=se>\</span>
+<span class=w>    </span>--recv-keys<span class=w> </span>DF9B9C49EAA9298432589D76DA87E80D6294BE9B
+
+<span class=go>gpg: key DA87E80D6294BE9B: &quot;Debian CD signing key &lt;debian-cd@lists.debian.org&gt;&quot; not changed</span>
+<span class=go>gpg: Total number processed: 1</span>
+<span class=go>gpg:              unchanged: 1</span>
+</code></pre></div> <p>Отдельно стоит подчеркнуть, что система <code>jigdo</code>-загрузок позволяет Вам “расширять” образ релиза при желании. Пример: я загрузил с помощью HTTP обычный ISO от DVD-версии с нужным мне окружением рабочего стола. Потом, когда буду готов поэкспериментировать больше, могу обновить DVD-версию до версии для 16G флэш-накопителей. В свою очередь, 16G обновляется в BD (Blu-ray Disk), а уже он может быть расширен в набор упомянутых DLBD.</p> <p>Где сияет система <code>jigdo</code>, так это для загрузок минорных обновлений. Степень переиспользования версий пакетов тут, очевидно, значительно выше, чем в мажорных релизах. На примере обновления с 12.10 до 12.11, я вижу, что загрузил всего 2007 из 63823 пакетов. Т.е., чуть более 3% от общего количества пакетов.</p> <p>Совместив гибкость такой системы загрузок/обновлений с возможностью держать локальный архив репозитория Debian (по крайней мере, <code>main</code> часть), и для меня ясно, что это один из лучших способов архивирования и обновления релизов Debian.</p> <time datetime=2024-01-14T14:12:00+03:00>14 января 2024 г.</time> <div class=changelog> <h4>Журнал изменений</h4> <p><b>2 сентября 2024 г.</b>: расширил практический пример работы с <code>jigdo</code>, уточнил мотивацию.</p> <p><b>16 марта 2025 г.</b>: добавил пример верификации образов.</p> <p><b>23 мая 2025 г.</b>: обновил для Debian 12.11, добавил видео-сопровождение.</p> </div> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 
