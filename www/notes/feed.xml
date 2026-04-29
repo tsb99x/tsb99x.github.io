@@ -7,7 +7,7 @@
 <link>https://tsb99x.github.io/notes/</link>
 <language>ru</language>
 <generator>pandoc</generator>
-<lastBuildDate>Wed, 29 Apr 2026 18:48:29 +0300</lastBuildDate>
+<lastBuildDate>Wed, 29 Apr 2026 20:05:48 +0300</lastBuildDate>
 
 <atom:link href="https://tsb99x.github.io/notes/feed.xml" rel="self" type="application/rss+xml" />
 
@@ -52,6 +52,13 @@
     <link>https://tsb99x.github.io/notes/labor-market.html</link>
     <pubDate>Fri, 16 Jan 2026 20:05:30 +0300</pubDate>
     <guid isPermaLink="false">e85cc648-cacc-45d6-b5d2-fdbc2eae6dd3</guid>
+</item>
+<item>
+    <title>Приключения с Podman начинаются</title>
+    <description><![CDATA[Особенности резолва образов]]></description>
+    <link>https://tsb99x.github.io/notes/podman-journey-begins.html</link>
+    <pubDate>Sat, 03 Jan 2026 20:40:00 +0300</pubDate>
+    <guid isPermaLink="false">1ea42b76-1abf-4f8c-ab42-cfbf7a87a5b8</guid>
 </item>
 <item>
     <title>Всех с наступающим!</title>

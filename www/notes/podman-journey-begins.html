@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru" prefix="og: https://ogp.me/ns#">
+
+<head>
+
+<meta charset="utf-8">
+<meta name="generator" content="pandoc">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Антон Муравьев">
+<meta name="dcterms.date" content="2026-01-03T20:40:00+03:00">
+<meta name="description" content="Особенности резолва образов">
+<meta property="og:url" content="https://tsb99x.github.io/notes/podman-journey-begins.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Приключения с Podman начинаются">
+<meta property="og:description" content="Особенности резолва образов">
+<meta property="og:image" content="https://tsb99x.github.io/res/avatar-512x512.png">
+<title>Приключения с Podman начинаются</title>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/modern-normalize.css">
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/pygments.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="canonical" href="https://tsb99x.github.io/notes/podman-journey-begins.html">
+
+</head>
+
+<body>
+
+<nav>
+    <a href="/">Обо мне</a>
+    <a href="/notes/">Заметки</a>
+</nav>
+
+<article>
+
+<header id="title-block-header">
+<h1 class="title">Приключения с Podman начинаются</h1>
+</header>
+
+<p>Пробежался по репам, много чего не работает AS-IS у меня на машине.</p>
+<p>Ещё несколько лет назад я пользовался Docker, сейчас же пользуюсь Podman. Вижу в Podman много плюсов: rootless by default, daemonless, да и в стандартных репах Debian лежит.</p>
+<p>Вроде они должны быть совместимы, но там и сям есть проблемы. Одна из них — резолвинг образов по имени. По-умолчанию, Podman не ищет образ, к примеру, <code>postgres:latest</code> в Docker Hub. Он просто скажет: хз что это, давай полное имя или настраивай резолюшн.</p>
+<p><em>“Explicit is better than implicit”</em>, так что проставил полные имена с префиксом <code>docker.io/library</code>, где надо было.</p>
+<p>Из менее важного — заменил во всех репах reStructuredText на Markdown, так привычнее.</p>
+
+<time datetime="2026-01-03T20:40:00+03:00">3 января 2026 г.</time>
+
+
+</article>
+
+<address class="contacts">
+    Если Вы хотите обсудить содержание заметки, задать вопросы или
+    предложить изменения, то со мной можно связаться в
+    <a href="https://t.me/tsb99x">Telegram</a>
+</address>
+
+<footer>
+    <span class="copyright">© 2019-2026</span> |
+    <a rel="license"
+        href="https://creativecommons.org/licenses/by/4.0/deed.ru">
+        CC BY 4.0
+    </a>
+</footer>
+
+</body>
+</html>
