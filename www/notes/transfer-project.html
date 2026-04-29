@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru" prefix="og: https://ogp.me/ns#">
+
+<head>
+
+<meta charset="utf-8">
+<meta name="generator" content="pandoc">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Антон Муравьев">
+<meta name="dcterms.date" content="2026-01-04T19:32:43+03:00">
+<meta name="description" content="Интересное тестовое задание">
+<meta property="og:url" content="https://tsb99x.github.io/notes/transfer-project.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Проект Transfer">
+<meta property="og:description" content="Интересное тестовое задание">
+<meta property="og:image" content="https://tsb99x.github.io/res/avatar-512x512.png">
+<title>Проект Transfer</title>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/modern-normalize.css">
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/pygments.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="canonical" href="https://tsb99x.github.io/notes/transfer-project.html">
+
+</head>
+
+<body>
+
+<nav>
+    <a href="/">Обо мне</a>
+    <a href="/notes/">Заметки</a>
+</nav>
+
+<article>
+
+<header id="title-block-header">
+<h1 class="title">Проект Transfer</h1>
+</header>
+
+<figure>
+<img src="res/transfer-project.webp" alt="Результаты работы Locust" />
+<figcaption aria-hidden="true">Результаты работы Locust</figcaption>
+</figure>
+<p>Восстановил работоспособность <a href="https://github.com/tsb99x/transfer">проектика</a> от 2020 года, который писал как небольшое тестовое.</p>
+<p>Смысл задачи простой – классика банковских переводов с одного счёта на другой. Подвох, который у этой задачи есть при решении в лоб с простой таблицей баланса счетов – возможность дедлока при одновременных переводах.</p>
+<p>Тогда я попадал на такое тестовое не впервые. Решил вместо мутируемого состояния положить в основу event sourcing. Получилось интересно. Как бонус такого подхода: хранение полной истории счёта уже включено из коробки.</p>
+<p>Прогнал вчера нагрузочные тесты Locust’а, работает даже спустя 5 с копейками лет, надо было только прибить корректные версии образов :)</p>
+
+<time datetime="2026-01-04T19:32:43+03:00">4 января 2026 г.</time>
+
+
+</article>
+
+<address class="contacts">
+    Если Вы хотите обсудить содержание заметки, задать вопросы или
+    предложить изменения, то со мной можно связаться в
+    <a href="https://t.me/tsb99x">Telegram</a>
+</address>
+
+<footer>
+    <span class="copyright">© 2019-2026</span> |
+    <a rel="license"
+        href="https://creativecommons.org/licenses/by/4.0/deed.ru">
+        CC BY 4.0
+    </a>
+</footer>
+
+</body>
+</html>
