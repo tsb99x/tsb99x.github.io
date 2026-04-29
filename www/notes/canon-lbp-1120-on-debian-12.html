@@ -1,57 +1,163 @@
-<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2024-06-08T14:49:25+03:00><meta name=description content="Устанавливаем и настраиваем CAPT"><meta property=og:url content=https://tsb99x.github.io/notes/canon-lbp-1120-on-debian-12.html><meta property=og:type content=article><meta property=og:title content="Canon LBP-1120 на Debian Bookworm"><meta property=og:description content="Устанавливаем и настраиваем CAPT"><meta property=og:image content=https://tsb99x.github.io/res/avatar-512x512.png><title>Canon LBP-1120 на Debian Bookworm</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.github.io/notes/canon-lbp-1120-on-debian-12.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> </nav> <article> <header id=title-block-header> <h1 class=title>Canon LBP-1120 на Debian Bookworm</h1> </header> <p>У меня есть принтер Canon LBP-1120. Это старый добрый ч/б лазерник. Своё дело знает и делает хорошо. Если не ошибаюсь, принтер выпускался в начале 2000-ых, копирайт в руководстве пользователя датирован 2002 годом. Принтеру уже больше 20 лет!</p> <p>Этот принтер относится к классу устройств, с которыми нужно немного повозиться, чтобы они заработали на Linux. Если знать тонкости, то подключить такой принтер совсем не сложно. Вот как подключить его на Debian Bookworm.</p> <p>Первым шагом нужно достать драйвер принтера Canon Advanced Printing Technology (CAPT) последней версии. Сейчас это версия 2.71, релиз датирован 15 мая 2017 года. Вот ссылка на <a href="https://www.canon.ru/support/consumer/products/printers/laser/lbp-series/laser-shot-lbp1120.html?type=drivers&os=Linux+%2864-bit%29">сайт Canon</a> с драйверами. Распаковываю загруженный драйвер.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>tar<span class=w> </span>xzf<span class=w> </span>linux-capt-drv-v271-uken.tar.gz
-</code></pre></div> <p>В распакованном пакете можно увидеть папки с 32-х битными версиями и 64-х битными. Запустить 64-х битные версии в прошлом у меня без дополнительной работы не получилось. Скорее всего, есть проблемы с неявными зависимостями от 32-х битных пакетов. Стоит отметить, что последняя проверенная версия Debian в документации указана как “Debian GNU/Linux 5.02 32-bit”. Устанавливаю 32-х битную версию, предварительно включив поддержку <code>i386</code> у <code>dpkg</code>.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>dpkg<span class=w> </span>--add-architecture<span class=w> </span>i386
-<span class=gp>$ </span><span class=nb>cd</span><span class=w> </span>linux-capt-drv-v271-uken/32-bit_Driver/Debian/
-<span class=gp>$ </span>sudo<span class=w> </span>apt<span class=w> </span>install<span class=w> </span>./*_i386.deb
-</code></pre></div> <p>Установка через <code>apt</code> подтянет все необходимые зависимости, даже в виде 32-х битных пакетов. Одним из основных элементов CAPT является демон CCP. Обновляю конфигурацию сервисов через <code>systemctl</code> и проверяю статус <code>ccpd.service</code>.</p> <p>Обновление сервисов обязательно, т.к. пакеты CAPT не включают Systemd сервисы, а только скрипты для System V, из которых Systemd сможет сгенерировать свои сервисы на лету.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>systemctl<span class=w> </span>daemon-reload
-<span class=gp>$ </span>sudo<span class=w> </span>systemctl<span class=w> </span>start<span class=w> </span>ccpd
-<span class=gp>$ </span>systemctl<span class=w> </span>status<span class=w> </span>ccpd.service
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru" prefix="og: https://ogp.me/ns#">
 
-<span class=go>● ccpd.service</span>
-<span class=go>     Loaded: loaded (/etc/init.d/ccpd; generated)</span>
-<span class=go>     Active: active (running) since Sat 2024-06-08 08:59:33 MSK; 4s ago</span>
-<span class=go>       Docs: man:systemd-sysv-generator(8)</span>
-<span class=go>    Process: 4368 ExecStart=/etc/init.d/ccpd start (code=exited, status=0/SUCCESS)</span>
-<span class=go>      Tasks: 1 (limit: 154370)</span>
-<span class=go>     Memory: 8.5M</span>
-<span class=go>        CPU: 33ms</span>
-<span class=go>     CGroup: /system.slice/ccpd.service</span>
-<span class=go>             └─4375 /usr/sbin/ccpd</span>
-</code></pre></div> <p>Ага, запустилось! Перед добавлением принтера в CUPS нужно узнать имя подходящего драйвера. Чтобы найти его, можно воспользоваться <code>lpinfo</code>.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>lpinfo<span class=w> </span>-m<span class=w> </span><span class=p>|</span><span class=w> </span>grep<span class=w> </span>LBP1120
+<head>
 
-<span class=go>CNCUPSLBP1120CAPTJ.ppd Canon LBP1120 CAPT ver.1.5</span>
-<span class=go>CNCUPSLBP1120CAPTK.ppd Canon LBP1120 CAPT ver.1.5</span>
-<span class=go>lsb/usr/CNCUPSLBP1120CAPTJ.ppd Canon LBP1120 CAPT ver.1.5</span>
-<span class=go>lsb/usr/CNCUPSLBP1120CAPTK.ppd Canon LBP1120 CAPT ver.1.5</span>
-</code></pre></div> <p>Методом проб и ошибок я выяснил, что именно CNCUPSLBP1120CAPT<strong>K</strong> является нужным драйвером. Версия c <strong>J</strong>, похоже, относится к моделям с японского рынка. Добавляю принтер с указанием драйвера через <code>lpadmin</code> под именем LBP1120</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>lpadmin<span class=w> </span>-p<span class=w> </span>LBP1120<span class=w> </span>-m<span class=w> </span>CNCUPSLBP1120CAPTK.ppd<span class=w> </span>-v<span class=w> </span>ccp://localhost:59687<span class=w> </span>-E
+<meta charset="utf-8">
+<meta name="generator" content="pandoc">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Антон Муравьев">
+<meta name="dcterms.date" content="2024-06-08T14:49:25+03:00">
+<meta name="description" content="Устанавливаем и настраиваем CAPT">
+<meta property="og:url" content="https://tsb99x.github.io/notes/canon-lbp-1120-on-debian-12.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Canon LBP-1120 на Debian Bookworm">
+<meta property="og:description" content="Устанавливаем и настраиваем CAPT">
+<meta property="og:image" content="https://tsb99x.github.io/res/avatar-512x512.png">
+<title>Canon LBP-1120 на Debian Bookworm</title>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/normalize.css">
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/pygments.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="canonical" href="https://tsb99x.github.io/notes/canon-lbp-1120-on-debian-12.html">
 
-<span class=go>lpadmin: Printer drivers are deprecated and will stop working in a future version of CUPS.</span>
-</code></pre></div> <p>Насчёт использованного адреса <code>ccp://localhost:59687</code> – это стандартный FIFO path, который мы увидим позже. Следующим шагом узнаю имя <code>lp</code>-устройства в <code>/dev/</code>, которое соотносится с моим принтером. У меня один принтер, простого <code>ls</code> хватит. На этом этапе принтер уже должен быть включен и подключен USB-кабелем к ПК.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>ls<span class=w> </span>/dev/usb/lp*
+</head>
 
-<span class=go>/dev/usb/lp5</span>
-</code></pre></div> <p>Добавляю новый принтер под именем LBP1120 с устройством <code>lp5</code> через <code>ccpadmin</code>.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>ccpdadmin<span class=w> </span>-p<span class=w> </span>LBP1120<span class=w> </span>-o<span class=w> </span>/dev/usb/lp5
+<body>
 
-<span class=go> CUPS_ConfigPath = /etc/cups/</span>
-<span class=go> LOG Path        = None</span>
-<span class=go> UI Port         = 59787</span>
+<nav>
+    <a href="/">Обо мне</a>
+    <a href="/notes/">Заметки</a>
+</nav>
 
-<span class=go> Entry Num  : Spooler   : Backend       : FIFO path             : Device Path   : Status</span>
-<span class=go> ----------------------------------------------------------------------------</span>
-<span class=go>     [0]    : LBP1120   : ccp           : //localhost:59687     : /dev/usb/lp5  : New!!</span>
-</code></pre></div> <p>Успех. Принтер добавлен со стандартным FIFO path и нужным Device Path. Печатаю тестовую страницу CUPS на пробу.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>lpr<span class=w> </span>/usr/share/cups/data/testprint
-</code></pre></div> <p>Если на данном шаге ничего не происходит то, возможно, нужно перезагрузить <code>ccpd.service</code> с помощью <code>systemctl restart</code>. В некоторых случаях помогает отключить-подключить принтер в другой USB-порт. Можно и перезагрузить систему, главное не забыть потом запустить <code>ccpd.service</code> с помощью <code>systemctl start</code>.</p> <p>Такое поведение я наблюдаю только после первого добавления принтера через <code>ccpdadmin</code>. При последующем использовании проблемы с зависанием задания печати я не увидел. Когда перезапустил <code>ccpd.service</code>, снова заново запускаю печать тестовой страницы. На выходе у принтера получаю ожидаемую эталонную страницу.</p> <p>Когда всё получилось, имеет смысл сделать автоматический старт <code>ccpd.service</code> с помощью <code>systemctl enable</code>.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>systemctl<span class=w> </span><span class=nb>enable</span><span class=w> </span>ccpd.service
+<article>
 
-<span class=go>ccpd.service is not a native service, redirecting to systemd-sysv-install.</span>
-<span class=go>Executing: /lib/systemd/systemd-sysv-install enable ccpd</span>
-<span class=go>update-rc.d: error: ccpd Default-Start contains no runlevels, aborting.</span>
-</code></pre></div> <p>Вспоминаю, что демон CCP поставляется только как скрипт инициализации System V в <code>/etc/init.d</code>. Поскольку Systemd авто-генерирует свой сервис из этого скрипта, мы можем определить запрашиваемые runlevels там. Открываем файл скрипта.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudoedit<span class=w> </span>/etc/init.d/ccpd
-</code></pre></div> <p>И добавляем блок <code>INIT INFO</code> между двух строк комментариев в самом начале файла. Остальной файл не трогаем. Начало файла должно выглядеть следующим образом.</p> <pre><code>#!/bin/sh
+<header id="title-block-header">
+<h1 class="title">Canon LBP-1120 на Debian Bookworm</h1>
+</header>
+
+<p>У меня есть принтер Canon LBP-1120. Это старый добрый ч/б лазерник. Своё дело знает и делает хорошо. Если не ошибаюсь, принтер выпускался в начале 2000-ых, копирайт в руководстве пользователя датирован 2002 годом. Принтеру уже больше 20 лет!</p>
+<p>Этот принтер относится к классу устройств, с которыми нужно немного повозиться, чтобы они заработали на Linux. Если знать тонкости, то подключить такой принтер совсем не сложно. Вот как подключить его на Debian Bookworm.</p>
+<p>Первым шагом нужно достать драйвер принтера Canon Advanced Printing Technology (CAPT) последней версии. Сейчас это версия 2.71, релиз датирован 15 мая 2017 года. Вот ссылка на <a href="https://www.canon.ru/support/consumer/products/printers/laser/lbp-series/laser-shot-lbp1120.html?type=drivers&amp;os=Linux+%2864-bit%29">сайт Canon</a> с драйверами. Распаковываю загруженный драйвер.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>tar<span class="w"> </span>xzf<span class="w"> </span>linux-capt-drv-v271-uken.tar.gz
+</code></pre></div>
+
+<p>В распакованном пакете можно увидеть папки с 32-х битными версиями и 64-х битными. Запустить 64-х битные версии в прошлом у меня без дополнительной работы не получилось. Скорее всего, есть проблемы с неявными зависимостями от 32-х битных пакетов. Стоит отметить, что последняя проверенная версия Debian в документации указана как “Debian GNU/Linux 5.02 32-bit”. Устанавливаю 32-х битную версию, предварительно включив поддержку <code>i386</code> у <code>dpkg</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>dpkg<span class="w"> </span>--add-architecture<span class="w"> </span>i386
+<span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span>linux-capt-drv-v271-uken/32-bit_Driver/Debian/
+<span class="gp">$ </span>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>./*_i386.deb
+</code></pre></div>
+
+<p>Установка через <code>apt</code> подтянет все необходимые зависимости, даже в виде 32-х битных пакетов. Одним из основных элементов CAPT является демон CCP. Обновляю конфигурацию сервисов через <code>systemctl</code> и проверяю статус <code>ccpd.service</code>.</p>
+<p>Обновление сервисов обязательно, т.к. пакеты CAPT не включают Systemd сервисы, а только скрипты для System V, из которых Systemd сможет сгенерировать свои сервисы на лету.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>systemctl<span class="w"> </span>daemon-reload
+<span class="gp">$ </span>sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>ccpd
+<span class="gp">$ </span>systemctl<span class="w"> </span>status<span class="w"> </span>ccpd.service
+
+<span class="go">● ccpd.service</span>
+<span class="go">     Loaded: loaded (/etc/init.d/ccpd; generated)</span>
+<span class="go">     Active: active (running) since Sat 2024-06-08 08:59:33 MSK; 4s ago</span>
+<span class="go">       Docs: man:systemd-sysv-generator(8)</span>
+<span class="go">    Process: 4368 ExecStart=/etc/init.d/ccpd start (code=exited, status=0/SUCCESS)</span>
+<span class="go">      Tasks: 1 (limit: 154370)</span>
+<span class="go">     Memory: 8.5M</span>
+<span class="go">        CPU: 33ms</span>
+<span class="go">     CGroup: /system.slice/ccpd.service</span>
+<span class="go">             └─4375 /usr/sbin/ccpd</span>
+</code></pre></div>
+
+<p>Ага, запустилось! Перед добавлением принтера в CUPS нужно узнать имя подходящего драйвера. Чтобы найти его, можно воспользоваться <code>lpinfo</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>lpinfo<span class="w"> </span>-m<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>LBP1120
+
+<span class="go">CNCUPSLBP1120CAPTJ.ppd Canon LBP1120 CAPT ver.1.5</span>
+<span class="go">CNCUPSLBP1120CAPTK.ppd Canon LBP1120 CAPT ver.1.5</span>
+<span class="go">lsb/usr/CNCUPSLBP1120CAPTJ.ppd Canon LBP1120 CAPT ver.1.5</span>
+<span class="go">lsb/usr/CNCUPSLBP1120CAPTK.ppd Canon LBP1120 CAPT ver.1.5</span>
+</code></pre></div>
+
+<p>Методом проб и ошибок я выяснил, что именно CNCUPSLBP1120CAPT<strong>K</strong> является нужным драйвером. Версия c <strong>J</strong>, похоже, относится к моделям с японского рынка. Добавляю принтер с указанием драйвера через <code>lpadmin</code> под именем LBP1120</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>lpadmin<span class="w"> </span>-p<span class="w"> </span>LBP1120<span class="w"> </span>-m<span class="w"> </span>CNCUPSLBP1120CAPTK.ppd<span class="w"> </span>-v<span class="w"> </span>ccp://localhost:59687<span class="w"> </span>-E
+
+<span class="go">lpadmin: Printer drivers are deprecated and will stop working in a future version of CUPS.</span>
+</code></pre></div>
+
+<p>Насчёт использованного адреса <code>ccp://localhost:59687</code> – это стандартный FIFO path, который мы увидим позже. Следующим шагом узнаю имя <code>lp</code>-устройства в <code>/dev/</code>, которое соотносится с моим принтером. У меня один принтер, простого <code>ls</code> хватит. На этом этапе принтер уже должен быть включен и подключен USB-кабелем к ПК.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>ls<span class="w"> </span>/dev/usb/lp*
+
+<span class="go">/dev/usb/lp5</span>
+</code></pre></div>
+
+<p>Добавляю новый принтер под именем LBP1120 с устройством <code>lp5</code> через <code>ccpadmin</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>ccpdadmin<span class="w"> </span>-p<span class="w"> </span>LBP1120<span class="w"> </span>-o<span class="w"> </span>/dev/usb/lp5
+
+<span class="go"> CUPS_ConfigPath = /etc/cups/</span>
+<span class="go"> LOG Path        = None</span>
+<span class="go"> UI Port         = 59787</span>
+
+<span class="go"> Entry Num  : Spooler   : Backend       : FIFO path             : Device Path   : Status</span>
+<span class="go"> ----------------------------------------------------------------------------</span>
+<span class="go">     [0]    : LBP1120   : ccp           : //localhost:59687     : /dev/usb/lp5  : New!!</span>
+</code></pre></div>
+
+<p>Успех. Принтер добавлен со стандартным FIFO path и нужным Device Path. Печатаю тестовую страницу CUPS на пробу.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>lpr<span class="w"> </span>/usr/share/cups/data/testprint
+</code></pre></div>
+
+<p>Если на данном шаге ничего не происходит то, возможно, нужно перезагрузить <code>ccpd.service</code> с помощью <code>systemctl restart</code>. В некоторых случаях помогает отключить-подключить принтер в другой USB-порт. Можно и перезагрузить систему, главное не забыть потом запустить <code>ccpd.service</code> с помощью <code>systemctl start</code>.</p>
+<p>Такое поведение я наблюдаю только после первого добавления принтера через <code>ccpdadmin</code>. При последующем использовании проблемы с зависанием задания печати я не увидел. Когда перезапустил <code>ccpd.service</code>, снова заново запускаю печать тестовой страницы. На выходе у принтера получаю ожидаемую эталонную страницу.</p>
+<p>Когда всё получилось, имеет смысл сделать автоматический старт <code>ccpd.service</code> с помощью <code>systemctl enable</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>ccpd.service
+
+<span class="go">ccpd.service is not a native service, redirecting to systemd-sysv-install.</span>
+<span class="go">Executing: /lib/systemd/systemd-sysv-install enable ccpd</span>
+<span class="go">update-rc.d: error: ccpd Default-Start contains no runlevels, aborting.</span>
+</code></pre></div>
+
+<p>Вспоминаю, что демон CCP поставляется только как скрипт инициализации System V в <code>/etc/init.d</code>. Поскольку Systemd авто-генерирует свой сервис из этого скрипта, мы можем определить запрашиваемые runlevels там. Открываем файл скрипта.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudoedit<span class="w"> </span>/etc/init.d/ccpd
+</code></pre></div>
+
+<p>И добавляем блок <code>INIT INFO</code> между двух строк комментариев в самом начале файла. Остальной файл не трогаем. Начало файла должно выглядеть следующим образом.</p>
+<pre><code>#!/bin/sh
 ### BEGIN INIT INFO
 # Provides: ccpd
 # Default-Start: 2 3 4 5
 # Default-Stop: 0 1 6
 ### END INIT INFO
-# startup script for Canon Printer Daemon for CUPS (ccpd)</code></pre> <p>Сохраняемся и повторяем процедуру с <code>systemctl enable</code>.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>systemctl<span class=w> </span><span class=nb>enable</span><span class=w> </span>ccpd.service
+# startup script for Canon Printer Daemon for CUPS (ccpd)</code></pre>
+<p>Сохраняемся и повторяем процедуру с <code>systemctl enable</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>ccpd.service
 
-<span class=go>ccpd.service is not a native service, redirecting to systemd-sysv-install.</span>
-<span class=go>Executing: /lib/systemd/systemd-sysv-install enable ccpd</span>
-</code></pre></div> <p>Теперь сервис должен автоматически стартовать при загрузке системы. Конечно, можно настроить правила <code>udev</code> на подключение, но это чуть более сложная задача.</p> <time datetime=2024-06-08T14:49:25+03:00>8 июня 2024 г.</time> <div class=changelog> <h4>Журнал изменений</h4> <p><b>22 августа 2024 г.</b>: добавил включение архитектуры <code>i386</code> для <code>dpkg</code>.</p> </div> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 
+<span class="go">ccpd.service is not a native service, redirecting to systemd-sysv-install.</span>
+<span class="go">Executing: /lib/systemd/systemd-sysv-install enable ccpd</span>
+</code></pre></div>
+
+<p>Теперь сервис должен автоматически стартовать при загрузке системы. Конечно, можно настроить правила <code>udev</code> на подключение, но это чуть более сложная задача.</p>
+
+<time datetime="2024-06-08T14:49:25+03:00">8 июня 2024 г.</time>
+
+<div class="changelog">
+<h4>Журнал изменений</h4>
+<p><b>22 августа 2024 г.</b>: добавил включение архитектуры <code>i386</code> для <code>dpkg</code>.</p>
+</div>
+
+</article>
+
+<address class="contacts">
+    Если Вы хотите обсудить содержание заметки, задать вопросы или
+    предложить изменения, то со мной можно связаться в
+    <a href="https://t.me/tsb99x">Telegram</a>
+</address>
+
+<footer>
+    <span class="copyright">© 2019-2026</span> |
+    <a rel="license"
+        href="https://creativecommons.org/licenses/by/4.0/deed.ru">
+        CC BY 4.0
+    </a>
+</footer>
+
+</body>
+</html>

@@ -1,42 +1,136 @@
-<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2024-09-09T18:34:14+03:00><meta name=description content="Настраиваем отображение и раскладку"><meta property=og:url content=https://tsb99x.github.io/notes/cyrillic-in-virtual-console.html><meta property=og:type content=article><meta property=og:title content="Кириллица в виртуальной консоли"><meta property=og:description content="Настраиваем отображение и раскладку"><meta property=og:image content=https://tsb99x.github.io/res/avatar-512x512.png><title>Кириллица в виртуальной консоли</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.github.io/notes/cyrillic-in-virtual-console.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> </nav> <article> <header id=title-block-header> <h1 class=title>Кириллица в виртуальной консоли</h1> </header> <p>После установки Debian имеет смысл настроить для консоли отображение кириллицы и русскую раскладку клавиатуры. Тогда можно работать с файловой системой, читать и редактировать текст с кириллицей без графического интерфейса. Это будет удобно для некоторых VM, ведь графика там нужна не всегда и можно обойтись консолью.</p> <p>Отмечу, подобная настройка не требуется для SSH-сервера, там в первую очередь нужна <a href=/notes/generating-ru-locale.html>генерация локали <code>ru</code></a>. Речь будет только о настройке для так называемой <a href=https://ru.wikipedia.org/wiki/%D0%92%D0%B8%D1%80%D1%82%D1%83%D0%B0%D0%BB%D1%8C%D0%BD%D0%B0%D1%8F_%D0%BA%D0%BE%D0%BD%D1%81%D0%BE%D0%BB%D1%8C>виртуальной консоли</a>. Доступ к ней <strong>обычно</strong> получается физически, с помощью комбинации <kbd>CTRL</kbd> + <kbd>ALT</kbd> + <kbd>F2</kbd>, а не о терминале в графической среде. Там свои правила, определяемые графической средой (Xorg/Wayland/etc.)</p> <p>В рамках этой заметки я буду пользоваться программой <code>sed</code>. Она заменяет в файле одну подстроку на другую. Если <code>sed</code> для Вас неудобен, то имеется <code>sudoedit</code>. Он откроет интерактивный редактор типа <code>nano</code>, в котором можно внести изменения.</p> <p>Первым делом объясним системе, что хотим видеть кириллицу в консоли. Пояснения для этой части можно найти в <a href=https://manpages.debian.org/bookworm/console-setup/console-setup.5.en.html>man console-setup</a>. Нужная конфигурация ожидает нас в файле <code>console-setup</code>, который найдём в директории <code>/etc/default/</code>:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>cat<span class=w> </span>/etc/default/console-setup
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru" prefix="og: https://ogp.me/ns#">
 
-<span class=gp># </span>CONFIGURATION<span class=w> </span>FILE<span class=w> </span>FOR<span class=w> </span>SETUPCON
+<head>
 
-<span class=gp># </span>Consult<span class=w> </span>the<span class=w> </span>console-setup<span class=o>(</span><span class=m>5</span><span class=o>)</span><span class=w> </span>manual<span class=w> </span>page.
+<meta charset="utf-8">
+<meta name="generator" content="pandoc">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Антон Муравьев">
+<meta name="dcterms.date" content="2024-09-09T18:34:14+03:00">
+<meta name="description" content="Настраиваем отображение и раскладку">
+<meta property="og:url" content="https://tsb99x.github.io/notes/cyrillic-in-virtual-console.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Кириллица в виртуальной консоли">
+<meta property="og:description" content="Настраиваем отображение и раскладку">
+<meta property="og:image" content="https://tsb99x.github.io/res/avatar-512x512.png">
+<title>Кириллица в виртуальной консоли</title>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/normalize.css">
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/pygments.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="canonical" href="https://tsb99x.github.io/notes/cyrillic-in-virtual-console.html">
 
-<span class=go>ACTIVE_CONSOLES=&quot;/dev/tty[1-6]&quot;</span>
+</head>
 
-<span class=go>CHARMAP=&quot;UTF-8&quot;</span>
+<body>
 
-<span class=go>CODESET=&quot;Lat15&quot;</span>
-<span class=go>FONTFACE=&quot;Fixed&quot;</span>
-<span class=go>FONTSIZE=&quot;8x16&quot;</span>
+<nav>
+    <a href="/">Обо мне</a>
+    <a href="/notes/">Заметки</a>
+</nav>
 
-<span class=go>VIDEOMODE=</span>
+<article>
 
-<span class=gp># </span>The<span class=w> </span>following<span class=w> </span>is<span class=w> </span>an<span class=w> </span>example<span class=w> </span>how<span class=w> </span>to<span class=w> </span>use<span class=w> </span>a<span class=w> </span>braille<span class=w> </span>font
-<span class=gp># </span><span class=nv>FONT</span><span class=o>=</span><span class=s1>&#39;lat9w-08.psf.gz brl-8x8.psf&#39;</span>
-</code></pre></div> <p>Видим <code>CODESET</code> установлен в <code>Lat15</code>, который не позволит отобразить кириллицу. Необходимость настройки <code>CODESET</code> может казаться странной в наше время с UTF-8. Виртуальная консоль в Linux имеет <a href=https://ru.wikipedia.org/wiki/%D0%A2%D0%B5%D0%BA%D1%81%D1%82%D0%BE%D0%B2%D1%8B%D0%B9_%D0%B2%D0%B8%D0%B4%D0%B5%D0%BE%D1%80%D0%B5%D0%B6%D0%B8%D0%BC_PC-%D1%81%D0%BE%D0%B2%D0%BC%D0%B5%D1%81%D1%82%D0%B8%D0%BC%D1%8B%D1%85_%D0%BA%D0%BE%D0%BC%D0%BF%D1%8C%D1%8E%D1%82%D0%B5%D1%80%D0%BE%D0%B2>VGA-совместимый режим</a>. Это и есть причина ограничения в 256 (есть наборы по 512) символов для отображения одновременно. Из-за этого и нужно устанавливать правильный <code>CODESET</code>. В страницах у <code>man</code> рассказывают и про вариант <code>guess</code>, но я привык явно задавать кодировку.</p> <p>Поменяем <code>CODESET</code> с <code>Lat15</code> на <code>CyrSlav</code>:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>sed<span class=w> </span>-i<span class=w> </span><span class=s1>&#39;s/CODESET=&quot;Lat15&quot;/CODESET=&quot;CyrSlav&quot;/g&#39;</span><span class=w> </span><span class=se>\</span>
-<span class=w>    </span>/etc/default/console-setup
-</code></pre></div> <p>Переходим к раскладкам клавиатуры. Документацию найдём в <a href=https://manpages.debian.org/bookworm/keyboard-configuration/keyboard.5.en.html>man keyboard</a>, а также в <a href=https://manpages.debian.org/bookworm/xkb-data/xkeyboard-config.7.en.html>man xkeyboard-config</a>. Конфигурация в <code>keyboard</code> из той же <code>/etc/default/</code>:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>cat<span class=w> </span>/etc/default/keyboard
+<header id="title-block-header">
+<h1 class="title">Кириллица в виртуальной консоли</h1>
+</header>
 
-<span class=gp># </span>KEYBOARD<span class=w> </span>CONFIGURATION<span class=w> </span>FILE
+<p>После установки Debian имеет смысл настроить для консоли отображение кириллицы и русскую раскладку клавиатуры. Тогда можно работать с файловой системой, читать и редактировать текст с кириллицей без графического интерфейса. Это будет удобно для некоторых VM, ведь графика там нужна не всегда и можно обойтись консолью.</p>
+<p>Отмечу, подобная настройка не требуется для SSH-сервера, там в первую очередь нужна <a href="/notes/generating-ru-locale.html">генерация локали <code>ru</code></a>. Речь будет только о настройке для так называемой <a href="https://ru.wikipedia.org/wiki/%D0%92%D0%B8%D1%80%D1%82%D1%83%D0%B0%D0%BB%D1%8C%D0%BD%D0%B0%D1%8F_%D0%BA%D0%BE%D0%BD%D1%81%D0%BE%D0%BB%D1%8C">виртуальной консоли</a>. Доступ к ней <strong>обычно</strong> получается физически, с помощью комбинации <kbd>CTRL</kbd> + <kbd>ALT</kbd> + <kbd>F2</kbd>, а не о терминале в графической среде. Там свои правила, определяемые графической средой (Xorg/Wayland/etc.)</p>
+<p>В рамках этой заметки я буду пользоваться программой <code>sed</code>. Она заменяет в файле одну подстроку на другую. Если <code>sed</code> для Вас неудобен, то имеется <code>sudoedit</code>. Он откроет интерактивный редактор типа <code>nano</code>, в котором можно внести изменения.</p>
+<p>Первым делом объясним системе, что хотим видеть кириллицу в консоли. Пояснения для этой части можно найти в <a href="https://manpages.debian.org/bookworm/console-setup/console-setup.5.en.html">man console-setup</a>. Нужная конфигурация ожидает нас в файле <code>console-setup</code>, который найдём в директории <code>/etc/default/</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>cat<span class="w"> </span>/etc/default/console-setup
 
-<span class=gp># </span>Consult<span class=w> </span>the<span class=w> </span>keyboard<span class=o>(</span><span class=m>5</span><span class=o>)</span><span class=w> </span>manual<span class=w> </span>page.
+<span class="gp"># </span>CONFIGURATION<span class="w"> </span>FILE<span class="w"> </span>FOR<span class="w"> </span>SETUPCON
 
-<span class=go>XKBMODEL=&quot;pc105&quot;</span>
-<span class=go>XKBLAYOUT=&quot;us&quot;</span>
-<span class=go>XKBVARIANT=&quot;&quot;</span>
-<span class=go>XKBOPTIONS=&quot;&quot;</span>
+<span class="gp"># </span>Consult<span class="w"> </span>the<span class="w"> </span>console-setup<span class="o">(</span><span class="m">5</span><span class="o">)</span><span class="w"> </span>manual<span class="w"> </span>page.
 
-<span class=go>BACKSPACE=&quot;guess&quot;</span>
-</code></pre></div> <p>Интересующие поля: <code>XKBLAYOUT</code>, <code>XKBVARIANT</code>, <code>XKBOPTIONS</code>. Установим нужные значения для них один-за-одним. Добавим раскладку <code>ru</code> и опцию переключения. В варианты записываем одну запятую, это означает простые <code>us</code> и <code>ru</code>:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>sed<span class=w> </span>-i<span class=w> </span><span class=s1>&#39;s/XKBLAYOUT=&quot;us&quot;/XKBLAYOUT=&quot;us,ru&quot;/g&#39;</span><span class=w> </span><span class=se>\</span>
-<span class=w>    </span>/etc/default/keyboard
-<span class=gp>$ </span>sudo<span class=w> </span>sed<span class=w> </span>-i<span class=w> </span><span class=s1>&#39;s/XKBVARIANT=&quot;&quot;/XKBVARIANT=&quot;,&quot;/g&#39;</span><span class=w> </span><span class=se>\</span>
-<span class=w>    </span>/etc/default/keyboard
-<span class=gp>$ </span>sudo<span class=w> </span>sed<span class=w> </span>-i<span class=w> </span><span class=s1>&#39;s/XKBOPTIONS=&quot;&quot;/XKBOPTIONS=&quot;grp:win_space_toggle&quot;/g&#39;</span><span class=w> </span><span class=se>\</span>
-<span class=w>    </span>/etc/default/keyboard
-</code></pre></div> <p>Можно ожидать, что в этой конфигурации переключение будет делаться по комбинации <kbd>WIN</kbd> + <kbd>SPACE</kbd>. Это будет верно для SDDM и других инструментов, использующих Xorg. Но в виртуальной консоли раскладка будет переключаться с помощью <kbd>SHIFT</kbd> + <kbd>SPACE</kbd>!</p> <p>Это неочевидно и может быть неудобно. Если Вы хотите что-то более очевидное, то можно использовать <code>grp:alt_shift_toggle</code>, который производит переключение с помощью <kbd>ALT</kbd> + <kbd>SHIFT</kbd> в любой среде, будь то SDDM или виртуальная консоль.</p> <p>Теперь нужно перезагрузиться для обновления настроек системы:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>reboot
-</code></pre></div> <p>После перезагрузки проверяю смену раскладки с помощью <kbd>WIN</kbd> + <kbd>SPACE</kbd> в SDDM, а потом проверяю <kbd>SHIFT</kbd> + <kbd>SPACE</kbd> в виртуальной консоли. Всё работает, супер!</p> <h1 id=p.s.-caps-lock>P.S.: CAPS Lock</h1> <p>После многих лет использования <kbd>WIN</kbd> + <kbd>SPACE</kbd> для переключения раскладок, я всё же перешёл на использование <kbd>CAPS Lock</kbd>. Пользуюсь новым вариантом переключения раскладки в течении полугода.</p> <p>CAPS Lock оказался намного удобнее с точки зрения работы в Vim. Безымянный палец уже привык переключать раскладку RU на EN сразу после выхода из режима INSERT в NORMAL. Исходным вариантом CAPS Lock как “зажатым SHIFT” я не пользуюсь практически никогда, поэтому ничего не потерял с точки зрения удобства.</p> <p>Немного про механику. При использовании опции <code>grp:caps_toggle</code> однократное нажатие <kbd>CAPS Lock</kbd> будет переключать раскладку. Нажатие вместе с <kbd>SHIFT</kbd> будет работать как CAPS Lock по-умолчанию – менять регистр символов.</p> <p>Вместе с <code>grp:caps_toggle</code> можно использовать опцию <code>grp_led:caps</code>. Тогда горящий индикатор CAPS Lock на клавиатуре будет означать, что у Вас включена раскладка с кириллицей. Работает <code>grp_led:caps</code> только в графической среде.</p> <p>Финальная версия изменений <code>XKBOPTIONS</code> для меня выглядит так:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>sed<span class=w> </span>-i<span class=w> </span><span class=s1>&#39;s/XKBOPTIONS=&quot;&quot;/XKBOPTIONS=&quot;grp:caps_toggle,grp_led:caps&quot;/g&#39;</span><span class=w> </span><span class=se>\</span>
-<span class=w>    </span>/etc/default/keyboard
-</code></pre></div> <time datetime=2024-09-09T18:34:14+03:00>9 сентября 2024 г.</time> <div class=changelog> <h4>Журнал изменений</h4> <p><b>10 марта 2025 г.</b>: добавил post scriptum про использование CAPS Lock.</p> </div> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 
+<span class="go">ACTIVE_CONSOLES=&quot;/dev/tty[1-6]&quot;</span>
+
+<span class="go">CHARMAP=&quot;UTF-8&quot;</span>
+
+<span class="go">CODESET=&quot;Lat15&quot;</span>
+<span class="go">FONTFACE=&quot;Fixed&quot;</span>
+<span class="go">FONTSIZE=&quot;8x16&quot;</span>
+
+<span class="go">VIDEOMODE=</span>
+
+<span class="gp"># </span>The<span class="w"> </span>following<span class="w"> </span>is<span class="w"> </span>an<span class="w"> </span>example<span class="w"> </span>how<span class="w"> </span>to<span class="w"> </span>use<span class="w"> </span>a<span class="w"> </span>braille<span class="w"> </span>font
+<span class="gp"># </span><span class="nv">FONT</span><span class="o">=</span><span class="s1">&#39;lat9w-08.psf.gz brl-8x8.psf&#39;</span>
+</code></pre></div>
+
+<p>Видим <code>CODESET</code> установлен в <code>Lat15</code>, который не позволит отобразить кириллицу. Необходимость настройки <code>CODESET</code> может казаться странной в наше время с UTF-8. Виртуальная консоль в Linux имеет <a href="https://ru.wikipedia.org/wiki/%D0%A2%D0%B5%D0%BA%D1%81%D1%82%D0%BE%D0%B2%D1%8B%D0%B9_%D0%B2%D0%B8%D0%B4%D0%B5%D0%BE%D1%80%D0%B5%D0%B6%D0%B8%D0%BC_PC-%D1%81%D0%BE%D0%B2%D0%BC%D0%B5%D1%81%D1%82%D0%B8%D0%BC%D1%8B%D1%85_%D0%BA%D0%BE%D0%BC%D0%BF%D1%8C%D1%8E%D1%82%D0%B5%D1%80%D0%BE%D0%B2">VGA-совместимый режим</a>. Это и есть причина ограничения в 256 (есть наборы по 512) символов для отображения одновременно. Из-за этого и нужно устанавливать правильный <code>CODESET</code>. В страницах у <code>man</code> рассказывают и про вариант <code>guess</code>, но я привык явно задавать кодировку.</p>
+<p>Поменяем <code>CODESET</code> с <code>Lat15</code> на <code>CyrSlav</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>sed<span class="w"> </span>-i<span class="w"> </span><span class="s1">&#39;s/CODESET=&quot;Lat15&quot;/CODESET=&quot;CyrSlav&quot;/g&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>/etc/default/console-setup
+</code></pre></div>
+
+<p>Переходим к раскладкам клавиатуры. Документацию найдём в <a href="https://manpages.debian.org/bookworm/keyboard-configuration/keyboard.5.en.html">man keyboard</a>, а также в <a href="https://manpages.debian.org/bookworm/xkb-data/xkeyboard-config.7.en.html">man xkeyboard-config</a>. Конфигурация в <code>keyboard</code> из той же <code>/etc/default/</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>cat<span class="w"> </span>/etc/default/keyboard
+
+<span class="gp"># </span>KEYBOARD<span class="w"> </span>CONFIGURATION<span class="w"> </span>FILE
+
+<span class="gp"># </span>Consult<span class="w"> </span>the<span class="w"> </span>keyboard<span class="o">(</span><span class="m">5</span><span class="o">)</span><span class="w"> </span>manual<span class="w"> </span>page.
+
+<span class="go">XKBMODEL=&quot;pc105&quot;</span>
+<span class="go">XKBLAYOUT=&quot;us&quot;</span>
+<span class="go">XKBVARIANT=&quot;&quot;</span>
+<span class="go">XKBOPTIONS=&quot;&quot;</span>
+
+<span class="go">BACKSPACE=&quot;guess&quot;</span>
+</code></pre></div>
+
+<p>Интересующие поля: <code>XKBLAYOUT</code>, <code>XKBVARIANT</code>, <code>XKBOPTIONS</code>. Установим нужные значения для них один-за-одним. Добавим раскладку <code>ru</code> и опцию переключения. В варианты записываем одну запятую, это означает простые <code>us</code> и <code>ru</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>sed<span class="w"> </span>-i<span class="w"> </span><span class="s1">&#39;s/XKBLAYOUT=&quot;us&quot;/XKBLAYOUT=&quot;us,ru&quot;/g&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>/etc/default/keyboard
+<span class="gp">$ </span>sudo<span class="w"> </span>sed<span class="w"> </span>-i<span class="w"> </span><span class="s1">&#39;s/XKBVARIANT=&quot;&quot;/XKBVARIANT=&quot;,&quot;/g&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>/etc/default/keyboard
+<span class="gp">$ </span>sudo<span class="w"> </span>sed<span class="w"> </span>-i<span class="w"> </span><span class="s1">&#39;s/XKBOPTIONS=&quot;&quot;/XKBOPTIONS=&quot;grp:win_space_toggle&quot;/g&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>/etc/default/keyboard
+</code></pre></div>
+
+<p>Можно ожидать, что в этой конфигурации переключение будет делаться по комбинации <kbd>WIN</kbd> + <kbd>SPACE</kbd>. Это будет верно для SDDM и других инструментов, использующих Xorg. Но в виртуальной консоли раскладка будет переключаться с помощью <kbd>SHIFT</kbd> + <kbd>SPACE</kbd>!</p>
+<p>Это неочевидно и может быть неудобно. Если Вы хотите что-то более очевидное, то можно использовать <code>grp:alt_shift_toggle</code>, который производит переключение с помощью <kbd>ALT</kbd> + <kbd>SHIFT</kbd> в любой среде, будь то SDDM или виртуальная консоль.</p>
+<p>Теперь нужно перезагрузиться для обновления настроек системы:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>reboot
+</code></pre></div>
+
+<p>После перезагрузки проверяю смену раскладки с помощью <kbd>WIN</kbd> + <kbd>SPACE</kbd> в SDDM, а потом проверяю <kbd>SHIFT</kbd> + <kbd>SPACE</kbd> в виртуальной консоли. Всё работает, супер!</p>
+<h1 id="p.s.-caps-lock">P.S.: CAPS Lock</h1>
+<p>После многих лет использования <kbd>WIN</kbd> + <kbd>SPACE</kbd> для переключения раскладок, я всё же перешёл на использование <kbd>CAPS Lock</kbd>. Пользуюсь новым вариантом переключения раскладки в течении полугода.</p>
+<p>CAPS Lock оказался намного удобнее с точки зрения работы в Vim. Безымянный палец уже привык переключать раскладку RU на EN сразу после выхода из режима INSERT в NORMAL. Исходным вариантом CAPS Lock как “зажатым SHIFT” я не пользуюсь практически никогда, поэтому ничего не потерял с точки зрения удобства.</p>
+<p>Немного про механику. При использовании опции <code>grp:caps_toggle</code> однократное нажатие <kbd>CAPS Lock</kbd> будет переключать раскладку. Нажатие вместе с <kbd>SHIFT</kbd> будет работать как CAPS Lock по-умолчанию – менять регистр символов.</p>
+<p>Вместе с <code>grp:caps_toggle</code> можно использовать опцию <code>grp_led:caps</code>. Тогда горящий индикатор CAPS Lock на клавиатуре будет означать, что у Вас включена раскладка с кириллицей. Работает <code>grp_led:caps</code> только в графической среде.</p>
+<p>Финальная версия изменений <code>XKBOPTIONS</code> для меня выглядит так:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>sed<span class="w"> </span>-i<span class="w"> </span><span class="s1">&#39;s/XKBOPTIONS=&quot;&quot;/XKBOPTIONS=&quot;grp:caps_toggle,grp_led:caps&quot;/g&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>/etc/default/keyboard
+</code></pre></div>
+
+<time datetime="2024-09-09T18:34:14+03:00">9 сентября 2024 г.</time>
+
+<div class="changelog">
+<h4>Журнал изменений</h4>
+<p><b>10 марта 2025 г.</b>: добавил post scriptum про использование CAPS Lock.</p>
+</div>
+
+</article>
+
+<address class="contacts">
+    Если Вы хотите обсудить содержание заметки, задать вопросы или
+    предложить изменения, то со мной можно связаться в
+    <a href="https://t.me/tsb99x">Telegram</a>
+</address>
+
+<footer>
+    <span class="copyright">© 2019-2026</span> |
+    <a rel="license"
+        href="https://creativecommons.org/licenses/by/4.0/deed.ru">
+        CC BY 4.0
+    </a>
+</footer>
+
+</body>
+</html>

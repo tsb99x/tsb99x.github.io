@@ -1,116 +1,244 @@
-<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2025-03-12T19:47:59+03:00><meta name=description content="Санта ходит-бродит по домам"><meta property=og:url content=https://tsb99x.github.io/notes/advent-of-code-2015-day-03.html><meta property=og:type content=article><meta property=og:title content="Advent of Code 2015, день 3"><meta property=og:description content="Санта ходит-бродит по домам"><meta property=og:image content=https://tsb99x.github.io/res/avatar-512x512.png><title>Advent of Code 2015, день 3</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.github.io/notes/advent-of-code-2015-day-03.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> </nav> <article> <header id=title-block-header> <h1 class=title>Advent of Code 2015, день 3</h1> </header> <figure> <img src=res/advent-of-code-2015-day-03.webp alt="Уже шесть звёзд в кармане"> <figcaption aria-hidden=true>Уже шесть звёзд в кармане</figcaption> </figure> <p>Следующая задача из Advent of Code 2015. Сегодня <a href=https://adventofcode.com/2015/day/3>задача третьего дня</a>. Первым делом разбираем условия. Вольный перевод от меня следует далее.</p> <h1 id=задача>Задача</h1> <p>Санта доставляет подарки на бесконечной двумерной сетке из домов.</p> <p>Он начинает с доставки подарка на его стартовой позиции. Затем эльф с Северного полюса связывается с Сантой по радио и говорит, куда двигаться дальше. Команды всегда означают следующий дом на север (^), юг (v), восток (&gt;) или запад (&lt;). После каждого движения Санта доставляет подарок в дом на его новой позиции.</p> <p>Эльф на Северном полюсе выпил много эгг-нога, поэтому его указания не совсем точные. Санта посетит некоторые дома больше, чем один раз. Как много домов будет иметь <strong>хотя бы один подарок</strong>?</p> <p>Примеры:</p> <ul> <li>&gt; доставит подарок в 2 дома: один на стартовой точке и один на востоке.</li> <li>^&gt;v&lt; доставит подарки в 4 дома, очерчивая квадрат, включая двойное посещение дома на стартовой/конечной точках.</li> <li>^v^v^v^v^v доставит много подарков очень везучим ребятам в 2-ух домах.</li> </ul> <h1 id=решение-на-си>Решение на Си</h1> <p>Эта задача прямо говорит о передвижениях, повторениях и поиске уникальных координат. Основной элемент задачи – двумерная сетка из домов и модель перемещения по ним. Сфокусируемся на понятии позиции как точки в двумерном пространстве и обработки команд для перемещения.</p> <div class=highlight><pre><span></span><code><span class=k>struct</span><span class=w> </span><span class=nc>point_2d</span><span class=w> </span><span class=p>{</span>
-<span class=w>        </span><span class=kt>int</span><span class=w> </span><span class=n>x</span><span class=p>;</span>
-<span class=w>        </span><span class=kt>int</span><span class=w> </span><span class=n>y</span><span class=p>;</span>
-<span class=p>};</span>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru" prefix="og: https://ogp.me/ns#">
 
-<span class=k>static</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>move</span><span class=p>(</span><span class=k>struct</span><span class=w> </span><span class=nc>point_2d</span><span class=w> </span><span class=o>*</span><span class=n>pos</span><span class=p>,</span><span class=w> </span><span class=kt>char</span><span class=w> </span><span class=n>ch</span><span class=p>)</span>
-<span class=p>{</span>
-<span class=w>        </span><span class=k>switch</span><span class=w> </span><span class=p>(</span><span class=n>ch</span><span class=p>)</span><span class=w> </span><span class=p>{</span>
-<span class=w>        </span><span class=k>case</span><span class=w> </span><span class=sc>&#39;&gt;&#39;</span><span class=p>:</span>
-<span class=w>                </span><span class=n>pos</span><span class=o>-&gt;</span><span class=n>x</span><span class=o>++</span><span class=p>;</span>
-<span class=w>                </span><span class=k>return</span><span class=p>;</span>
-<span class=w>        </span><span class=k>case</span><span class=w> </span><span class=sc>&#39;&lt;&#39;</span><span class=p>:</span>
-<span class=w>                </span><span class=n>pos</span><span class=o>-&gt;</span><span class=n>x</span><span class=o>--</span><span class=p>;</span>
-<span class=w>                </span><span class=k>return</span><span class=p>;</span>
-<span class=w>        </span><span class=k>case</span><span class=w> </span><span class=sc>&#39;^&#39;</span><span class=p>:</span>
-<span class=w>                </span><span class=n>pos</span><span class=o>-&gt;</span><span class=n>y</span><span class=o>++</span><span class=p>;</span>
-<span class=w>                </span><span class=k>return</span><span class=p>;</span>
-<span class=w>        </span><span class=k>case</span><span class=w> </span><span class=sc>&#39;v&#39;</span><span class=p>:</span>
-<span class=w>                </span><span class=n>pos</span><span class=o>-&gt;</span><span class=n>y</span><span class=o>--</span><span class=p>;</span>
-<span class=w>                </span><span class=k>return</span><span class=p>;</span>
-<span class=w>        </span><span class=k>default</span><span class=o>:</span>
-<span class=w>                </span><span class=k>return</span><span class=p>;</span>
-<span class=w>        </span><span class=p>}</span>
-<span class=p>}</span>
-</code></pre></div> <p>Структура <code>point_2d</code> представляет ту самую точку. Процедура <code>move</code> позволит применить поступившую “инструкцию” и обновить координаты. Неизвестные команды игнорируем. Достаточно прямолинейно.</p> <p>Теперь к вопросу представления сетки домов. Решение в лоб – взять двумерный массив и отмечать на нём перемещения. После обработки всех команд пройтись по этой сетке и посчитать посещённые Сантой точки.</p> <p>Это решение, пусть и простое, имеет один недостаток – тяжело спрогнозировать объём реально используемой памяти для работы и понять как корректировать размерность сетки. Пример: Санта пошёл в одну сторону и идёт только в этом направлении. Когда он упрётся в границы поля, что дальше делать? Подобное решение требует дополнительного учёта множества граничных ситуаций, которые не описали в исходной постановке.</p> <p>Вернёмся к условиям: задача говорит только о поиске <strong>уникальных</strong> координат. У нас уже имеется структура <code>point_2d</code>. Если сохранять <code>point_2d</code> в некий аналог математического множества (Set), то мы сможем значительно упростить работу!</p> <p>Самая большой недостаток этого подхода – отсутствие понятия Set в Си. Давайте реализуем самый наивный вариант того, как можно добавлять элементы в Set.</p> <div class=highlight><pre><span></span><code><span class=cp>#define SET_SIZE 4096</span>
+<head>
 
-<span class=k>static</span><span class=w> </span><span class=kt>int</span><span class=w> </span><span class=nf>set_add</span><span class=p>(</span><span class=kt>int</span><span class=w> </span><span class=n>set_count</span><span class=p>,</span><span class=w> </span><span class=k>struct</span><span class=w> </span><span class=nc>point_2d</span><span class=w> </span><span class=n>set</span><span class=p>[],</span><span class=w> </span><span class=k>struct</span><span class=w> </span><span class=nc>point_2d</span><span class=w> </span><span class=n>elem</span><span class=p>)</span>
-<span class=p>{</span>
-<span class=w>        </span><span class=k>for</span><span class=w> </span><span class=p>(</span><span class=kt>int</span><span class=w> </span><span class=n>i</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=mi>0</span><span class=p>;</span><span class=w> </span><span class=n>i</span><span class=w> </span><span class=o>&lt;</span><span class=w> </span><span class=n>set_count</span><span class=p>;</span><span class=w> </span><span class=n>i</span><span class=o>++</span><span class=p>)</span><span class=w> </span><span class=p>{</span>
-<span class=w>                </span><span class=k>if</span><span class=w> </span><span class=p>((</span><span class=n>set</span><span class=p>[</span><span class=n>i</span><span class=p>].</span><span class=n>x</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=n>elem</span><span class=p>.</span><span class=n>x</span><span class=p>)</span><span class=w> </span><span class=o>&amp;&amp;</span><span class=w> </span><span class=p>(</span><span class=n>set</span><span class=p>[</span><span class=n>i</span><span class=p>].</span><span class=n>y</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=n>elem</span><span class=p>.</span><span class=n>y</span><span class=p>))</span><span class=w> </span><span class=p>{</span>
-<span class=w>                        </span><span class=k>return</span><span class=w> </span><span class=n>set_count</span><span class=p>;</span>
-<span class=w>                </span><span class=p>}</span>
-<span class=w>        </span><span class=p>}</span>
+<meta charset="utf-8">
+<meta name="generator" content="pandoc">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Антон Муравьев">
+<meta name="dcterms.date" content="2025-03-12T19:47:59+03:00">
+<meta name="description" content="Санта ходит-бродит по домам">
+<meta property="og:url" content="https://tsb99x.github.io/notes/advent-of-code-2015-day-03.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Advent of Code 2015, день 3">
+<meta property="og:description" content="Санта ходит-бродит по домам">
+<meta property="og:image" content="https://tsb99x.github.io/res/avatar-512x512.png">
+<title>Advent of Code 2015, день 3</title>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/normalize.css">
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/pygments.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="canonical" href="https://tsb99x.github.io/notes/advent-of-code-2015-day-03.html">
 
-<span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>set_count</span><span class=w> </span><span class=o>&gt;=</span><span class=w> </span><span class=n>SET_SIZE</span><span class=p>)</span><span class=w> </span><span class=p>{</span>
-<span class=w>                </span><span class=p>(</span><span class=kt>void</span><span class=p>)</span><span class=n>fputs</span><span class=p>(</span><span class=s>&quot;Failed to set_add, capacity reached</span><span class=se>\n</span><span class=s>&quot;</span><span class=p>,</span><span class=w> </span><span class=n>stderr</span><span class=p>);</span>
-<span class=w>                </span><span class=n>exit</span><span class=p>(</span><span class=n>EXIT_FAILURE</span><span class=p>);</span>
-<span class=w>        </span><span class=p>}</span>
+</head>
 
-<span class=w>        </span><span class=n>set</span><span class=p>[</span><span class=n>set_count</span><span class=p>]</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>elem</span><span class=p>;</span>
-<span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>set_count</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=mi>1</span><span class=p>;</span>
-<span class=p>}</span>
-</code></pre></div> <p>Это имплементация, построенная вокруг простого массива. При добавлении в <code>set</code> элемента <code>elem</code>, мы первым делом перебираем весь массив в попытке найти такой же элемент. Если получилось найти, то возвращаем исходное количество элементов множества, ведь мы ничего не добавили.</p> <p>Если такого элемента нет, то мы проверяем, есть ли место в массиве для новых элементов, <code>set_count &gt;= SET_SIZE</code>. Если места нет – просто “падаем” с ошибкой. В ином случае записываем новый элемент на следующую доступную позицию в <code>set</code> и возвращаем новое количество элементов <code>set_count + 1</code>.</p> <p>Эту реализацию можно значительно улучшать: сделать динамическую аллокацию, деаллокацию и реаллокацию памяти; сделать структуру <code>set_point_2d</code>, куда вынести <code>set_count</code>, и где сохранить <code>set_capacity</code>… Вариантов много, но это более многословная реализация, не требуемая для этой задачи.</p> <p>Самое главное, чего удалось добиться – понятного увеличения количества используемой памяти. Set на основе массива – одномерная структура, тут нет проблем с пониманием как увеличить выделенную память (достаточно поменять значение <code>SET_SIZE</code>).</p> <p>Теперь перейдём к основной функции <code>how_many_houses</code>.</p> <div class=highlight><pre><span></span><code><span class=k>static</span><span class=w> </span><span class=kt>int</span><span class=w> </span><span class=nf>how_many_houses</span><span class=p>(</span><span class=kt>FILE</span><span class=w> </span><span class=o>*</span><span class=n>stream</span><span class=p>)</span>
-<span class=p>{</span>
-<span class=w>        </span><span class=kt>int</span><span class=w> </span><span class=n>ch</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=mi>0</span><span class=p>;</span>
-<span class=w>        </span><span class=k>struct</span><span class=w> </span><span class=nc>point_2d</span><span class=w> </span><span class=n>pos</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=p>{</span><span class=mi>0</span><span class=p>};</span>
-<span class=w>        </span><span class=k>struct</span><span class=w> </span><span class=nc>point_2d</span><span class=w> </span><span class=n>set</span><span class=p>[</span><span class=n>SET_SIZE</span><span class=p>]</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=p>{</span><span class=mi>0</span><span class=p>};</span>
-<span class=w>        </span><span class=kt>int</span><span class=w> </span><span class=n>set_count</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>set_add</span><span class=p>(</span><span class=mi>0</span><span class=p>,</span><span class=w> </span><span class=n>set</span><span class=p>,</span><span class=w> </span><span class=n>pos</span><span class=p>);</span>
+<body>
 
-<span class=w>        </span><span class=k>while</span><span class=w> </span><span class=p>((</span><span class=n>ch</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>fgetc</span><span class=p>(</span><span class=n>stream</span><span class=p>))</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=n>EOF</span><span class=p>)</span><span class=w> </span><span class=p>{</span>
-<span class=w>                </span><span class=n>move</span><span class=p>(</span><span class=o>&amp;</span><span class=n>pos</span><span class=p>,</span><span class=w> </span><span class=p>(</span><span class=kt>char</span><span class=p>)</span><span class=n>ch</span><span class=p>);</span>
-<span class=w>                </span><span class=n>set_count</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>set_add</span><span class=p>(</span><span class=n>set_count</span><span class=p>,</span><span class=w> </span><span class=n>set</span><span class=p>,</span><span class=w> </span><span class=n>pos</span><span class=p>);</span>
-<span class=w>        </span><span class=p>}</span>
+<nav>
+    <a href="/">Обо мне</a>
+    <a href="/notes/">Заметки</a>
+</nav>
 
-<span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=o>!</span><span class=n>feof</span><span class=p>(</span><span class=n>stream</span><span class=p>))</span><span class=w> </span><span class=p>{</span>
-<span class=w>                </span><span class=n>perror</span><span class=p>(</span><span class=s>&quot;Failed to fgetc&quot;</span><span class=p>);</span>
-<span class=w>                </span><span class=n>exit</span><span class=p>(</span><span class=n>EXIT_FAILURE</span><span class=p>);</span>
-<span class=w>        </span><span class=p>}</span>
+<article>
 
-<span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>set_count</span><span class=p>;</span>
-<span class=p>}</span>
-</code></pre></div> <p>Это – связующее звено между предыдущими функциями. Как и в предыдущих задачах, принимаем ввод в виде стрима из <code>FILE*</code>. С самого начала инициализируем <code>set</code> и добавляем в него исходную позицию Санты. На каждую инструкцию в <code>ch</code> изменяем позицию <code>pos</code> и добавляем значение обновлённой позиции в <code>set</code>. Для получения ответа на задачу просто возвращаем <code>set_count</code> – количество элементов в <code>set</code>.</p> <p>Завершает решение типичная функция <code>main</code>.</p> <div class=highlight><pre><span></span><code><span class=kt>int</span><span class=w> </span><span class=nf>main</span><span class=p>(</span><span class=kt>int</span><span class=w> </span><span class=n>argc</span><span class=p>,</span><span class=w> </span><span class=kt>char</span><span class=w> </span><span class=o>*</span><span class=n>argv</span><span class=p>[])</span>
-<span class=p>{</span>
-<span class=w>        </span><span class=kt>int</span><span class=w> </span><span class=n>houses</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=mi>0</span><span class=p>;</span>
+<header id="title-block-header">
+<h1 class="title">Advent of Code 2015, день 3</h1>
+</header>
 
-<span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>argc</span><span class=w> </span><span class=o>&gt;</span><span class=w> </span><span class=mi>1</span><span class=p>)</span><span class=w> </span><span class=p>{</span>
-<span class=w>                </span><span class=p>(</span><span class=kt>void</span><span class=p>)</span><span class=n>fprintf</span><span class=p>(</span><span class=n>stderr</span><span class=p>,</span>
-<span class=w>                              </span><span class=s>&quot;No arguments are accepted!</span><span class=se>\n</span><span class=s>&quot;</span>
-<span class=w>                              </span><span class=s>&quot;Use IO redirection: %s &lt; input</span><span class=se>\n</span><span class=s>&quot;</span><span class=p>,</span>
-<span class=w>                              </span><span class=n>argv</span><span class=p>[</span><span class=mi>0</span><span class=p>]);</span>
-<span class=w>                </span><span class=k>return</span><span class=w> </span><span class=n>EXIT_FAILURE</span><span class=p>;</span>
-<span class=w>        </span><span class=p>}</span>
+<figure>
+<img src="res/advent-of-code-2015-day-03.webp" alt="Уже шесть звёзд в кармане" />
+<figcaption aria-hidden="true">Уже шесть звёзд в кармане</figcaption>
+</figure>
+<p>Следующая задача из Advent of Code 2015. Сегодня <a href="https://adventofcode.com/2015/day/3">задача третьего дня</a>. Первым делом разбираем условия. Вольный перевод от меня следует далее.</p>
+<h1 id="задача">Задача</h1>
+<p>Санта доставляет подарки на бесконечной двумерной сетке из домов.</p>
+<p>Он начинает с доставки подарка на его стартовой позиции. Затем эльф с Северного полюса связывается с Сантой по радио и говорит, куда двигаться дальше. Команды всегда означают следующий дом на север (^), юг (v), восток (&gt;) или запад (&lt;). После каждого движения Санта доставляет подарок в дом на его новой позиции.</p>
+<p>Эльф на Северном полюсе выпил много эгг-нога, поэтому его указания не совсем точные. Санта посетит некоторые дома больше, чем один раз. Как много домов будет иметь <strong>хотя бы один подарок</strong>?</p>
+<p>Примеры:</p>
+<ul>
+<li>&gt; доставит подарок в 2 дома: один на стартовой точке и один на востоке.</li>
+<li>^&gt;v&lt; доставит подарки в 4 дома, очерчивая квадрат, включая двойное посещение дома на стартовой/конечной точках.</li>
+<li>^v^v^v^v^v доставит много подарков очень везучим ребятам в 2-ух домах.</li>
+</ul>
+<h1 id="решение-на-си">Решение на Си</h1>
+<p>Эта задача прямо говорит о передвижениях, повторениях и поиске уникальных координат. Основной элемент задачи – двумерная сетка из домов и модель перемещения по ним. Сфокусируемся на понятии позиции как точки в двумерном пространстве и обработки команд для перемещения.</p>
+<div class="highlight"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">point_2d</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">;</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">y</span><span class="p">;</span>
+<span class="p">};</span>
 
-<span class=w>        </span><span class=n>houses</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>how_many_houses</span><span class=p>(</span><span class=n>stdin</span><span class=p>);</span>
-<span class=w>        </span><span class=p>(</span><span class=kt>void</span><span class=p>)</span><span class=n>printf</span><span class=p>(</span><span class=s>&quot;%d</span><span class=se>\n</span><span class=s>&quot;</span><span class=p>,</span><span class=w> </span><span class=n>houses</span><span class=p>);</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">move</span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">point_2d</span><span class="w"> </span><span class="o">*</span><span class="n">pos</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="n">ch</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">        </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">ch</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="sc">&#39;&gt;&#39;</span><span class="p">:</span>
+<span class="w">                </span><span class="n">pos</span><span class="o">-&gt;</span><span class="n">x</span><span class="o">++</span><span class="p">;</span>
+<span class="w">                </span><span class="k">return</span><span class="p">;</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="sc">&#39;&lt;&#39;</span><span class="p">:</span>
+<span class="w">                </span><span class="n">pos</span><span class="o">-&gt;</span><span class="n">x</span><span class="o">--</span><span class="p">;</span>
+<span class="w">                </span><span class="k">return</span><span class="p">;</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="sc">&#39;^&#39;</span><span class="p">:</span>
+<span class="w">                </span><span class="n">pos</span><span class="o">-&gt;</span><span class="n">y</span><span class="o">++</span><span class="p">;</span>
+<span class="w">                </span><span class="k">return</span><span class="p">;</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="sc">&#39;v&#39;</span><span class="p">:</span>
+<span class="w">                </span><span class="n">pos</span><span class="o">-&gt;</span><span class="n">y</span><span class="o">--</span><span class="p">;</span>
+<span class="w">                </span><span class="k">return</span><span class="p">;</span>
+<span class="w">        </span><span class="k">default</span><span class="o">:</span>
+<span class="w">                </span><span class="k">return</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
 
-<span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>EXIT_SUCCESS</span><span class=p>;</span>
-<span class=p>}</span>
-</code></pre></div> <p>Здесь ничего нового относительно предыдущих решений нет.</p> <p>Запускаем тесты:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>./test_i.sh
+<p>Структура <code>point_2d</code> представляет ту самую точку. Процедура <code>move</code> позволит применить поступившую “инструкцию” и обновить координаты. Неизвестные команды игнорируем. Достаточно прямолинейно.</p>
+<p>Теперь к вопросу представления сетки домов. Решение в лоб – взять двумерный массив и отмечать на нём перемещения. После обработки всех команд пройтись по этой сетке и посчитать посещённые Сантой точки.</p>
+<p>Это решение, пусть и простое, имеет один недостаток – тяжело спрогнозировать объём реально используемой памяти для работы и понять как корректировать размерность сетки. Пример: Санта пошёл в одну сторону и идёт только в этом направлении. Когда он упрётся в границы поля, что дальше делать? Подобное решение требует дополнительного учёта множества граничных ситуаций, которые не описали в исходной постановке.</p>
+<p>Вернёмся к условиям: задача говорит только о поиске <strong>уникальных</strong> координат. У нас уже имеется структура <code>point_2d</code>. Если сохранять <code>point_2d</code> в некий аналог математического множества (Set), то мы сможем значительно упростить работу!</p>
+<p>Самая большой недостаток этого подхода – отсутствие понятия Set в Си. Давайте реализуем самый наивный вариант того, как можно добавлять элементы в Set.</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#define SET_SIZE 4096</span>
 
-<span class=go>Test &gt; =&gt; 2 PASSED</span>
-<span class=go>Test ^&gt;v&lt; =&gt; 4 PASSED</span>
-<span class=go>Test ^v^v^v^v^v =&gt; 2 PASSED</span>
-<span class=go>All tests are completed and passed!</span>
-<span class=go>Answer for input: 2565</span>
-</code></pre></div> <p>Этот ответ устраивает Advent of Code.</p> <h2 id=вторая-часть>Вторая часть</h2> <p>В следующем году, чтобы ускорить процесс, Санта создаёт робо-версию себя, <strong>Робо-Санту</strong>.</p> <p>Санта и Робо-Санта начинают на той же локации. Они доставляют два подарка в один и тот же дом, а затем поочерёдно двигаются по инструкциям от эльфа, который читает те же указания, что и в предыдущем году, попивая эгг-ног.</p> <p>Как много домов будут иметь <strong>хотя бы один подарок</strong> в этом году?</p> <p>Примеры:</p> <ul> <li>^v доставит подарки в 3 дома, потому что Санта отправляется на север, а затем Робо-Санта идёт на юг.</li> <li>^&gt;v&lt; теперь доставит подарки в 3 дома, а Санта и Робо-Санта придут в ту же точку, откуда начинали.</li> <li>^v^v^v^v^v теперь доставляет подарки в 11 домов, ведь Санта идёт в одну сторону, а Робо-Санта идёт в другую.</li> </ul> <h2 id=изменения-в-исходном-решении>Изменения в исходном решении</h2> <p>Постановка практически не изменилась, за исключением появления новой позиции у Робо-Санты и поочерёдной обработки указаний от эльфа.</p> <p>Посмотрим на <code>diff -u part_{i,ii}.c</code>:</p> <div class=highlight><pre><span></span><code><span class=gd>--- part_i.c    2025-03-12 18:20:38.991916889 +0300</span>
-<span class=gi>+++ part_ii.c   2025-03-12 18:20:45.428005634 +0300</span>
-<span class=gu>@@ -49,13 +49,16 @@</span>
-<span class=w> </span>static int how_many_houses(FILE *stream)
-<span class=w> </span>{
-<span class=w> </span>        int ch = 0;
-<span class=gd>-        struct point_2d pos = {0};</span>
-<span class=gi>+        struct point_2d santa_pos = {0};</span>
-<span class=gi>+        struct point_2d robo_pos = {0};</span>
-<span class=gi>+        struct point_2d *current = &amp;santa_pos;</span>
-<span class=w> </span>        struct point_2d set[SET_SIZE] = {0};
-<span class=gd>-        int set_count = set_add(0, set, pos);</span>
-<span class=gi>+        int set_count = set_add(0, set, *current);</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">set_add</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">set_count</span><span class="p">,</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">point_2d</span><span class="w"> </span><span class="n">set</span><span class="p">[],</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">point_2d</span><span class="w"> </span><span class="n">elem</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">set_count</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">set</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">x</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">elem</span><span class="p">.</span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">set</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">y</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">elem</span><span class="p">.</span><span class="n">y</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                        </span><span class="k">return</span><span class="w"> </span><span class="n">set_count</span><span class="p">;</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
 
-<span class=w> </span>        while ((ch = fgetc(stream)) != EOF) {
-<span class=gd>-                move(&amp;pos, (char)ch);</span>
-<span class=gd>-                set_count = set_add(set_count, set, pos);</span>
-<span class=gi>+                move(current, (char)ch);</span>
-<span class=gi>+                set_count = set_add(set_count, set, *current);</span>
-<span class=gi>+                current = (current == &amp;santa_pos) ? &amp;robo_pos : &amp;santa_pos;</span>
-<span class=w> </span>        }
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">set_count</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">SET_SIZE</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">fputs</span><span class="p">(</span><span class="s">&quot;Failed to set_add, capacity reached</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">stderr</span><span class="p">);</span>
+<span class="w">                </span><span class="n">exit</span><span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
 
-<span class=w> </span>        if (!feof(stream)) {
-</code></pre></div> <p>Теперь <code>pos</code> разделился на <code>santa_pos</code> и <code>robo_pos</code>. Появился указатель <code>current</code>, который определяет какую именно позицию мы будем изменять. После каждой команды <code>current</code> переключается с Санты на Робо-Санту или наоборот.</p> <p>Прогоняем тесты:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>./test_ii.sh
+<span class="w">        </span><span class="n">set</span><span class="p">[</span><span class="n">set_count</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">elem</span><span class="p">;</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">set_count</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
 
-<span class=go>Test ^v =&gt; 3 PASSED</span>
-<span class=go>Test ^&gt;v&lt; =&gt; 3 PASSED</span>
-<span class=go>Test ^v^v^v^v^v =&gt; 11 PASSED</span>
-<span class=go>All tests are completed and passed!</span>
-<span class=go>Answer for input: 2639</span>
-</code></pre></div> <p>И этот ответ подошёл, отлично! Задача решена.</p> <p>Решения задачек можно найти в <a href=https://github.com/tsb99x/solutions>репозитории</a> на GitHub.</p> <time datetime=2025-03-12T19:47:59+03:00>12 марта 2025 г.</time> <div class=changelog> <h4>Журнал изменений</h4> <p><b>2 января 2026 г.</b>: перенёс исходный код на GitHub.</p> </div> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 
+<p>Это имплементация, построенная вокруг простого массива. При добавлении в <code>set</code> элемента <code>elem</code>, мы первым делом перебираем весь массив в попытке найти такой же элемент. Если получилось найти, то возвращаем исходное количество элементов множества, ведь мы ничего не добавили.</p>
+<p>Если такого элемента нет, то мы проверяем, есть ли место в массиве для новых элементов, <code>set_count &gt;= SET_SIZE</code>. Если места нет – просто “падаем” с ошибкой. В ином случае записываем новый элемент на следующую доступную позицию в <code>set</code> и возвращаем новое количество элементов <code>set_count + 1</code>.</p>
+<p>Эту реализацию можно значительно улучшать: сделать динамическую аллокацию, деаллокацию и реаллокацию памяти; сделать структуру <code>set_point_2d</code>, куда вынести <code>set_count</code>, и где сохранить <code>set_capacity</code>… Вариантов много, но это более многословная реализация, не требуемая для этой задачи.</p>
+<p>Самое главное, чего удалось добиться – понятного увеличения количества используемой памяти. Set на основе массива – одномерная структура, тут нет проблем с пониманием как увеличить выделенную память (достаточно поменять значение <code>SET_SIZE</code>).</p>
+<p>Теперь перейдём к основной функции <code>how_many_houses</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">how_many_houses</span><span class="p">(</span><span class="kt">FILE</span><span class="w"> </span><span class="o">*</span><span class="n">stream</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">ch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="k">struct</span><span class="w"> </span><span class="nc">point_2d</span><span class="w"> </span><span class="n">pos</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+<span class="w">        </span><span class="k">struct</span><span class="w"> </span><span class="nc">point_2d</span><span class="w"> </span><span class="n">set</span><span class="p">[</span><span class="n">SET_SIZE</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">set_count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">set_add</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">set</span><span class="p">,</span><span class="w"> </span><span class="n">pos</span><span class="p">);</span>
+
+<span class="w">        </span><span class="k">while</span><span class="w"> </span><span class="p">((</span><span class="n">ch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fgetc</span><span class="p">(</span><span class="n">stream</span><span class="p">))</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">EOF</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">move</span><span class="p">(</span><span class="o">&amp;</span><span class="n">pos</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">char</span><span class="p">)</span><span class="n">ch</span><span class="p">);</span>
+<span class="w">                </span><span class="n">set_count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">set_add</span><span class="p">(</span><span class="n">set_count</span><span class="p">,</span><span class="w"> </span><span class="n">set</span><span class="p">,</span><span class="w"> </span><span class="n">pos</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">feof</span><span class="p">(</span><span class="n">stream</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">perror</span><span class="p">(</span><span class="s">&quot;Failed to fgetc&quot;</span><span class="p">);</span>
+<span class="w">                </span><span class="n">exit</span><span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">set_count</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Это – связующее звено между предыдущими функциями. Как и в предыдущих задачах, принимаем ввод в виде стрима из <code>FILE*</code>. С самого начала инициализируем <code>set</code> и добавляем в него исходную позицию Санты. На каждую инструкцию в <code>ch</code> изменяем позицию <code>pos</code> и добавляем значение обновлённой позиции в <code>set</code>. Для получения ответа на задачу просто возвращаем <code>set_count</code> – количество элементов в <code>set</code>.</p>
+<p>Завершает решение типичная функция <code>main</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">argv</span><span class="p">[])</span>
+<span class="p">{</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">houses</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">argc</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span>
+<span class="w">                              </span><span class="s">&quot;No arguments are accepted!</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">                              </span><span class="s">&quot;Use IO redirection: %s &lt; input</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span>
+<span class="w">                              </span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="n">EXIT_FAILURE</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="n">houses</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">how_many_houses</span><span class="p">(</span><span class="n">stdin</span><span class="p">);</span>
+<span class="w">        </span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;%d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">houses</span><span class="p">);</span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">EXIT_SUCCESS</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Здесь ничего нового относительно предыдущих решений нет.</p>
+<p>Запускаем тесты:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>./test_i.sh
+
+<span class="go">Test &gt; =&gt; 2 PASSED</span>
+<span class="go">Test ^&gt;v&lt; =&gt; 4 PASSED</span>
+<span class="go">Test ^v^v^v^v^v =&gt; 2 PASSED</span>
+<span class="go">All tests are completed and passed!</span>
+<span class="go">Answer for input: 2565</span>
+</code></pre></div>
+
+<p>Этот ответ устраивает Advent of Code.</p>
+<h2 id="вторая-часть">Вторая часть</h2>
+<p>В следующем году, чтобы ускорить процесс, Санта создаёт робо-версию себя, <strong>Робо-Санту</strong>.</p>
+<p>Санта и Робо-Санта начинают на той же локации. Они доставляют два подарка в один и тот же дом, а затем поочерёдно двигаются по инструкциям от эльфа, который читает те же указания, что и в предыдущем году, попивая эгг-ног.</p>
+<p>Как много домов будут иметь <strong>хотя бы один подарок</strong> в этом году?</p>
+<p>Примеры:</p>
+<ul>
+<li>^v доставит подарки в 3 дома, потому что Санта отправляется на север, а затем Робо-Санта идёт на юг.</li>
+<li>^&gt;v&lt; теперь доставит подарки в 3 дома, а Санта и Робо-Санта придут в ту же точку, откуда начинали.</li>
+<li>^v^v^v^v^v теперь доставляет подарки в 11 домов, ведь Санта идёт в одну сторону, а Робо-Санта идёт в другую.</li>
+</ul>
+<h2 id="изменения-в-исходном-решении">Изменения в исходном решении</h2>
+<p>Постановка практически не изменилась, за исключением появления новой позиции у Робо-Санты и поочерёдной обработки указаний от эльфа.</p>
+<p>Посмотрим на <code>diff -u part_{i,ii}.c</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="gd">--- part_i.c    2025-03-12 18:20:38.991916889 +0300</span>
+<span class="gi">+++ part_ii.c   2025-03-12 18:20:45.428005634 +0300</span>
+<span class="gu">@@ -49,13 +49,16 @@</span>
+<span class="w"> </span>static int how_many_houses(FILE *stream)
+<span class="w"> </span>{
+<span class="w"> </span>        int ch = 0;
+<span class="gd">-        struct point_2d pos = {0};</span>
+<span class="gi">+        struct point_2d santa_pos = {0};</span>
+<span class="gi">+        struct point_2d robo_pos = {0};</span>
+<span class="gi">+        struct point_2d *current = &amp;santa_pos;</span>
+<span class="w"> </span>        struct point_2d set[SET_SIZE] = {0};
+<span class="gd">-        int set_count = set_add(0, set, pos);</span>
+<span class="gi">+        int set_count = set_add(0, set, *current);</span>
+
+<span class="w"> </span>        while ((ch = fgetc(stream)) != EOF) {
+<span class="gd">-                move(&amp;pos, (char)ch);</span>
+<span class="gd">-                set_count = set_add(set_count, set, pos);</span>
+<span class="gi">+                move(current, (char)ch);</span>
+<span class="gi">+                set_count = set_add(set_count, set, *current);</span>
+<span class="gi">+                current = (current == &amp;santa_pos) ? &amp;robo_pos : &amp;santa_pos;</span>
+<span class="w"> </span>        }
+
+<span class="w"> </span>        if (!feof(stream)) {
+</code></pre></div>
+
+<p>Теперь <code>pos</code> разделился на <code>santa_pos</code> и <code>robo_pos</code>. Появился указатель <code>current</code>, который определяет какую именно позицию мы будем изменять. После каждой команды <code>current</code> переключается с Санты на Робо-Санту или наоборот.</p>
+<p>Прогоняем тесты:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>./test_ii.sh
+
+<span class="go">Test ^v =&gt; 3 PASSED</span>
+<span class="go">Test ^&gt;v&lt; =&gt; 3 PASSED</span>
+<span class="go">Test ^v^v^v^v^v =&gt; 11 PASSED</span>
+<span class="go">All tests are completed and passed!</span>
+<span class="go">Answer for input: 2639</span>
+</code></pre></div>
+
+<p>И этот ответ подошёл, отлично! Задача решена.</p>
+<p>Решения задачек можно найти в <a href="https://github.com/tsb99x/solutions">репозитории</a> на GitHub.</p>
+
+<time datetime="2025-03-12T19:47:59+03:00">12 марта 2025 г.</time>
+
+<div class="changelog">
+<h4>Журнал изменений</h4>
+<p><b>2 января 2026 г.</b>: перенёс исходный код на GitHub.</p>
+</div>
+
+</article>
+
+<address class="contacts">
+    Если Вы хотите обсудить содержание заметки, задать вопросы или
+    предложить изменения, то со мной можно связаться в
+    <a href="https://t.me/tsb99x">Telegram</a>
+</address>
+
+<footer>
+    <span class="copyright">© 2019-2026</span> |
+    <a rel="license"
+        href="https://creativecommons.org/licenses/by/4.0/deed.ru">
+        CC BY 4.0
+    </a>
+</footer>
+
+</body>
+</html>

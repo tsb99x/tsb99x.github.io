@@ -1,14 +1,90 @@
-<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2024-04-17T19:48:33+03:00><meta name=description content="Даём права на управление приоритетом"><meta property=og:url content=https://tsb99x.github.io/notes/wine-adjust-rlimit-nice.html><meta property=og:type content=article><meta property=og:title content="Wine и RLIMIT_NICE"><meta property=og:description content="Даём права на управление приоритетом"><meta property=og:image content=https://tsb99x.github.io/res/avatar-512x512.png><title>Wine и RLIMIT_NICE</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.github.io/notes/wine-adjust-rlimit-nice.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> </nav> <article> <header id=title-block-header> <h1 class=title>Wine и RLIMIT_NICE</h1> </header> <p>При запуске игр в Lutris я неоднократно замечал следующую строчку в логах:</p> <pre><code>wine: RLIMIT_NICE is &lt;= 20, unable to use setpriority safely</code></pre> <p>Эта строка говорит о том, что <code>wine</code> не может устанавливать параметры приоритета для себя и своих же процессов. Это может сказываться, к примеру, на стабильности времени ожидания кадра или приводить к проблемам с проигрыванием аудио.</p> <p>Вот показательное обсуждение на GitHub того, <a href=https://github.com/ValveSoftware/Proton/issues/6141>как дать Wine нужные права</a>. Там есть пример, как дать <code>CAP_SYS_NICE</code> для <code>gamescope</code>. И, действительно, выдача <code>CAP_SYS_NICE</code> для <code>gamescope</code> помогает. Но что делать, если <code>gamescope</code> мне не нужен?</p> <p>Кажется, выдача <code>CAP_SYS_NICE</code> для <code>wine</code> должна помочь. Но не тут то было. Всё то же предупреждение про <code>RLIMIT_NICE</code> намекнёт, что так не получится.</p> <p>Одна из альтернатив – дать возможность самостоятельного управления приоритетом для <strong>всех</strong> процессов пользователя. Для этого нужно изменить конфигурацию <code>limits.conf</code>. Мне такой вариант не нравится, т.к. это глобальное изменение для решения локальной проблемы только с <code>wine</code>.</p> <p>На помощь приходит Wine HQ и <a href=https://wiki.winehq.org/Wine-Staging_Environment_Variables>страница о переменных окружения для Wine-Staging</a>. Главное там: <code>CAP_SYS_NICE</code> нужен не самому <code>wine</code>, а <code>wineserver</code>! Применим команду <code>setcap</code> для <code>wineserver</code> после перехода в директорию с wine runner’ами:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span><span class=nb>cd</span><span class=w> </span>~/.local/share/lutris/runners/wine
-<span class=gp>$ </span>ls<span class=w> </span>-1
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru" prefix="og: https://ogp.me/ns#">
 
-<span class=go>wine-ge-8-22-x86_64</span>
-<span class=go>wine-ge-8-26-x86_64</span>
+<head>
 
-<span class=gp>$ </span>sudo<span class=w> </span>find<span class=w> </span>.<span class=w> </span>-type<span class=w> </span>f<span class=w> </span>-name<span class=w> </span><span class=s1>&#39;wineserver&#39;</span><span class=w> </span>-exec<span class=w> </span><span class=se>\</span>
-<span class=w>    </span>setcap<span class=w> </span><span class=s1>&#39;cap_sys_nice=eip&#39;</span><span class=w> </span><span class=o>{}</span><span class=w> </span><span class=se>\;</span>
-</code></pre></div> <p>Комбинация с <code>find</code> сразу применит <code>CAP_SYS_NICE</code> для всех runner’ов. Для проверки, есть ли <code>CAP_SYS_NICE</code> у нужного <code>wineserver</code>, используем <code>getcap</code>:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>find<span class=w> </span>.<span class=w> </span>-type<span class=w> </span>f<span class=w> </span>-name<span class=w> </span><span class=s1>&#39;wineserver&#39;</span><span class=w> </span>-exec<span class=w> </span><span class=se>\</span>
-<span class=w>    </span>getcap<span class=w> </span><span class=o>{}</span><span class=w> </span><span class=se>\;</span>
+<meta charset="utf-8">
+<meta name="generator" content="pandoc">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Антон Муравьев">
+<meta name="dcterms.date" content="2024-04-17T19:48:33+03:00">
+<meta name="description" content="Даём права на управление приоритетом">
+<meta property="og:url" content="https://tsb99x.github.io/notes/wine-adjust-rlimit-nice.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Wine и RLIMIT_NICE">
+<meta property="og:description" content="Даём права на управление приоритетом">
+<meta property="og:image" content="https://tsb99x.github.io/res/avatar-512x512.png">
+<title>Wine и RLIMIT_NICE</title>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/normalize.css">
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/pygments.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="canonical" href="https://tsb99x.github.io/notes/wine-adjust-rlimit-nice.html">
 
-<span class=go>./wine-ge-8-22-x86_64/bin/wineserver cap_sys_nice=eip</span>
-<span class=go>./wine-ge-8-26-x86_64/bin/wineserver cap_sys_nice=eip</span>
-</code></pre></div> <p>Значит, изменения успешны. Теперь после запуска игр <code>wine</code> рапортует о том, что он может (и будет) самостоятельно менять приоритета процесса:</p> <pre><code>wine: Using setpriority to control niceness in the [-19,19] range</code></pre> <p>Стоит помнить, что при установке новых runner’ов процедуру нужно повторить.</p> <time datetime=2024-04-17T19:48:33+03:00>17 апреля 2024 г.</time> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 
+</head>
+
+<body>
+
+<nav>
+    <a href="/">Обо мне</a>
+    <a href="/notes/">Заметки</a>
+</nav>
+
+<article>
+
+<header id="title-block-header">
+<h1 class="title">Wine и RLIMIT_NICE</h1>
+</header>
+
+<p>При запуске игр в Lutris я неоднократно замечал следующую строчку в логах:</p>
+<pre><code>wine: RLIMIT_NICE is &lt;= 20, unable to use setpriority safely</code></pre>
+<p>Эта строка говорит о том, что <code>wine</code> не может устанавливать параметры приоритета для себя и своих же процессов. Это может сказываться, к примеру, на стабильности времени ожидания кадра или приводить к проблемам с проигрыванием аудио.</p>
+<p>Вот показательное обсуждение на GitHub того, <a href="https://github.com/ValveSoftware/Proton/issues/6141">как дать Wine нужные права</a>. Там есть пример, как дать <code>CAP_SYS_NICE</code> для <code>gamescope</code>. И, действительно, выдача <code>CAP_SYS_NICE</code> для <code>gamescope</code> помогает. Но что делать, если <code>gamescope</code> мне не нужен?</p>
+<p>Кажется, выдача <code>CAP_SYS_NICE</code> для <code>wine</code> должна помочь. Но не тут то было. Всё то же предупреждение про <code>RLIMIT_NICE</code> намекнёт, что так не получится.</p>
+<p>Одна из альтернатив – дать возможность самостоятельного управления приоритетом для <strong>всех</strong> процессов пользователя. Для этого нужно изменить конфигурацию <code>limits.conf</code>. Мне такой вариант не нравится, т.к. это глобальное изменение для решения локальной проблемы только с <code>wine</code>.</p>
+<p>На помощь приходит Wine HQ и <a href="https://wiki.winehq.org/Wine-Staging_Environment_Variables">страница о переменных окружения для Wine-Staging</a>. Главное там: <code>CAP_SYS_NICE</code> нужен не самому <code>wine</code>, а <code>wineserver</code>! Применим команду <code>setcap</code> для <code>wineserver</code> после перехода в директорию с wine runner’ами:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span>~/.local/share/lutris/runners/wine
+<span class="gp">$ </span>ls<span class="w"> </span>-1
+
+<span class="go">wine-ge-8-22-x86_64</span>
+<span class="go">wine-ge-8-26-x86_64</span>
+
+<span class="gp">$ </span>sudo<span class="w"> </span>find<span class="w"> </span>.<span class="w"> </span>-type<span class="w"> </span>f<span class="w"> </span>-name<span class="w"> </span><span class="s1">&#39;wineserver&#39;</span><span class="w"> </span>-exec<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>setcap<span class="w"> </span><span class="s1">&#39;cap_sys_nice=eip&#39;</span><span class="w"> </span><span class="o">{}</span><span class="w"> </span><span class="se">\;</span>
+</code></pre></div>
+
+<p>Комбинация с <code>find</code> сразу применит <code>CAP_SYS_NICE</code> для всех runner’ов. Для проверки, есть ли <code>CAP_SYS_NICE</code> у нужного <code>wineserver</code>, используем <code>getcap</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>find<span class="w"> </span>.<span class="w"> </span>-type<span class="w"> </span>f<span class="w"> </span>-name<span class="w"> </span><span class="s1">&#39;wineserver&#39;</span><span class="w"> </span>-exec<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>getcap<span class="w"> </span><span class="o">{}</span><span class="w"> </span><span class="se">\;</span>
+
+<span class="go">./wine-ge-8-22-x86_64/bin/wineserver cap_sys_nice=eip</span>
+<span class="go">./wine-ge-8-26-x86_64/bin/wineserver cap_sys_nice=eip</span>
+</code></pre></div>
+
+<p>Значит, изменения успешны. Теперь после запуска игр <code>wine</code> рапортует о том, что он может (и будет) самостоятельно менять приоритета процесса:</p>
+<pre><code>wine: Using setpriority to control niceness in the [-19,19] range</code></pre>
+<p>Стоит помнить, что при установке новых runner’ов процедуру нужно повторить.</p>
+
+<time datetime="2024-04-17T19:48:33+03:00">17 апреля 2024 г.</time>
+
+
+</article>
+
+<address class="contacts">
+    Если Вы хотите обсудить содержание заметки, задать вопросы или
+    предложить изменения, то со мной можно связаться в
+    <a href="https://t.me/tsb99x">Telegram</a>
+</address>
+
+<footer>
+    <span class="copyright">© 2019-2026</span> |
+    <a rel="license"
+        href="https://creativecommons.org/licenses/by/4.0/deed.ru">
+        CC BY 4.0
+    </a>
+</footer>
+
+</body>
+</html>

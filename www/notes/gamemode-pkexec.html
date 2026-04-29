@@ -1,128 +1,220 @@
-<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2024-11-25T17:34:59+03:00><meta name=description content="Исправляем отсутствие pkexec"><meta property=og:url content=https://tsb99x.github.io/notes/gamemode-pkexec.html><meta property=og:type content=article><meta property=og:title content="Gamemode не переключает governor"><meta property=og:description content="Исправляем отсутствие pkexec"><meta property=og:image content=https://tsb99x.github.io/res/avatar-512x512.png><title>Gamemode не переключает governor</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.github.io/notes/gamemode-pkexec.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> </nav> <article> <header id=title-block-header> <h1 class=title>Gamemode не переключает governor</h1> </header> <p>Обкатывая на Debian 12 свежий backport пакета Linux версии 6.11.5, я решил наконец-то заняться сбором статистики с помощью MangoHud. После настройки <code>output_folder</code> для MangoHud, можно запустить сбор метрик в файлы CSV комбинацией клавиш <kbd>SHIFT + F2</kbd>.</p> <p>Собирая метрики, я увидел, что CPU governor указан как powersave. Это странно. Ведь я использую Gamemode, а он должен переключать CPU governor из powersave в performance при запуске игр.</p> <p>При запущенной игре проверяю что CPU governor это действительно powersave.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>cat<span class=w> </span>/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru" prefix="og: https://ogp.me/ns#">
 
-<span class=go>powersave</span>
-</code></pre></div> <p>Как видим, действительно <code>powersave</code>. Теперь проверим, что <code>gamemoded</code> работает.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>systemctl<span class=w> </span>--user<span class=w> </span>status<span class=w> </span>gamemoded.service
+<head>
 
-<span class=go>● gamemoded.service - gamemoded</span>
-<span class=go>     Loaded: loaded (/usr/lib/systemd/user/gamemoded.service; disabled; preset: enabled)</span>
-<span class=go>     Active: active (running) since Sat 2024-11-09 18:27:46 MSK; 4h 33min ago</span>
-<span class=go>   Main PID: 2649 (gamemoded)</span>
-<span class=go>     Status: &quot;GameMode is now active.&quot;</span>
-<span class=go>      Tasks: 2 (limit: 154386)</span>
-<span class=go>     Memory: 1.7M</span>
-<span class=go>        CPU: 164ms</span>
-<span class=go>     CGroup: /user.slice/user-1000.slice/user@1000.service/app.slice/gamemoded.service</span>
-<span class=go>             └─2649 /usr/bin/gamemoded</span>
-</code></pre></div> <p>Всё действительно так, <code>active</code>. Поиск в интернете не дал значительных ответов, самым полезным мне показалась <a href=https://github.com/FeralInteractive/gamemode/issues/452>переписка на GitHub</a>, в которой рекомендовали добавлять пользователя в группу <code>gamemode</code>. Окей, на всякий случай добавляю.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>getent<span class=w> </span>group<span class=w> </span><span class=p>|</span><span class=w> </span>grep<span class=w> </span>gamemode
+<meta charset="utf-8">
+<meta name="generator" content="pandoc">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Антон Муравьев">
+<meta name="dcterms.date" content="2024-11-25T17:34:59+03:00">
+<meta name="description" content="Исправляем отсутствие pkexec">
+<meta property="og:url" content="https://tsb99x.github.io/notes/gamemode-pkexec.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Gamemode не переключает governor">
+<meta property="og:description" content="Исправляем отсутствие pkexec">
+<meta property="og:image" content="https://tsb99x.github.io/res/avatar-512x512.png">
+<title>Gamemode не переключает governor</title>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/normalize.css">
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/pygments.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="canonical" href="https://tsb99x.github.io/notes/gamemode-pkexec.html">
 
-<span class=go>gamemode:x:993:</span>
+</head>
 
-<span class=gp>$ </span>sudo<span class=w> </span>usermod<span class=w> </span>-a<span class=w> </span>-G<span class=w> </span>gamemode<span class=w> </span><span class=nv>$USER</span>
-<span class=gp>$ </span>getent<span class=w> </span>group<span class=w> </span><span class=p>|</span><span class=w> </span>grep<span class=w> </span>gamemode
+<body>
 
-<span class=go>gamemode:x:993:tsb99x</span>
-</code></pre></div> <p>Теперь перезапускаю игру… И… Ничего, CPU governor не поменялся. В той же переписке на GitHub упомянут механизм тестирования для Gamemode, флаг <code>-t</code>.</p> <p>Выхожу из игры и пробую запустить тест работоспособности.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>gamemoded<span class=w> </span>-t
+<nav>
+    <a href="/">Обо мне</a>
+    <a href="/notes/">Заметки</a>
+</nav>
 
-<span class=go>: Loading config</span>
-<span class=go>Loading config file [/usr/share/gamemode/gamemode.ini]</span>
-<span class=go>: Running tests</span>
+<article>
 
-<span class=go>:: Basic client tests</span>
-<span class=go>:: Passed</span>
+<header id="title-block-header">
+<h1 class="title">Gamemode не переключает governor</h1>
+</header>
 
-<span class=go>:: Dual client tests</span>
-<span class=go>gamemode request succeeded and is active</span>
-<span class=go>Quitting by request...</span>
-<span class=go>:: Passed</span>
+<p>Обкатывая на Debian 12 свежий backport пакета Linux версии 6.11.5, я решил наконец-то заняться сбором статистики с помощью MangoHud. После настройки <code>output_folder</code> для MangoHud, можно запустить сбор метрик в файлы CSV комбинацией клавиш <kbd>SHIFT + F2</kbd>.</p>
+<p>Собирая метрики, я увидел, что CPU governor указан как powersave. Это странно. Ведь я использую Gamemode, а он должен переключать CPU governor из powersave в performance при запуске игр.</p>
+<p>При запущенной игре проверяю что CPU governor это действительно powersave.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>cat<span class="w"> </span>/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 
-<span class=go>:: Gamemoderun and reaper thread tests</span>
-<span class=go>...Waiting for child to quit...</span>
-<span class=go>...Waiting for reaper thread (reaper_frequency set to 5 seconds)...</span>
-<span class=go>:: Passed</span>
+<span class="go">powersave</span>
+</code></pre></div>
 
-<span class=go>:: Supervisor tests</span>
-<span class=go>:: Passed</span>
+<p>Как видим, действительно <code>powersave</code>. Теперь проверим, что <code>gamemoded</code> работает.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>systemctl<span class="w"> </span>--user<span class="w"> </span>status<span class="w"> </span>gamemoded.service
 
-<span class=go>:: Feature tests</span>
-<span class=go>::: Verifying CPU governor setting</span>
-<span class=go>ERROR: Governor was not set to performance (was actually powersave)!</span>
-<span class=go>::: Failed!</span>
-<span class=go>::: Verifying Scripts</span>
-<span class=go>::: Passed (no scripts configured to run)</span>
-<span class=go>::: Verifying GPU Optimisations</span>
-<span class=go>::: Passed (gpu optimisations not configured to run)</span>
-<span class=go>::: Verifying renice</span>
-<span class=go>::: Passed (no renice configured)</span>
-<span class=go>::: Verifying ioprio</span>
-<span class=go>::: Passed</span>
-<span class=go>ERROR: :: Failed!</span>
-<span class=go>: Tests Failed!</span>
-</code></pre></div> <p>Ага! Тест действительно не проходит, осталось узнать почему. Почитаем логи.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>journalctl<span class=w> </span>-b<span class=w> </span><span class=p>|</span><span class=w> </span>grep<span class=w> </span>gamemode
+<span class="go">● gamemoded.service - gamemoded</span>
+<span class="go">     Loaded: loaded (/usr/lib/systemd/user/gamemoded.service; disabled; preset: enabled)</span>
+<span class="go">     Active: active (running) since Sat 2024-11-09 18:27:46 MSK; 4h 33min ago</span>
+<span class="go">   Main PID: 2649 (gamemoded)</span>
+<span class="go">     Status: &quot;GameMode is now active.&quot;</span>
+<span class="go">      Tasks: 2 (limit: 154386)</span>
+<span class="go">     Memory: 1.7M</span>
+<span class="go">        CPU: 164ms</span>
+<span class="go">     CGroup: /user.slice/user-1000.slice/user@1000.service/app.slice/gamemoded.service</span>
+<span class="go">             └─2649 /usr/bin/gamemoded</span>
+</code></pre></div>
 
-<span class=go>[...]</span>
+<p>Всё действительно так, <code>active</code>. Поиск в интернете не дал значительных ответов, самым полезным мне показалась <a href="https://github.com/FeralInteractive/gamemode/issues/452">переписка на GitHub</a>, в которой рекомендовали добавлять пользователя в группу <code>gamemode</code>. Окей, на всякий случай добавляю.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>getent<span class="w"> </span>group<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>gamemode
 
-<span class=go>gamemoded[2543]: ERROR: Failed to update cpu governor policy</span>
-<span class=go>gamemoded[6839]: ERROR: Failed to execute external process: pkexec No such file or directory</span>
-<span class=go>gamemoded[2543]: ERROR: External process failed with exit code 1</span>
-<span class=go>gamemoded[2543]: ERROR: Output was:  was initially set to [powersave]</span>
+<span class="go">gamemode:x:993:</span>
 
-<span class=go>[...]</span>
-</code></pre></div> <p>Ругается на отсутствие <code>pkexec</code>, неужели у меня нет компонента PolicyKit?</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>pkexec<span class=w> </span>date
+<span class="gp">$ </span>sudo<span class="w"> </span>usermod<span class="w"> </span>-a<span class="w"> </span>-G<span class="w"> </span>gamemode<span class="w"> </span><span class="nv">$USER</span>
+<span class="gp">$ </span>getent<span class="w"> </span>group<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>gamemode
 
-<span class=go>bash: pkexec: command not found</span>
-</code></pre></div> <p>А есть он в зависимостях у пакетов <code>gamemode</code>?</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>apt-cache<span class=w> </span>show<span class=w> </span>gamemode-daemon<span class=w> </span><span class=p>|</span><span class=w> </span>grep<span class=w> </span>-E<span class=w> </span><span class=s1>&#39;Depends|Recommends|Suggests&#39;</span>
+<span class="go">gamemode:x:993:tsb99x</span>
+</code></pre></div>
 
-<span class=go>Depends: init-system-helpers (&gt;= 1.52), libc6 (&gt;= 2.34), libinih1 (&gt;= 40), libsystemd0 (&gt;= 243)</span>
+<p>Теперь перезапускаю игру… И… Ничего, CPU governor не поменялся. В той же переписке на GitHub упомянут механизм тестирования для Gamemode, флаг <code>-t</code>.</p>
+<p>Выхожу из игры и пробую запустить тест работоспособности.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>gamemoded<span class="w"> </span>-t
 
-<span class=gp>$ </span>apt-cache<span class=w> </span>show<span class=w> </span>gamemode<span class=w> </span><span class=p>|</span><span class=w> </span>grep<span class=w> </span>-E<span class=w> </span><span class=s1>&#39;Depends|Recommends|Suggests&#39;</span>
+<span class="go">: Loading config</span>
+<span class="go">Loading config file [/usr/share/gamemode/gamemode.ini]</span>
+<span class="go">: Running tests</span>
 
-<span class=go>Depends: libc6 (&gt;= 2.34), gamemode-daemon, libgamemode0, libgamemodeauto0</span>
-<span class=go>Recommends: libgamemode0:i386, libgamemodeauto0:i386</span>
-<span class=go>Suggests: gnome-shell-extension-gamemode</span>
-</code></pre></div> <p>Интересно, <code>pkexec</code> нет… Ну что же, устанавливаем сами.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>apt<span class=w> </span>install<span class=w> </span>pkexec
+<span class="go">:: Basic client tests</span>
+<span class="go">:: Passed</span>
 
-<span class=go>[...]</span>
+<span class="go">:: Dual client tests</span>
+<span class="go">gamemode request succeeded and is active</span>
+<span class="go">Quitting by request...</span>
+<span class="go">:: Passed</span>
 
-<span class=go>The following NEW packages will be installed:</span>
-<span class=go>  pkexec</span>
-<span class=go>0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.</span>
+<span class="go">:: Gamemoderun and reaper thread tests</span>
+<span class="go">...Waiting for child to quit...</span>
+<span class="go">...Waiting for reaper thread (reaper_frequency set to 5 seconds)...</span>
+<span class="go">:: Passed</span>
 
-<span class=go>[...]</span>
-</code></pre></div> <p>И сразу попробуем протестировать Gamemode.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>gamemoded<span class=w> </span>-t
+<span class="go">:: Supervisor tests</span>
+<span class="go">:: Passed</span>
 
-<span class=go>: Loading config</span>
-<span class=go>Loading config file [/usr/share/gamemode/gamemode.ini]</span>
-<span class=go>: Running tests</span>
+<span class="go">:: Feature tests</span>
+<span class="go">::: Verifying CPU governor setting</span>
+<span class="go">ERROR: Governor was not set to performance (was actually powersave)!</span>
+<span class="go">::: Failed!</span>
+<span class="go">::: Verifying Scripts</span>
+<span class="go">::: Passed (no scripts configured to run)</span>
+<span class="go">::: Verifying GPU Optimisations</span>
+<span class="go">::: Passed (gpu optimisations not configured to run)</span>
+<span class="go">::: Verifying renice</span>
+<span class="go">::: Passed (no renice configured)</span>
+<span class="go">::: Verifying ioprio</span>
+<span class="go">::: Passed</span>
+<span class="go">ERROR: :: Failed!</span>
+<span class="go">: Tests Failed!</span>
+</code></pre></div>
 
-<span class=go>:: Basic client tests</span>
-<span class=go>:: Passed</span>
+<p>Ага! Тест действительно не проходит, осталось узнать почему. Почитаем логи.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>journalctl<span class="w"> </span>-b<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>gamemode
 
-<span class=go>:: Dual client tests</span>
-<span class=go>gamemode request succeeded and is active</span>
-<span class=go>Quitting by request...</span>
-<span class=go>...Waiting for child to quit...</span>
-<span class=go>:: Passed</span>
+<span class="go">[...]</span>
 
-<span class=go>:: Gamemoderun and reaper thread tests</span>
-<span class=go>...Waiting for child to quit...</span>
-<span class=go>...Waiting for reaper thread (reaper_frequency set to 5 seconds)...</span>
-<span class=go>:: Passed</span>
+<span class="go">gamemoded[2543]: ERROR: Failed to update cpu governor policy</span>
+<span class="go">gamemoded[6839]: ERROR: Failed to execute external process: pkexec No such file or directory</span>
+<span class="go">gamemoded[2543]: ERROR: External process failed with exit code 1</span>
+<span class="go">gamemoded[2543]: ERROR: Output was:  was initially set to [powersave]</span>
 
-<span class=go>:: Supervisor tests</span>
-<span class=go>:: Passed</span>
+<span class="go">[...]</span>
+</code></pre></div>
 
-<span class=go>:: Feature tests</span>
-<span class=go>::: Verifying CPU governor setting</span>
-<span class=go>::: Passed</span>
-<span class=go>::: Verifying Scripts</span>
-<span class=go>::: Passed (no scripts configured to run)</span>
-<span class=go>::: Verifying GPU Optimisations</span>
-<span class=go>::: Passed (gpu optimisations not configured to run)</span>
-<span class=go>::: Verifying renice</span>
-<span class=go>::: Passed (no renice configured)</span>
-<span class=go>::: Verifying ioprio</span>
-<span class=go>::: Passed</span>
-<span class=go>:: Passed</span>
+<p>Ругается на отсутствие <code>pkexec</code>, неужели у меня нет компонента PolicyKit?</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>pkexec<span class="w"> </span>date
 
-<span class=go>: All Tests Passed!</span>
-</code></pre></div> <p>Отлично, при запуске игры CPU governor также установился как performance.</p> <time datetime=2024-11-25T17:34:59+03:00>25 ноября 2024 г.</time> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 
+<span class="go">bash: pkexec: command not found</span>
+</code></pre></div>
+
+<p>А есть он в зависимостях у пакетов <code>gamemode</code>?</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>apt-cache<span class="w"> </span>show<span class="w"> </span>gamemode-daemon<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">&#39;Depends|Recommends|Suggests&#39;</span>
+
+<span class="go">Depends: init-system-helpers (&gt;= 1.52), libc6 (&gt;= 2.34), libinih1 (&gt;= 40), libsystemd0 (&gt;= 243)</span>
+
+<span class="gp">$ </span>apt-cache<span class="w"> </span>show<span class="w"> </span>gamemode<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">&#39;Depends|Recommends|Suggests&#39;</span>
+
+<span class="go">Depends: libc6 (&gt;= 2.34), gamemode-daemon, libgamemode0, libgamemodeauto0</span>
+<span class="go">Recommends: libgamemode0:i386, libgamemodeauto0:i386</span>
+<span class="go">Suggests: gnome-shell-extension-gamemode</span>
+</code></pre></div>
+
+<p>Интересно, <code>pkexec</code> нет… Ну что же, устанавливаем сами.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>pkexec
+
+<span class="go">[...]</span>
+
+<span class="go">The following NEW packages will be installed:</span>
+<span class="go">  pkexec</span>
+<span class="go">0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.</span>
+
+<span class="go">[...]</span>
+</code></pre></div>
+
+<p>И сразу попробуем протестировать Gamemode.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>gamemoded<span class="w"> </span>-t
+
+<span class="go">: Loading config</span>
+<span class="go">Loading config file [/usr/share/gamemode/gamemode.ini]</span>
+<span class="go">: Running tests</span>
+
+<span class="go">:: Basic client tests</span>
+<span class="go">:: Passed</span>
+
+<span class="go">:: Dual client tests</span>
+<span class="go">gamemode request succeeded and is active</span>
+<span class="go">Quitting by request...</span>
+<span class="go">...Waiting for child to quit...</span>
+<span class="go">:: Passed</span>
+
+<span class="go">:: Gamemoderun and reaper thread tests</span>
+<span class="go">...Waiting for child to quit...</span>
+<span class="go">...Waiting for reaper thread (reaper_frequency set to 5 seconds)...</span>
+<span class="go">:: Passed</span>
+
+<span class="go">:: Supervisor tests</span>
+<span class="go">:: Passed</span>
+
+<span class="go">:: Feature tests</span>
+<span class="go">::: Verifying CPU governor setting</span>
+<span class="go">::: Passed</span>
+<span class="go">::: Verifying Scripts</span>
+<span class="go">::: Passed (no scripts configured to run)</span>
+<span class="go">::: Verifying GPU Optimisations</span>
+<span class="go">::: Passed (gpu optimisations not configured to run)</span>
+<span class="go">::: Verifying renice</span>
+<span class="go">::: Passed (no renice configured)</span>
+<span class="go">::: Verifying ioprio</span>
+<span class="go">::: Passed</span>
+<span class="go">:: Passed</span>
+
+<span class="go">: All Tests Passed!</span>
+</code></pre></div>
+
+<p>Отлично, при запуске игры CPU governor также установился как performance.</p>
+
+<time datetime="2024-11-25T17:34:59+03:00">25 ноября 2024 г.</time>
+
+
+</article>
+
+<address class="contacts">
+    Если Вы хотите обсудить содержание заметки, задать вопросы или
+    предложить изменения, то со мной можно связаться в
+    <a href="https://t.me/tsb99x">Telegram</a>
+</address>
+
+<footer>
+    <span class="copyright">© 2019-2026</span> |
+    <a rel="license"
+        href="https://creativecommons.org/licenses/by/4.0/deed.ru">
+        CC BY 4.0
+    </a>
+</footer>
+
+</body>
+</html>

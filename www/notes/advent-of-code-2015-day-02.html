@@ -1,114 +1,235 @@
-<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2025-03-10T14:34:05+03:00><meta name=description content="Эльфы упаковывают подарки"><meta property=og:url content=https://tsb99x.github.io/notes/advent-of-code-2015-day-02.html><meta property=og:type content=article><meta property=og:title content="Advent of Code 2015, день 2"><meta property=og:description content="Эльфы упаковывают подарки"><meta property=og:image content=https://tsb99x.github.io/res/avatar-512x512.png><title>Advent of Code 2015, день 2</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.github.io/notes/advent-of-code-2015-day-02.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> </nav> <article> <header id=title-block-header> <h1 class=title>Advent of Code 2015, день 2</h1> </header> <figure> <img src=res/advent-of-code-2015-day-02.webp alt="Четыре звезды есть"> <figcaption aria-hidden=true>Четыре звезды есть</figcaption> </figure> <p>Продолжаем решать задачки Advent of Code. Сегодня будет <a href=https://adventofcode.com/2015/day/2>задача второго дня</a>. Полностью переводить её не буду, сделаю очередную краткую выжимку от себя.</p> <h1 id=задача>Задача</h1> <p>Эльфы оборачивают подарки в обёрточную бумагу. Подарки находятся в прямоугольных коробках. Чтобы посчитать, сколько бумаги нужно для обёртки, нужно вычислить площадь поверхности коробки:</p> <p><span class="math display"><em>S</em><sub><em>b</em><em>o</em><em>x</em></sub> = 2 <em>l</em> <em>w</em> + 2 <em>w</em> <em>h</em> + 2 <em>h</em> <em>l</em></span></p> <p>Здесь <span class="math display"><em>l</em></span> – длина, <span class="math display"><em>w</em></span> – ширина, а <span class="math display"><em>h</em></span> – высота коробки.</p> <p>Кроме этого, эльфам потребуется немного лишней (запасной) бумаги в размере площади наименьшей стороны коробки.</p> <p>Примеры:</p> <ul> <li>Коробка 2x3x4 это 2*6 + 2*12 + 2*8 = 52 и запас 6, итого 58 кв. футов.</li> <li>Коробка 1x1x10 это 2*1 + 2*10 + 2*10 = 42 и запас 1, итого 43 кв. фута.</li> </ul> <p>Сколько квадратных футов бумаги нужно заказать эльфам <strong>для всех</strong> подарков?</p> <h1 id=решение-на-си>Решение на Си</h1> <p>Основная часть задачи – расчёт поверхности коробки и дополнительной бумаги “про запас”. Не смотря на то, что в условиях фигурируют <span class="math display"><em>l</em></span>, <span class="math display"><em>w</em></span> и <span class="math display"><em>h</em></span>, с точки зрения кода проще всего работать с площадью сторон. На то же намекают и примеры для тестов. Если выделить площади сторон как <code>a</code>, <code>b</code> и <code>c</code>, то нахождение площади наименьшей стороны коробки станет элементарным использованием <code>min(a, b, c)</code>.</p> <p>Поскольку Си не имеет функции <code>min</code>, её тоже нужно реализовать.</p> <div class=highlight><pre><span></span><code><span class=k>static</span><span class=w> </span><span class=kt>int</span><span class=w> </span><span class=nf>min</span><span class=p>(</span><span class=kt>int</span><span class=w> </span><span class=n>a</span><span class=p>,</span><span class=w> </span><span class=kt>int</span><span class=w> </span><span class=n>b</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w> </span><span class=k>return</span><span class=w> </span><span class=p>(</span><span class=n>a</span><span class=w> </span><span class=o>&lt;</span><span class=w> </span><span class=n>b</span><span class=p>)</span><span class=w> </span><span class=o>?</span><span class=w> </span><span class=n>a</span><span class=w> </span><span class=o>:</span><span class=w> </span><span class=n>b</span><span class=p>;</span><span class=w> </span><span class=p>}</span>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru" prefix="og: https://ogp.me/ns#">
 
-<span class=k>static</span><span class=w> </span><span class=kt>int</span><span class=w> </span><span class=nf>feet_of_paper</span><span class=p>(</span><span class=kt>int</span><span class=w> </span><span class=n>l</span><span class=p>,</span><span class=w> </span><span class=kt>int</span><span class=w> </span><span class=n>w</span><span class=p>,</span><span class=w> </span><span class=kt>int</span><span class=w> </span><span class=n>h</span><span class=p>)</span>
-<span class=p>{</span>
-<span class=w>        </span><span class=kt>int</span><span class=w> </span><span class=n>a</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>l</span><span class=w> </span><span class=o>*</span><span class=w> </span><span class=n>w</span><span class=p>;</span>
-<span class=w>        </span><span class=kt>int</span><span class=w> </span><span class=n>b</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>w</span><span class=w> </span><span class=o>*</span><span class=w> </span><span class=n>h</span><span class=p>;</span>
-<span class=w>        </span><span class=kt>int</span><span class=w> </span><span class=n>c</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>h</span><span class=w> </span><span class=o>*</span><span class=w> </span><span class=n>l</span><span class=p>;</span>
-<span class=w>        </span><span class=kt>int</span><span class=w> </span><span class=n>wrap</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=p>(</span><span class=mi>2</span><span class=w> </span><span class=o>*</span><span class=w> </span><span class=n>a</span><span class=p>)</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=p>(</span><span class=mi>2</span><span class=w> </span><span class=o>*</span><span class=w> </span><span class=n>b</span><span class=p>)</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=p>(</span><span class=mi>2</span><span class=w> </span><span class=o>*</span><span class=w> </span><span class=n>c</span><span class=p>);</span>
-<span class=w>        </span><span class=kt>int</span><span class=w> </span><span class=n>slack</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>min</span><span class=p>(</span><span class=n>min</span><span class=p>(</span><span class=n>a</span><span class=p>,</span><span class=w> </span><span class=n>b</span><span class=p>),</span><span class=w> </span><span class=n>c</span><span class=p>);</span>
+<head>
 
-<span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>wrap</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>slack</span><span class=p>;</span>
-<span class=p>}</span>
-</code></pre></div> <p>Файл <code>input</code> для задачи содержит построчный листинг размерностей коробок. Имеет смысл выделить отдельную функцию, чтобы вычитать ввод, преобразовать его в параметры и отдать определённой выше функции <code>feet_of_paper</code>.</p> <p>Особое внимание уделим функции <code>fscanf</code>. В строке формата есть ограничители для максимального количества символов у числа. <code>%3d</code> значит “считывать не больше трёх символов”. А результат <code>fscanf</code> сравнивается с <code>3</code> – количеством успешно обработанных параметров. Если не указывать ограничения по символам и не проверять результат <code>fscanf</code>, то можно получить неожиданные результаты.</p> <p>Строка формата также содержит пробелы между <code>%3d</code>, хотя файл <code>input</code> от Advent of Code не содержит пробелов между размерами. Так допустимо делать, т.к. группа функций <code>scanf</code> будет просто игнорировать эти пробелы. Зато, разделение строки формата на визуальные блоки <code>%3d</code> наглядно показывает количество аргументов.</p> <p>После получения ввода обязательно проверяем его на соответствие ожиданиям. В случае этой задачи мы получаем размеры коробки, они не могут быть с минусом или равными нулю. В случае ошибок, опять же, заканчиваем исполнение программы.</p> <p>Традиционная проверка <code>feof</code> даст понять, весь ли ввод корректно обработан.</p> <div class=highlight><pre><span></span><code><span class=k>static</span><span class=w> </span><span class=kt>int</span><span class=w> </span><span class=nf>total_feet_of_paper</span><span class=p>(</span><span class=kt>FILE</span><span class=w> </span><span class=o>*</span><span class=n>stream</span><span class=p>)</span>
-<span class=p>{</span>
-<span class=w>        </span><span class=kt>int</span><span class=w> </span><span class=n>l</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=mi>0</span><span class=p>;</span>
-<span class=w>        </span><span class=kt>int</span><span class=w> </span><span class=n>w</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=mi>0</span><span class=p>;</span>
-<span class=w>        </span><span class=kt>int</span><span class=w> </span><span class=n>h</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=mi>0</span><span class=p>;</span>
-<span class=w>        </span><span class=kt>int</span><span class=w> </span><span class=n>total</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=mi>0</span><span class=p>;</span>
+<meta charset="utf-8">
+<meta name="generator" content="pandoc">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Антон Муравьев">
+<meta name="dcterms.date" content="2025-03-10T14:34:05+03:00">
+<meta name="description" content="Эльфы упаковывают подарки">
+<meta property="og:url" content="https://tsb99x.github.io/notes/advent-of-code-2015-day-02.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Advent of Code 2015, день 2">
+<meta property="og:description" content="Эльфы упаковывают подарки">
+<meta property="og:image" content="https://tsb99x.github.io/res/avatar-512x512.png">
+<title>Advent of Code 2015, день 2</title>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/normalize.css">
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/pygments.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="canonical" href="https://tsb99x.github.io/notes/advent-of-code-2015-day-02.html">
 
-<span class=w>        </span><span class=k>while</span><span class=w> </span><span class=p>(</span><span class=n>fscanf</span><span class=p>(</span><span class=n>stream</span><span class=p>,</span><span class=w> </span><span class=s>&quot;%3d x %3d x %3d&quot;</span><span class=p>,</span><span class=w> </span><span class=o>&amp;</span><span class=n>l</span><span class=p>,</span><span class=w> </span><span class=o>&amp;</span><span class=n>w</span><span class=p>,</span><span class=w> </span><span class=o>&amp;</span><span class=n>h</span><span class=p>)</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=mi>3</span><span class=p>)</span><span class=w> </span><span class=p>{</span>
-<span class=w>                </span><span class=k>if</span><span class=w> </span><span class=p>((</span><span class=n>l</span><span class=w> </span><span class=o>&lt;=</span><span class=w> </span><span class=mi>0</span><span class=p>)</span><span class=w> </span><span class=o>||</span><span class=w> </span><span class=p>(</span><span class=n>w</span><span class=w> </span><span class=o>&lt;=</span><span class=w> </span><span class=mi>0</span><span class=p>)</span><span class=w> </span><span class=o>||</span><span class=w> </span><span class=p>(</span><span class=n>h</span><span class=w> </span><span class=o>&lt;=</span><span class=w> </span><span class=mi>0</span><span class=p>))</span><span class=w> </span><span class=p>{</span>
-<span class=w>                        </span><span class=p>(</span><span class=kt>void</span><span class=p>)</span><span class=n>fprintf</span><span class=p>(</span><span class=n>stderr</span><span class=p>,</span>
-<span class=w>                                      </span><span class=s>&quot;All sizes must be &gt;= 0, &quot;</span>
-<span class=w>                                      </span><span class=s>&quot;but dimensions were: %d x %d x %d</span><span class=se>\n</span><span class=s>&quot;</span><span class=p>,</span>
-<span class=w>                                      </span><span class=n>l</span><span class=p>,</span><span class=w> </span><span class=n>w</span><span class=p>,</span><span class=w> </span><span class=n>h</span><span class=p>);</span>
-<span class=w>                        </span><span class=n>exit</span><span class=p>(</span><span class=n>EXIT_FAILURE</span><span class=p>);</span>
-<span class=w>                </span><span class=p>}</span>
-<span class=w>                </span><span class=n>total</span><span class=w> </span><span class=o>+=</span><span class=w> </span><span class=n>feet_of_paper</span><span class=p>(</span><span class=n>l</span><span class=p>,</span><span class=w> </span><span class=n>w</span><span class=p>,</span><span class=w> </span><span class=n>h</span><span class=p>);</span>
-<span class=w>        </span><span class=p>}</span>
+</head>
 
-<span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=o>!</span><span class=n>feof</span><span class=p>(</span><span class=n>stream</span><span class=p>))</span><span class=w> </span><span class=p>{</span>
-<span class=w>                </span><span class=n>perror</span><span class=p>(</span><span class=s>&quot;Failed to fscanf&quot;</span><span class=p>);</span>
-<span class=w>                </span><span class=n>exit</span><span class=p>(</span><span class=n>EXIT_FAILURE</span><span class=p>);</span>
-<span class=w>        </span><span class=p>}</span>
+<body>
 
-<span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>total</span><span class=p>;</span>
-<span class=p>}</span>
-</code></pre></div> <p>Завершает решение базовый <code>main</code>. Тут только передаём бразды правления функции <code>total_feet_of_paper</code> и выводим результат. Дополнительно проверяем, что по ошибке в программу не были переданы аргументы. Их не имеет смысла принимать, т.к. основной поток ввода – STDIN, а вывода – STDOUT.</p> <div class=highlight><pre><span></span><code><span class=kt>int</span><span class=w> </span><span class=nf>main</span><span class=p>(</span><span class=kt>int</span><span class=w> </span><span class=n>argc</span><span class=p>,</span><span class=w> </span><span class=kt>char</span><span class=w> </span><span class=o>*</span><span class=n>argv</span><span class=p>[])</span>
-<span class=p>{</span>
-<span class=w>        </span><span class=kt>int</span><span class=w> </span><span class=n>total</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=mi>0</span><span class=p>;</span>
+<nav>
+    <a href="/">Обо мне</a>
+    <a href="/notes/">Заметки</a>
+</nav>
 
-<span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>argc</span><span class=w> </span><span class=o>&gt;</span><span class=w> </span><span class=mi>1</span><span class=p>)</span><span class=w> </span><span class=p>{</span>
-<span class=w>                </span><span class=p>(</span><span class=kt>void</span><span class=p>)</span><span class=n>fprintf</span><span class=p>(</span><span class=n>stderr</span><span class=p>,</span>
-<span class=w>                              </span><span class=s>&quot;No arguments are accepted!</span><span class=se>\n</span><span class=s>&quot;</span>
-<span class=w>                              </span><span class=s>&quot;Use IO redirection: %s &lt; input</span><span class=se>\n</span><span class=s>&quot;</span><span class=p>,</span>
-<span class=w>                              </span><span class=n>argv</span><span class=p>[</span><span class=mi>0</span><span class=p>]);</span>
-<span class=w>                </span><span class=k>return</span><span class=w> </span><span class=n>EXIT_FAILURE</span><span class=p>;</span>
-<span class=w>        </span><span class=p>}</span>
+<article>
 
-<span class=w>        </span><span class=n>total</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>total_feet_of_paper</span><span class=p>(</span><span class=n>stdin</span><span class=p>);</span>
-<span class=w>        </span><span class=p>(</span><span class=kt>void</span><span class=p>)</span><span class=n>printf</span><span class=p>(</span><span class=s>&quot;%d</span><span class=se>\n</span><span class=s>&quot;</span><span class=p>,</span><span class=w> </span><span class=n>total</span><span class=p>);</span>
+<header id="title-block-header">
+<h1 class="title">Advent of Code 2015, день 2</h1>
+</header>
 
-<span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>EXIT_SUCCESS</span><span class=p>;</span>
-<span class=p>}</span>
-</code></pre></div> <p>Запускаем тесты:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>./test_i.sh
+<figure>
+<img src="res/advent-of-code-2015-day-02.webp" alt="Четыре звезды есть" />
+<figcaption aria-hidden="true">Четыре звезды есть</figcaption>
+</figure>
+<p>Продолжаем решать задачки Advent of Code. Сегодня будет <a href="https://adventofcode.com/2015/day/2">задача второго дня</a>. Полностью переводить её не буду, сделаю очередную краткую выжимку от себя.</p>
+<h1 id="задача">Задача</h1>
+<p>Эльфы оборачивают подарки в обёрточную бумагу. Подарки находятся в прямоугольных коробках. Чтобы посчитать, сколько бумаги нужно для обёртки, нужно вычислить площадь поверхности коробки:</p>
+<p><span class="math display"><em>S</em><sub><em>b</em><em>o</em><em>x</em></sub> = 2 <em>l</em> <em>w</em> + 2 <em>w</em> <em>h</em> + 2 <em>h</em> <em>l</em></span></p>
+<p>Здесь <span class="math display"><em>l</em></span> – длина, <span class="math display"><em>w</em></span> – ширина, а <span class="math display"><em>h</em></span> – высота коробки.</p>
+<p>Кроме этого, эльфам потребуется немного лишней (запасной) бумаги в размере площади наименьшей стороны коробки.</p>
+<p>Примеры:</p>
+<ul>
+<li>Коробка 2x3x4 это 2*6 + 2*12 + 2*8 = 52 и запас 6, итого 58 кв. футов.</li>
+<li>Коробка 1x1x10 это 2*1 + 2*10 + 2*10 = 42 и запас 1, итого 43 кв. фута.</li>
+</ul>
+<p>Сколько квадратных футов бумаги нужно заказать эльфам <strong>для всех</strong> подарков?</p>
+<h1 id="решение-на-си">Решение на Си</h1>
+<p>Основная часть задачи – расчёт поверхности коробки и дополнительной бумаги “про запас”. Не смотря на то, что в условиях фигурируют <span class="math display"><em>l</em></span>, <span class="math display"><em>w</em></span> и <span class="math display"><em>h</em></span>, с точки зрения кода проще всего работать с площадью сторон. На то же намекают и примеры для тестов. Если выделить площади сторон как <code>a</code>, <code>b</code> и <code>c</code>, то нахождение площади наименьшей стороны коробки станет элементарным использованием <code>min(a, b, c)</code>.</p>
+<p>Поскольку Си не имеет функции <code>min</code>, её тоже нужно реализовать.</p>
+<div class="highlight"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">min</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">b</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 
-<span class=go>Test 2x3x4 =&gt; 58 PASSED</span>
-<span class=go>Test 1x1x10 =&gt; 43 PASSED</span>
-<span class=go>All tests are completed and passed!</span>
-<span class=go>Answer for input: 1586300</span>
-</code></pre></div> <p>Advent of Code устроил полученный ответ.</p> <h2 id=вторая-часть>Вторая часть</h2> <p>Эльфам не хватает ещё и ленты для подарков. Лента имеет одинаковую ширину, нужно найти только длину. Длина ленты вокруг подарка – наикратчайшая дистанция вокруг сторон или, проще, наименьший периметр одной из граней.</p> <p>Каждый подарок также требует бантик из ленты. Количество ленты для банта равно объёму подарка. Даже не спрашивайте как такой бантик завязывать…</p> <p>Примеры:</p> <ul> <li>Коробка 2x3x4 это 2+2+3+3 = 10 и бант 2*3*4 = 24, всего 34 фута.</li> <li>Коробка 1x1x10 это 1+1+1+1 = 4 и бант 1*1*10 = 10, всего 14 футов.</li> </ul> <p>Сколько футов ленты нужно заказать эльфам для <strong>всех подарков</strong>?</p> <h2 id=изменения-в-исходном-решении>Изменения в исходном решении</h2> <p>Формулы для расчёта в новой постановке поменялись. Теперь нас интересуют не столько площади, сколько периметры сторон и объём коробки. Доработаем код.</p> <p>Как и в предыдущей задаче, посмотрим на <code>diff -u part_{i,ii}.c</code>:</p> <div class=highlight><pre><span></span><code><span class=gd>--- part_i.c    2025-03-11 12:11:55.837225321 +0300</span>
-<span class=gi>+++ part_ii.c   2025-03-11 12:12:00.997305687 +0300</span>
-<span class=gu>@@ -3,18 +3,18 @@</span>
+<span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">feet_of_paper</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">l</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">w</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">h</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">l</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">w</span><span class="p">;</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">w</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">h</span><span class="p">;</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">h</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">l</span><span class="p">;</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">wrap</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">a</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">c</span><span class="p">);</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">slack</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">min</span><span class="p">(</span><span class="n">min</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">),</span><span class="w"> </span><span class="n">c</span><span class="p">);</span>
 
-<span class=w> </span>static int min(int a, int b) { return (a &lt; b) ? a : b; }
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">wrap</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">slack</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
 
-<span class=gd>-static int feet_of_paper(int l, int w, int h)</span>
-<span class=gi>+static int feet_of_ribbon(int l, int w, int h)</span>
-<span class=w> </span>{
-<span class=gd>-        int a = l * w;</span>
-<span class=gd>-        int b = w * h;</span>
-<span class=gd>-        int c = h * l;</span>
-<span class=gd>-        int wrap = (2 * a) + (2 * b) + (2 * c);</span>
-<span class=gd>-        int slack = min(min(a, b), c);</span>
-<span class=gi>+        int a = l + w;</span>
-<span class=gi>+        int b = w + h;</span>
-<span class=gi>+        int c = h + l;</span>
-<span class=gi>+        int wrap = 2 * min(min(a, b), c);</span>
-<span class=gi>+        int bow = l * w * h;</span>
+<p>Файл <code>input</code> для задачи содержит построчный листинг размерностей коробок. Имеет смысл выделить отдельную функцию, чтобы вычитать ввод, преобразовать его в параметры и отдать определённой выше функции <code>feet_of_paper</code>.</p>
+<p>Особое внимание уделим функции <code>fscanf</code>. В строке формата есть ограничители для максимального количества символов у числа. <code>%3d</code> значит “считывать не больше трёх символов”. А результат <code>fscanf</code> сравнивается с <code>3</code> – количеством успешно обработанных параметров. Если не указывать ограничения по символам и не проверять результат <code>fscanf</code>, то можно получить неожиданные результаты.</p>
+<p>Строка формата также содержит пробелы между <code>%3d</code>, хотя файл <code>input</code> от Advent of Code не содержит пробелов между размерами. Так допустимо делать, т.к. группа функций <code>scanf</code> будет просто игнорировать эти пробелы. Зато, разделение строки формата на визуальные блоки <code>%3d</code> наглядно показывает количество аргументов.</p>
+<p>После получения ввода обязательно проверяем его на соответствие ожиданиям. В случае этой задачи мы получаем размеры коробки, они не могут быть с минусом или равными нулю. В случае ошибок, опять же, заканчиваем исполнение программы.</p>
+<p>Традиционная проверка <code>feof</code> даст понять, весь ли ввод корректно обработан.</p>
+<div class="highlight"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">total_feet_of_paper</span><span class="p">(</span><span class="kt">FILE</span><span class="w"> </span><span class="o">*</span><span class="n">stream</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">l</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">w</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">h</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">total</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
-<span class=gd>-        return wrap + slack;</span>
-<span class=gi>+        return wrap + bow;</span>
-<span class=w> </span>}
+<span class="w">        </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">fscanf</span><span class="p">(</span><span class="n">stream</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;%3d x %3d x %3d&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">l</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">w</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">h</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">l</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="p">(</span><span class="n">w</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="p">(</span><span class="n">h</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">0</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                        </span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span>
+<span class="w">                                      </span><span class="s">&quot;All sizes must be &gt;= 0, &quot;</span>
+<span class="w">                                      </span><span class="s">&quot;but dimensions were: %d x %d x %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span>
+<span class="w">                                      </span><span class="n">l</span><span class="p">,</span><span class="w"> </span><span class="n">w</span><span class="p">,</span><span class="w"> </span><span class="n">h</span><span class="p">);</span>
+<span class="w">                        </span><span class="n">exit</span><span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">);</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">                </span><span class="n">total</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">feet_of_paper</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="w"> </span><span class="n">w</span><span class="p">,</span><span class="w"> </span><span class="n">h</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
 
-<span class=gd>-static int total_feet_of_paper(FILE *stream)</span>
-<span class=gi>+static int total_feet_of_ribbon(FILE *stream)</span>
-<span class=w> </span>{
-<span class=w> </span>        int l = 0;
-<span class=w> </span>        int w = 0;
-<span class=gu>@@ -29,7 +29,7 @@</span>
-<span class=w> </span>                                      l, w, h);
-<span class=w> </span>                        exit(EXIT_FAILURE);
-<span class=w> </span>                }
-<span class=gd>-                total += feet_of_paper(l, w, h);</span>
-<span class=gi>+                total += feet_of_ribbon(l, w, h);</span>
-<span class=w> </span>        }
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">feof</span><span class="p">(</span><span class="n">stream</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">perror</span><span class="p">(</span><span class="s">&quot;Failed to fscanf&quot;</span><span class="p">);</span>
+<span class="w">                </span><span class="n">exit</span><span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
 
-<span class=w> </span>        if (!feof(stream)) {
-<span class=gu>@@ -52,7 +52,7 @@</span>
-<span class=w> </span>                return EXIT_FAILURE;
-<span class=w> </span>        }
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">total</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
 
-<span class=gd>-        total = total_feet_of_paper(stdin);</span>
-<span class=gi>+        total = total_feet_of_ribbon(stdin);</span>
-<span class=w> </span>        (void)printf(&quot;%d\n&quot;, total);
+<p>Завершает решение базовый <code>main</code>. Тут только передаём бразды правления функции <code>total_feet_of_paper</code> и выводим результат. Дополнительно проверяем, что по ошибке в программу не были переданы аргументы. Их не имеет смысла принимать, т.к. основной поток ввода – STDIN, а вывода – STDOUT.</p>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">argv</span><span class="p">[])</span>
+<span class="p">{</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">total</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
-<span class=w> </span>        return EXIT_SUCCESS;
-</code></pre></div> <p>Основные изменения приходятся только на <code>feet_of_paper</code>. Эта функция теперь называется <code>feet_of_ribbon</code>. Как видно, кроме этого, теперь меняются формулы. <code>a</code>, <code>b</code> и <code>c</code> описывают полу-периметры, а <code>wrap</code> представляет объём коробки. Кроме смены формул, других значимых изменений в коде не требуется.</p> <p>Запускаем тесты для проверки обновлённого решения:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>./test_ii.sh
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">argc</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span>
+<span class="w">                              </span><span class="s">&quot;No arguments are accepted!</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">                              </span><span class="s">&quot;Use IO redirection: %s &lt; input</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span>
+<span class="w">                              </span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="n">EXIT_FAILURE</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
 
-<span class=go>Test 2x3x4 =&gt; 34 PASSED</span>
-<span class=go>Test 1x1x10 =&gt; 14 PASSED</span>
-<span class=go>All tests are completed and passed!</span>
-<span class=go>Answer for input: 3737498</span>
-</code></pre></div> <p>Advent of Code полученный ответ принял, задача полностью решена.</p> <p>Решения задачек можно найти в <a href=https://github.com/tsb99x/solutions>репозитории</a> на GitHub.</p> <time datetime=2025-03-10T14:34:05+03:00>10 марта 2025 г.</time> <div class=changelog> <h4>Журнал изменений</h4> <p><b>19 марта 2025 г.</b>: добавил проверку размеров коробки l &gt;= 0, w &gt;= 0, h &gt;= 0.</p> <p><b>2 января 2026 г.</b>: перенёс исходный код на GitHub.</p> </div> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 
+<span class="w">        </span><span class="n">total</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">total_feet_of_paper</span><span class="p">(</span><span class="n">stdin</span><span class="p">);</span>
+<span class="w">        </span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;%d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">total</span><span class="p">);</span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">EXIT_SUCCESS</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Запускаем тесты:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>./test_i.sh
+
+<span class="go">Test 2x3x4 =&gt; 58 PASSED</span>
+<span class="go">Test 1x1x10 =&gt; 43 PASSED</span>
+<span class="go">All tests are completed and passed!</span>
+<span class="go">Answer for input: 1586300</span>
+</code></pre></div>
+
+<p>Advent of Code устроил полученный ответ.</p>
+<h2 id="вторая-часть">Вторая часть</h2>
+<p>Эльфам не хватает ещё и ленты для подарков. Лента имеет одинаковую ширину, нужно найти только длину. Длина ленты вокруг подарка – наикратчайшая дистанция вокруг сторон или, проще, наименьший периметр одной из граней.</p>
+<p>Каждый подарок также требует бантик из ленты. Количество ленты для банта равно объёму подарка. Даже не спрашивайте как такой бантик завязывать…</p>
+<p>Примеры:</p>
+<ul>
+<li>Коробка 2x3x4 это 2+2+3+3 = 10 и бант 2*3*4 = 24, всего 34 фута.</li>
+<li>Коробка 1x1x10 это 1+1+1+1 = 4 и бант 1*1*10 = 10, всего 14 футов.</li>
+</ul>
+<p>Сколько футов ленты нужно заказать эльфам для <strong>всех подарков</strong>?</p>
+<h2 id="изменения-в-исходном-решении">Изменения в исходном решении</h2>
+<p>Формулы для расчёта в новой постановке поменялись. Теперь нас интересуют не столько площади, сколько периметры сторон и объём коробки. Доработаем код.</p>
+<p>Как и в предыдущей задаче, посмотрим на <code>diff -u part_{i,ii}.c</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="gd">--- part_i.c    2025-03-11 12:11:55.837225321 +0300</span>
+<span class="gi">+++ part_ii.c   2025-03-11 12:12:00.997305687 +0300</span>
+<span class="gu">@@ -3,18 +3,18 @@</span>
+
+<span class="w"> </span>static int min(int a, int b) { return (a &lt; b) ? a : b; }
+
+<span class="gd">-static int feet_of_paper(int l, int w, int h)</span>
+<span class="gi">+static int feet_of_ribbon(int l, int w, int h)</span>
+<span class="w"> </span>{
+<span class="gd">-        int a = l * w;</span>
+<span class="gd">-        int b = w * h;</span>
+<span class="gd">-        int c = h * l;</span>
+<span class="gd">-        int wrap = (2 * a) + (2 * b) + (2 * c);</span>
+<span class="gd">-        int slack = min(min(a, b), c);</span>
+<span class="gi">+        int a = l + w;</span>
+<span class="gi">+        int b = w + h;</span>
+<span class="gi">+        int c = h + l;</span>
+<span class="gi">+        int wrap = 2 * min(min(a, b), c);</span>
+<span class="gi">+        int bow = l * w * h;</span>
+
+<span class="gd">-        return wrap + slack;</span>
+<span class="gi">+        return wrap + bow;</span>
+<span class="w"> </span>}
+
+<span class="gd">-static int total_feet_of_paper(FILE *stream)</span>
+<span class="gi">+static int total_feet_of_ribbon(FILE *stream)</span>
+<span class="w"> </span>{
+<span class="w"> </span>        int l = 0;
+<span class="w"> </span>        int w = 0;
+<span class="gu">@@ -29,7 +29,7 @@</span>
+<span class="w"> </span>                                      l, w, h);
+<span class="w"> </span>                        exit(EXIT_FAILURE);
+<span class="w"> </span>                }
+<span class="gd">-                total += feet_of_paper(l, w, h);</span>
+<span class="gi">+                total += feet_of_ribbon(l, w, h);</span>
+<span class="w"> </span>        }
+
+<span class="w"> </span>        if (!feof(stream)) {
+<span class="gu">@@ -52,7 +52,7 @@</span>
+<span class="w"> </span>                return EXIT_FAILURE;
+<span class="w"> </span>        }
+
+<span class="gd">-        total = total_feet_of_paper(stdin);</span>
+<span class="gi">+        total = total_feet_of_ribbon(stdin);</span>
+<span class="w"> </span>        (void)printf(&quot;%d\n&quot;, total);
+
+<span class="w"> </span>        return EXIT_SUCCESS;
+</code></pre></div>
+
+<p>Основные изменения приходятся только на <code>feet_of_paper</code>. Эта функция теперь называется <code>feet_of_ribbon</code>. Как видно, кроме этого, теперь меняются формулы. <code>a</code>, <code>b</code> и <code>c</code> описывают полу-периметры, а <code>wrap</code> представляет объём коробки. Кроме смены формул, других значимых изменений в коде не требуется.</p>
+<p>Запускаем тесты для проверки обновлённого решения:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>./test_ii.sh
+
+<span class="go">Test 2x3x4 =&gt; 34 PASSED</span>
+<span class="go">Test 1x1x10 =&gt; 14 PASSED</span>
+<span class="go">All tests are completed and passed!</span>
+<span class="go">Answer for input: 3737498</span>
+</code></pre></div>
+
+<p>Advent of Code полученный ответ принял, задача полностью решена.</p>
+<p>Решения задачек можно найти в <a href="https://github.com/tsb99x/solutions">репозитории</a> на GitHub.</p>
+
+<time datetime="2025-03-10T14:34:05+03:00">10 марта 2025 г.</time>
+
+<div class="changelog">
+<h4>Журнал изменений</h4>
+<p><b>19 марта 2025 г.</b>: добавил проверку размеров коробки l &gt;= 0, w &gt;= 0, h &gt;= 0.</p>
+<p><b>2 января 2026 г.</b>: перенёс исходный код на GitHub.</p>
+</div>
+
+</article>
+
+<address class="contacts">
+    Если Вы хотите обсудить содержание заметки, задать вопросы или
+    предложить изменения, то со мной можно связаться в
+    <a href="https://t.me/tsb99x">Telegram</a>
+</address>
+
+<footer>
+    <span class="copyright">© 2019-2026</span> |
+    <a rel="license"
+        href="https://creativecommons.org/licenses/by/4.0/deed.ru">
+        CC BY 4.0
+    </a>
+</footer>
+
+</body>
+</html>

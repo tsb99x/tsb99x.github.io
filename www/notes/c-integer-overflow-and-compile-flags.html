@@ -1,31 +1,112 @@
-<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2025-03-07T14:03:40+03:00><meta name=description content="Флаги санитизации для Си"><meta property=og:url content=https://tsb99x.github.io/notes/c-integer-overflow-and-compile-flags.html><meta property=og:type content=article><meta property=og:title content="Отслеживаем переполнение int"><meta property=og:description content="Флаги санитизации для Си"><meta property=og:image content=https://tsb99x.github.io/res/avatar-512x512.png><title>Отслеживаем переполнение int</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.github.io/notes/c-integer-overflow-and-compile-flags.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> </nav> <article> <header id=title-block-header> <h1 class=title>Отслеживаем переполнение <code>int</code></h1> </header> <p>Стандарт Си определяет только минимальные размерности целочисленных значений. Например, на системах, где байт представлен как 8 бит, <code>int</code> имеет минимальный размер в 2 байта. Верхняя граница размерности стандартном не ограничена.</p> <p>Имплементации компиляторов Си вольны сами выбирать размерность под архитектуру. На моей системе <code>sizeof(int)</code> эквивалентен 4 байтам. Это в два раза больше минимального значения из спецификации, но, всё же, это конечное значение.</p> <p>Что будет, если при работе приложения произойдёт выход за границы допустимых значений? Произойдёт переполнение. Как понять, где и когда это происходит?</p> <p>Решить такую задачу поможет флаг компиляции, который можно передать для Clang и GCC – <code>-fsanitize=undefined</code>. Флаг влияет на исполнение приложения в момент, когда появляется undefined behavior. Переполнение целочисленного <code>int</code> – это undefined behavior. При переполнении тогда включаются механизмы санитизации.</p> <p>Для тюнинга работы механизмов санитизации есть ещё один полезный флаг компиляции <code>-fno-sanitize-recover=all</code>. Он требует, чтобы программа в случае санитизации прекратила исполнение с ошибкой, а не продолжала работать как будто бы всё окей.</p> <p>Иными словами, комбинация указанных флагов будет останавливать программу с выводом описания ошибки в момент появления undefined behavior. В частности, переполнения целочисленного <code>int</code>, но не только. Проверим, как это выглядит.</p> <p>Опишем простую функцию <code>main</code> в файле <code>test.c</code>:</p> <div class=highlight><pre><span></span><code><span class=cp>#include</span><span class=w> </span><span class=cpf>&lt;limits.h&gt;</span>
-<span class=cp>#include</span><span class=w> </span><span class=cpf>&lt;stdio.h&gt;</span>
-<span class=cp>#include</span><span class=w> </span><span class=cpf>&lt;stdlib.h&gt;</span>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru" prefix="og: https://ogp.me/ns#">
 
-<span class=kt>int</span><span class=w> </span><span class=nf>main</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span><span class=w> </span><span class=p>{</span>
-<span class=w>        </span><span class=kt>int</span><span class=w> </span><span class=n>x</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>INT_MAX</span><span class=p>;</span>
-<span class=w>        </span><span class=n>printf</span><span class=p>(</span><span class=s>&quot;x + 1 = %d</span><span class=se>\n</span><span class=s>&quot;</span><span class=p>,</span><span class=w> </span><span class=n>x</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=mi>1</span><span class=p>);</span>
-<span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>EXIT_SUCCESS</span><span class=p>;</span>
-<span class=p>}</span>
-</code></pre></div> <p>В момент вычисления <code>x + 1</code> должен происходить тот самый undefined behavior. В зависимости от платформы можно наблюдать разный результат. Проверю у себя:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>gcc<span class=w> </span>-o<span class=w> </span><span class=nb>test</span><span class=w> </span>test.c
-<span class=gp>$ </span>./test
+<head>
 
-<span class=go>x + 1 = -2147483648</span>
-</code></pre></div> <p>Вместо ожидаемого значения 2147483648 получаем -2147483648. Окей, всё понятно. Поскольку у меня платформа, на которой отрицательные значения представлены с помощью <a href=https://ru.wikipedia.org/wiki/%D0%94%D0%BE%D0%BF%D0%BE%D0%BB%D0%BD%D0%B8%D1%82%D0%B5%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9_%D0%BA%D0%BE%D0%B4>дополнительного кода</a>, то <code>INT_MAX + 1</code> даёт <code>INT_MIN</code>. Теперь скомпилируем и запустим тестовую программу с флагом <code>-fsanitize=undefined</code>:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>gcc<span class=w> </span>-fsanitize<span class=o>=</span>undefined<span class=w> </span>-o<span class=w> </span><span class=nb>test</span><span class=w> </span>test.c
-<span class=gp>$ </span>./test
+<meta charset="utf-8">
+<meta name="generator" content="pandoc">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Антон Муравьев">
+<meta name="dcterms.date" content="2025-03-07T14:03:40+03:00">
+<meta name="description" content="Флаги санитизации для Си">
+<meta property="og:url" content="https://tsb99x.github.io/notes/c-integer-overflow-and-compile-flags.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Отслеживаем переполнение int">
+<meta property="og:description" content="Флаги санитизации для Си">
+<meta property="og:image" content="https://tsb99x.github.io/res/avatar-512x512.png">
+<title>Отслеживаем переполнение int</title>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/normalize.css">
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/pygments.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="canonical" href="https://tsb99x.github.io/notes/c-integer-overflow-and-compile-flags.html">
 
-<span class=go>test.c:7:3: runtime error: signed integer overflow: 2147483647 + 1 cannot be represented in type &#39;int&#39;</span>
-<span class=go>x + 1 = -2147483648</span>
+</head>
 
-<span class=gp>$ </span><span class=nb>echo</span><span class=w> </span><span class=nv>$?</span>
+<body>
 
-<span class=go>0</span>
-</code></pre></div> <p>Как видим, сообщение об ошибке было выведено, но программа продолжила своё исполнение и завершилась с кодом успеха (0). Такое поведение мне очень не нравится, я предпочитаю выход из программы ровно в момент, когда происходит signed integer overflow. Добавляем флаг <code>-fno-sanitize-recover=all</code>:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>gcc<span class=w> </span>-fsanitize<span class=o>=</span>undefined<span class=w> </span>-fno-sanitize-recover<span class=o>=</span>all<span class=w> </span>-o<span class=w> </span><span class=nb>test</span><span class=w> </span>test.c
-<span class=gp>$ </span>./test
+<nav>
+    <a href="/">Обо мне</a>
+    <a href="/notes/">Заметки</a>
+</nav>
 
-<span class=go>test.c:7:3: runtime error: signed integer overflow: 2147483647 + 1 cannot be represented in type &#39;int&#39;</span>
+<article>
 
-<span class=gp>$ </span><span class=nb>echo</span><span class=w> </span><span class=nv>$?</span>
+<header id="title-block-header">
+<h1 class="title">Отслеживаем переполнение <code>int</code></h1>
+</header>
 
-<span class=go>1</span>
-</code></pre></div> <p>Вот! То, что нужно! Программа завершилась с ошибкой и вернула соответствующий статус-код (1). Тест на предотвращение signed integer overflow пройден успешно.</p> <p>Самый главный плюс использования этих флагов – исходный код не требует никаких изменений. Если Вы уверены в корректности своей программы, то эти флаги можно опустить при компиляции релизных версии программ, если Вам так больше нравится.</p> <time datetime=2025-03-07T14:03:40+03:00>7 марта 2025 г.</time> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 
+<p>Стандарт Си определяет только минимальные размерности целочисленных значений. Например, на системах, где байт представлен как 8 бит, <code>int</code> имеет минимальный размер в 2 байта. Верхняя граница размерности стандартном не ограничена.</p>
+<p>Имплементации компиляторов Си вольны сами выбирать размерность под архитектуру. На моей системе <code>sizeof(int)</code> эквивалентен 4 байтам. Это в два раза больше минимального значения из спецификации, но, всё же, это конечное значение.</p>
+<p>Что будет, если при работе приложения произойдёт выход за границы допустимых значений? Произойдёт переполнение. Как понять, где и когда это происходит?</p>
+<p>Решить такую задачу поможет флаг компиляции, который можно передать для Clang и GCC – <code>-fsanitize=undefined</code>. Флаг влияет на исполнение приложения в момент, когда появляется undefined behavior. Переполнение целочисленного <code>int</code> – это undefined behavior. При переполнении тогда включаются механизмы санитизации.</p>
+<p>Для тюнинга работы механизмов санитизации есть ещё один полезный флаг компиляции <code>-fno-sanitize-recover=all</code>. Он требует, чтобы программа в случае санитизации прекратила исполнение с ошибкой, а не продолжала работать как будто бы всё окей.</p>
+<p>Иными словами, комбинация указанных флагов будет останавливать программу с выводом описания ошибки в момент появления undefined behavior. В частности, переполнения целочисленного <code>int</code>, но не только. Проверим, как это выглядит.</p>
+<p>Опишем простую функцию <code>main</code> в файле <code>test.c</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;limits.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdio.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdlib.h&gt;</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">INT_MAX</span><span class="p">;</span>
+<span class="w">        </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;x + 1 = %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">EXIT_SUCCESS</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>В момент вычисления <code>x + 1</code> должен происходить тот самый undefined behavior. В зависимости от платформы можно наблюдать разный результат. Проверю у себя:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>gcc<span class="w"> </span>-o<span class="w"> </span><span class="nb">test</span><span class="w"> </span>test.c
+<span class="gp">$ </span>./test
+
+<span class="go">x + 1 = -2147483648</span>
+</code></pre></div>
+
+<p>Вместо ожидаемого значения 2147483648 получаем -2147483648. Окей, всё понятно. Поскольку у меня платформа, на которой отрицательные значения представлены с помощью <a href="https://ru.wikipedia.org/wiki/%D0%94%D0%BE%D0%BF%D0%BE%D0%BB%D0%BD%D0%B8%D1%82%D0%B5%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9_%D0%BA%D0%BE%D0%B4">дополнительного кода</a>, то <code>INT_MAX + 1</code> даёт <code>INT_MIN</code>. Теперь скомпилируем и запустим тестовую программу с флагом <code>-fsanitize=undefined</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>gcc<span class="w"> </span>-fsanitize<span class="o">=</span>undefined<span class="w"> </span>-o<span class="w"> </span><span class="nb">test</span><span class="w"> </span>test.c
+<span class="gp">$ </span>./test
+
+<span class="go">test.c:7:3: runtime error: signed integer overflow: 2147483647 + 1 cannot be represented in type &#39;int&#39;</span>
+<span class="go">x + 1 = -2147483648</span>
+
+<span class="gp">$ </span><span class="nb">echo</span><span class="w"> </span><span class="nv">$?</span>
+
+<span class="go">0</span>
+</code></pre></div>
+
+<p>Как видим, сообщение об ошибке было выведено, но программа продолжила своё исполнение и завершилась с кодом успеха (0). Такое поведение мне очень не нравится, я предпочитаю выход из программы ровно в момент, когда происходит signed integer overflow. Добавляем флаг <code>-fno-sanitize-recover=all</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>gcc<span class="w"> </span>-fsanitize<span class="o">=</span>undefined<span class="w"> </span>-fno-sanitize-recover<span class="o">=</span>all<span class="w"> </span>-o<span class="w"> </span><span class="nb">test</span><span class="w"> </span>test.c
+<span class="gp">$ </span>./test
+
+<span class="go">test.c:7:3: runtime error: signed integer overflow: 2147483647 + 1 cannot be represented in type &#39;int&#39;</span>
+
+<span class="gp">$ </span><span class="nb">echo</span><span class="w"> </span><span class="nv">$?</span>
+
+<span class="go">1</span>
+</code></pre></div>
+
+<p>Вот! То, что нужно! Программа завершилась с ошибкой и вернула соответствующий статус-код (1). Тест на предотвращение signed integer overflow пройден успешно.</p>
+<p>Самый главный плюс использования этих флагов – исходный код не требует никаких изменений. Если Вы уверены в корректности своей программы, то эти флаги можно опустить при компиляции релизных версии программ, если Вам так больше нравится.</p>
+
+<time datetime="2025-03-07T14:03:40+03:00">7 марта 2025 г.</time>
+
+
+</article>
+
+<address class="contacts">
+    Если Вы хотите обсудить содержание заметки, задать вопросы или
+    предложить изменения, то со мной можно связаться в
+    <a href="https://t.me/tsb99x">Telegram</a>
+</address>
+
+<footer>
+    <span class="copyright">© 2019-2026</span> |
+    <a rel="license"
+        href="https://creativecommons.org/licenses/by/4.0/deed.ru">
+        CC BY 4.0
+    </a>
+</footer>
+
+</body>
+</html>

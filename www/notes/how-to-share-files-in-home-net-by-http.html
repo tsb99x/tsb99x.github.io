@@ -1,6 +1,123 @@
-<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2022-05-12T21:21:00+03:00><meta name=description content="Копируем файлы по HTTP в домашней LAN"><meta property=og:url content=https://tsb99x.github.io/notes/how-to-share-files-in-home-net-by-http.html><meta property=og:type content=article><meta property=og:title content="Как раздать файлы в домашней сети"><meta property=og:description content="Копируем файлы по HTTP в домашней LAN"><meta property=og:image content=https://tsb99x.github.io/res/avatar-512x512.png><title>Как раздать файлы в домашней сети</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.github.io/notes/how-to-share-files-in-home-net-by-http.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> </nav> <article> <header id=title-block-header> <h1 class=title>Как раздать файлы в домашней сети</h1> </header> <blockquote> <p>В прошлом я много рекомендовал HFS 2. К сожалению, Rejetto кардинально изменил свой софт в версии 3. Теперь это другая программа. Рекомендовать её в новом виде я не могу. Старая версия, как пишет разработчик, “имеет проблемы с безопасностью”. Патчить HFS 2-й версии Rejetto не будет.</p> </blockquote> <p>Метод подходит для копирования файлов:</p> <ul> <li>с компьютера на телефон без USB-кабеля</li> <li>на ноутбук без флешки</li> <li>на VM с хост-машины</li> <li>без настройки SMB, NFS, FTP</li> <li>без настройки Nginx или Apache</li> <li>на устройство, где нельзя установить ПО</li> </ul> <h2 id=запуск-сервера-на-windows>Запуск сервера на Windows</h2> <p>Для Windows используем портативное приложение <a href=https://rejetto.com/hfs/ >HFS</a> размером 2.5MB. Работает, начиная от XP. Последовательность действий:</p> <ul> <li>скачать и запустить <code>hfs.exe</code></li> <li>скинуть в окно файлы для раздачи</li> <li>HFS определит IP сервера, на скриншоте это <code>10.0.2.15</code></li> </ul> <figure> <img src=res/how-to-share-files-in-home-net-by-http-hfs-interface.webp alt="Интерфейс HFS"> <figcaption aria-hidden=true>Интерфейс HFS</figcaption> </figure> <h2 id=запуск-сервера-на-linux-или-os-x>Запуск сервера на Linux или OS X</h2> <p>Дистрибутивы Linux и Mac OS X поставляются с Python и модулем HTTP сервера, который решает задачу раздачи файлов. Перейдем в папку с файлами для раздачи:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span><span class=nb>cd</span><span class=w> </span>/home/my_user/dir_to_share
-</code></pre></div> <p>Выполним команду запуска для Python 3 и модуля <a href=https://docs.python.org/3/library/http.server.html>http.server</a>:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>python3<span class=w> </span>-m<span class=w> </span>http.server
-</code></pre></div> <p>При отсутствии Python 3 – для Python 2 и модуля <a href=https://docs.python.org/2/library/simplehttpserver.html>SimpleHTTPServer</a>:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>python2<span class=w> </span>-m<span class=w> </span>SimpleHTTPServer
-</code></pre></div> <p>Сервер запустится на порте <code>8000</code> всех сетевых интерфейсов.</p> <p>Узнаем IP раздающего устройства в домашней сети:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>ip<span class=w> </span>-o<span class=w> </span>route<span class=w> </span>get<span class=w> </span><span class=s1>&#39;1.1.1.1&#39;</span><span class=w> </span><span class=p>|</span><span class=w> </span>awk<span class=w> </span><span class=s1>&#39;{ print $7 }&#39;</span>
-</code></pre></div> <p>Или посмотрим IP для всех интерфейсов и подберем нужный:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>ip<span class=w> </span>-br<span class=w> </span>a
-</code></pre></div> <h2 id=загрузка-файлов>Загрузка файлов</h2> <p>Переходим в веб-браузере по IP сервера и посмотрим на список доступных файлов.</p> <figure> <img src=res/how-to-share-files-in-home-net-by-http-hfs-file-listing.webp alt="Веб-страница по адресу HFS"> <figcaption aria-hidden=true>Веб-страница по адресу HFS</figcaption> </figure> <figure> <img src=res/how-to-share-files-in-home-net-by-http-python-file-listing.webp alt="Веб-страница сервера на Python"> <figcaption aria-hidden=true>Веб-страница сервера на Python</figcaption> </figure> <p>Скачиваем необходимые файлы по клику в списке.</p> <time datetime=2022-05-12T21:21:00+03:00>12 мая 2022 г.</time> <div class=changelog> <h4>Журнал изменений</h4> <p><b>16 сентября 2022 г.</b>: заменил устаревший <code>ifconfig</code> для подбора IP адреса на <code>ip -br a</code>.</p> <p><b>11 февраля 2025 г.</b>: добавил замечание о новой версии HFS и проблемах с безопасностью.</p> </div> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru" prefix="og: https://ogp.me/ns#">
+
+<head>
+
+<meta charset="utf-8">
+<meta name="generator" content="pandoc">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Антон Муравьев">
+<meta name="dcterms.date" content="2022-05-12T21:21:00+03:00">
+<meta name="description" content="Копируем файлы по HTTP в домашней LAN">
+<meta property="og:url" content="https://tsb99x.github.io/notes/how-to-share-files-in-home-net-by-http.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Как раздать файлы в домашней сети">
+<meta property="og:description" content="Копируем файлы по HTTP в домашней LAN">
+<meta property="og:image" content="https://tsb99x.github.io/res/avatar-512x512.png">
+<title>Как раздать файлы в домашней сети</title>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/normalize.css">
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/pygments.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="canonical" href="https://tsb99x.github.io/notes/how-to-share-files-in-home-net-by-http.html">
+
+</head>
+
+<body>
+
+<nav>
+    <a href="/">Обо мне</a>
+    <a href="/notes/">Заметки</a>
+</nav>
+
+<article>
+
+<header id="title-block-header">
+<h1 class="title">Как раздать файлы в домашней сети</h1>
+</header>
+
+<blockquote>
+<p>В прошлом я много рекомендовал HFS 2. К сожалению, Rejetto кардинально изменил свой софт в версии 3. Теперь это другая программа. Рекомендовать её в новом виде я не могу. Старая версия, как пишет разработчик, “имеет проблемы с безопасностью”. Патчить HFS 2-й версии Rejetto не будет.</p>
+</blockquote>
+<p>Метод подходит для копирования файлов:</p>
+<ul>
+<li>с компьютера на телефон без USB-кабеля</li>
+<li>на ноутбук без флешки</li>
+<li>на VM с хост-машины</li>
+<li>без настройки SMB, NFS, FTP</li>
+<li>без настройки Nginx или Apache</li>
+<li>на устройство, где нельзя установить ПО</li>
+</ul>
+<h2 id="запуск-сервера-на-windows">Запуск сервера на Windows</h2>
+<p>Для Windows используем портативное приложение <a href="https://rejetto.com/hfs/">HFS</a> размером 2.5MB. Работает, начиная от XP. Последовательность действий:</p>
+<ul>
+<li>скачать и запустить <code>hfs.exe</code></li>
+<li>скинуть в окно файлы для раздачи</li>
+<li>HFS определит IP сервера, на скриншоте это <code>10.0.2.15</code></li>
+</ul>
+<figure>
+<img src="res/how-to-share-files-in-home-net-by-http-hfs-interface.webp" alt="Интерфейс HFS" />
+<figcaption aria-hidden="true">Интерфейс HFS</figcaption>
+</figure>
+<h2 id="запуск-сервера-на-linux-или-os-x">Запуск сервера на Linux или OS X</h2>
+<p>Дистрибутивы Linux и Mac OS X поставляются с Python и модулем HTTP сервера, который решает задачу раздачи файлов. Перейдем в папку с файлами для раздачи:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span>/home/my_user/dir_to_share
+</code></pre></div>
+
+<p>Выполним команду запуска для Python 3 и модуля <a href="https://docs.python.org/3/library/http.server.html">http.server</a>:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>python3<span class="w"> </span>-m<span class="w"> </span>http.server
+</code></pre></div>
+
+<p>При отсутствии Python 3 – для Python 2 и модуля <a href="https://docs.python.org/2/library/simplehttpserver.html">SimpleHTTPServer</a>:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>python2<span class="w"> </span>-m<span class="w"> </span>SimpleHTTPServer
+</code></pre></div>
+
+<p>Сервер запустится на порте <code>8000</code> всех сетевых интерфейсов.</p>
+<p>Узнаем IP раздающего устройства в домашней сети:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>ip<span class="w"> </span>-o<span class="w"> </span>route<span class="w"> </span>get<span class="w"> </span><span class="s1">&#39;1.1.1.1&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span><span class="s1">&#39;{ print $7 }&#39;</span>
+</code></pre></div>
+
+<p>Или посмотрим IP для всех интерфейсов и подберем нужный:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>ip<span class="w"> </span>-br<span class="w"> </span>a
+</code></pre></div>
+
+<h2 id="загрузка-файлов">Загрузка файлов</h2>
+<p>Переходим в веб-браузере по IP сервера и посмотрим на список доступных файлов.</p>
+<figure>
+<img src="res/how-to-share-files-in-home-net-by-http-hfs-file-listing.webp" alt="Веб-страница по адресу HFS" />
+<figcaption aria-hidden="true">Веб-страница по адресу HFS</figcaption>
+</figure>
+<figure>
+<img src="res/how-to-share-files-in-home-net-by-http-python-file-listing.webp" alt="Веб-страница сервера на Python" />
+<figcaption aria-hidden="true">Веб-страница сервера на Python</figcaption>
+</figure>
+<p>Скачиваем необходимые файлы по клику в списке.</p>
+
+<time datetime="2022-05-12T21:21:00+03:00">12 мая 2022 г.</time>
+
+<div class="changelog">
+<h4>Журнал изменений</h4>
+<p><b>16 сентября 2022 г.</b>: заменил устаревший <code>ifconfig</code> для подбора IP адреса на <code>ip -br a</code>.</p>
+<p><b>11 февраля 2025 г.</b>: добавил замечание о новой версии HFS и проблемах с безопасностью.</p>
+</div>
+
+</article>
+
+<address class="contacts">
+    Если Вы хотите обсудить содержание заметки, задать вопросы или
+    предложить изменения, то со мной можно связаться в
+    <a href="https://t.me/tsb99x">Telegram</a>
+</address>
+
+<footer>
+    <span class="copyright">© 2019-2026</span> |
+    <a rel="license"
+        href="https://creativecommons.org/licenses/by/4.0/deed.ru">
+        CC BY 4.0
+    </a>
+</footer>
+
+</body>
+</html>

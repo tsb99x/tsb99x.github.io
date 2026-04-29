@@ -1,5 +1,89 @@
-<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2025-02-14T20:33:49+03:00><meta name=description content="Адаптируем дефективный DevKit"><meta property=og:url content=https://tsb99x.github.io/notes/programming-esp32-through-nodemcu.html><meta property=og:type content=article><meta property=og:title content="Прошивка ESP32 через NodeMCU"><meta property=og:description content="Адаптируем дефективный DevKit"><meta property=og:image content=https://tsb99x.github.io/res/avatar-512x512.png><title>Прошивка ESP32 через NodeMCU</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.github.io/notes/programming-esp32-through-nodemcu.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> </nav> <article> <header id=title-block-header> <h1 class=title>Прошивка ESP32 через NodeMCU</h1> </header> <iframe class=rutube-player src=https://rutube.ru/play/embed/1007b2c355d4405455a8169f9f536041/ frameborder=0 allow="clipboard-write; autoplay" webkitallowfullscreen mozallowfullscreen allowfullscreen> </iframe> <p>Чуть больше полутора лет назад я купил ESP8266 на отладочной плате NodeMCU V3 с SoC ESP-12F. Штука мне показалась интересной, захотелось посмотреть аналогичные платы. Выбирал плату с ESP 32. Заказал NodeMCU с ESP32-WROOM32 за копейки.</p> <p>Когда она ко мне приехала, я сразу понял: что-то не так. USB порт не Micro-USB, а Type-C. Распиновка по именам пинов не сходилась. Подключил к ПК и ничего не увидел. Какая-то часть платы, работающая с USB, оказалось мертвой.</p> <p>Может быть дело в дорожках, чипе CH340 или самом порте. Незначительный ток по цепи бегает, но плата не заводится. Светодиод PWR загорелся при подключении внешних 3V и GND. Плата стоила копейки, поэтому просто кинул в коробку и забыл.</p> <p>Вчера потратил день на изучение вопроса прошивки без программатора.</p> <p>Для начала решил понять, какая именно плата у меня на руках. Выяснил, что у меня никакой не NodeMCU ESP32, а клон DOIT ESP32 DevKit.</p> <p>С подключением оказалось всё достаточно прозаично. По-сути, мне не хватало как раз всей обвязки до SoC ESP32-WROOM32. 1-в-1 обвязка есть на NodeMCU с ESP-12F. То есть, нужно их просто соединить. 3V3 и GND точно нужны для питания.</p> <figure> <img src=res/programming-esp32-through-nodemcu-01-connection-diagram.webp alt="Схема подключения DevKit через NodeMCU"> <figcaption aria-hidden=true>Схема подключения DevKit через NodeMCU</figcaption> </figure> <p>Пара TX и RX – ключевая частью при прошивке, их тоже нужно соединить. Причём никаких кроссов делать не нужно, TX отправляется к TX, а RX к RX.</p> <p>В такой конфигурации ESP-12F не будет допускать ESP32-WROOM-32 к прошивке. ESP-12F нужно отключить. Предыдущий опыт подсказывал, что нужно соединить EN пин с GND, после этого ESP-12F не будет мешать ESP32-WROOM-32.</p> <p>И, вроде всё уже должно работать, но нет. Прошивка никак не хотела загружаться. Получал одну и ту же ошибку:</p> <pre><code>esptool.py v4.8.1
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru" prefix="og: https://ogp.me/ns#">
+
+<head>
+
+<meta charset="utf-8">
+<meta name="generator" content="pandoc">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Антон Муравьев">
+<meta name="dcterms.date" content="2025-02-14T20:33:49+03:00">
+<meta name="description" content="Адаптируем дефективный DevKit">
+<meta property="og:url" content="https://tsb99x.github.io/notes/programming-esp32-through-nodemcu.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Прошивка ESP32 через NodeMCU">
+<meta property="og:description" content="Адаптируем дефективный DevKit">
+<meta property="og:image" content="https://tsb99x.github.io/res/avatar-512x512.png">
+<title>Прошивка ESP32 через NodeMCU</title>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/normalize.css">
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/pygments.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="canonical" href="https://tsb99x.github.io/notes/programming-esp32-through-nodemcu.html">
+
+</head>
+
+<body>
+
+<nav>
+    <a href="/">Обо мне</a>
+    <a href="/notes/">Заметки</a>
+</nav>
+
+<article>
+
+<header id="title-block-header">
+<h1 class="title">Прошивка ESP32 через NodeMCU</h1>
+</header>
+
+<iframe class="rutube-player" src="https://rutube.ru/play/embed/1007b2c355d4405455a8169f9f536041/" frameBorder="0" allow="clipboard-write; autoplay" webkitAllowFullScreen mozallowfullscreen allowFullScreen>
+</iframe>
+<p>Чуть больше полутора лет назад я купил ESP8266 на отладочной плате NodeMCU V3 с SoC ESP-12F. Штука мне показалась интересной, захотелось посмотреть аналогичные платы. Выбирал плату с ESP 32. Заказал NodeMCU с ESP32-WROOM32 за копейки.</p>
+<p>Когда она ко мне приехала, я сразу понял: что-то не так. USB порт не Micro-USB, а Type-C. Распиновка по именам пинов не сходилась. Подключил к ПК и ничего не увидел. Какая-то часть платы, работающая с USB, оказалось мертвой.</p>
+<p>Может быть дело в дорожках, чипе CH340 или самом порте. Незначительный ток по цепи бегает, но плата не заводится. Светодиод PWR загорелся при подключении внешних 3V и GND. Плата стоила копейки, поэтому просто кинул в коробку и забыл.</p>
+<p>Вчера потратил день на изучение вопроса прошивки без программатора.</p>
+<p>Для начала решил понять, какая именно плата у меня на руках. Выяснил, что у меня никакой не NodeMCU ESP32, а клон DOIT ESP32 DevKit.</p>
+<p>С подключением оказалось всё достаточно прозаично. По-сути, мне не хватало как раз всей обвязки до SoC ESP32-WROOM32. 1-в-1 обвязка есть на NodeMCU с ESP-12F. То есть, нужно их просто соединить. 3V3 и GND точно нужны для питания.</p>
+<figure>
+<img src="res/programming-esp32-through-nodemcu-01-connection-diagram.webp" alt="Схема подключения DevKit через NodeMCU" />
+<figcaption aria-hidden="true">Схема подключения DevKit через NodeMCU</figcaption>
+</figure>
+<p>Пара TX и RX – ключевая частью при прошивке, их тоже нужно соединить. Причём никаких кроссов делать не нужно, TX отправляется к TX, а RX к RX.</p>
+<p>В такой конфигурации ESP-12F не будет допускать ESP32-WROOM-32 к прошивке. ESP-12F нужно отключить. Предыдущий опыт подсказывал, что нужно соединить EN пин с GND, после этого ESP-12F не будет мешать ESP32-WROOM-32.</p>
+<p>И, вроде всё уже должно работать, но нет. Прошивка никак не хотела загружаться. Получал одну и ту же ошибку:</p>
+<pre><code>esptool.py v4.8.1
 Serial port /dev/ttyUSB0
 Connecting......................................
 
-A fatal error occurred: Failed to connect to ESP32: No serial data received.</code></pre> <p>Никакие нажатия BOOT или EN на ESP 32 DevKit не помогали. Долго вертя в руках плату, посмотрел спеки, почитал несколько сайтов и только <a href=https://wiki.amperka.ru/products:esp32-wroom-wifi-devkit-v1>на Амперке</a> нашёл корректную последовательность для перевода DevKit в Upload режим, а именно:</p> <ul> <li>Зажать <strong>и держать</strong> кнопку BOOT.</li> <li>Однократно нажать <strong>и отпустить</strong> кнопку EN.</li> <li>Отпустить кнопку BOOT.</li> </ul> <p>Если выполнить эту последовательность и загружать скетч из Arduino IDE, то программа успешно запустится. Блинк у меня заработал и душа спокойна, в запасе есть DevKit для ESP 32, можно поиграть и с Bluetooth, а не только WiFi.</p> <time datetime=2025-02-14T20:33:49+03:00>14 февраля 2025 г.</time> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 
+A fatal error occurred: Failed to connect to ESP32: No serial data received.</code></pre>
+<p>Никакие нажатия BOOT или EN на ESP 32 DevKit не помогали. Долго вертя в руках плату, посмотрел спеки, почитал несколько сайтов и только <a href="https://wiki.amperka.ru/products:esp32-wroom-wifi-devkit-v1">на Амперке</a> нашёл корректную последовательность для перевода DevKit в Upload режим, а именно:</p>
+<ul>
+<li>Зажать <strong>и держать</strong> кнопку BOOT.</li>
+<li>Однократно нажать <strong>и отпустить</strong> кнопку EN.</li>
+<li>Отпустить кнопку BOOT.</li>
+</ul>
+<p>Если выполнить эту последовательность и загружать скетч из Arduino IDE, то программа успешно запустится. Блинк у меня заработал и душа спокойна, в запасе есть DevKit для ESP 32, можно поиграть и с Bluetooth, а не только WiFi.</p>
+
+<time datetime="2025-02-14T20:33:49+03:00">14 февраля 2025 г.</time>
+
+
+</article>
+
+<address class="contacts">
+    Если Вы хотите обсудить содержание заметки, задать вопросы или
+    предложить изменения, то со мной можно связаться в
+    <a href="https://t.me/tsb99x">Telegram</a>
+</address>
+
+<footer>
+    <span class="copyright">© 2019-2026</span> |
+    <a rel="license"
+        href="https://creativecommons.org/licenses/by/4.0/deed.ru">
+        CC BY 4.0
+    </a>
+</footer>
+
+</body>
+</html>

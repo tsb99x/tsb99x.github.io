@@ -1,1 +1,72 @@
-<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2025-02-04T21:04:57+03:00><meta name=description content="Статья от Джоэла Спольски"><meta property=og:url content=https://tsb99x.github.io/notes/absolute-minimum-about-utf8.html><meta property=og:type content=article><meta property=og:title content="Что нужно знать про Unicode"><meta property=og:description content="Статья от Джоэла Спольски"><meta property=og:image content=https://tsb99x.github.io/res/avatar-512x512.png><title>Что нужно знать про Unicode</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.github.io/notes/absolute-minimum-about-utf8.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> </nav> <article> <header id=title-block-header> <h1 class=title>Что нужно знать про Unicode</h1> </header> <figure> <img src=res/absolute-minimum-about-utf8-preview.webp alt="Превью статьи на сайте Джоэла Спольски"> <figcaption aria-hidden=true>Превью статьи <a href=https://www.joelonsoftware.com/2003/10/08/the-absolute-minimum-every-software-developer-absolutely-positively-must-know-about-unicode-and-character-sets-no-excuses/ >на сайте Джоэла Спольски</a></figcaption> </figure> <p>Большая часть сложностей с кодировками ушла в прошлое. Сейчас у нас есть Unicode. Он признаётся как универсальный стандарт всеми современными ОС.</p> <p>Да, сейчас не нужно часто думать про то, какая кодовая страница будет использоваться, какие локали нужно совместить и т.д.</p> <p>Проблема только в том, что Unicode имеет несколько актуальных видов, которыми он может быть закодирован. И всё же, жизнь стала значительно проще.</p> <p>Тематику Unicode затронул Джоэл Спольски ещё в далёком 2003 году, но она актуальна и на сегодняшний день.</p> <p>Его статью можно часто встретить как стартовую рекомендацию, когда речь заходит о Unicode. И к этой рекомендации я могу только присоединиться.</p> <p>Статья не просто имеет место быть, но обязательна для ознакомления, если Вы работаете с текстом на уровне байт.</p> <time datetime=2025-02-04T21:04:57+03:00>4 февраля 2025 г.</time> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru" prefix="og: https://ogp.me/ns#">
+
+<head>
+
+<meta charset="utf-8">
+<meta name="generator" content="pandoc">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Антон Муравьев">
+<meta name="dcterms.date" content="2025-02-04T21:04:57+03:00">
+<meta name="description" content="Статья от Джоэла Спольски">
+<meta property="og:url" content="https://tsb99x.github.io/notes/absolute-minimum-about-utf8.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Что нужно знать про Unicode">
+<meta property="og:description" content="Статья от Джоэла Спольски">
+<meta property="og:image" content="https://tsb99x.github.io/res/avatar-512x512.png">
+<title>Что нужно знать про Unicode</title>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/normalize.css">
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/pygments.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="canonical" href="https://tsb99x.github.io/notes/absolute-minimum-about-utf8.html">
+
+</head>
+
+<body>
+
+<nav>
+    <a href="/">Обо мне</a>
+    <a href="/notes/">Заметки</a>
+</nav>
+
+<article>
+
+<header id="title-block-header">
+<h1 class="title">Что нужно знать про Unicode</h1>
+</header>
+
+<figure>
+<img src="res/absolute-minimum-about-utf8-preview.webp" alt="Превью статьи на сайте Джоэла Спольски" />
+<figcaption aria-hidden="true">Превью статьи <a href="https://www.joelonsoftware.com/2003/10/08/the-absolute-minimum-every-software-developer-absolutely-positively-must-know-about-unicode-and-character-sets-no-excuses/">на сайте Джоэла Спольски</a></figcaption>
+</figure>
+<p>Большая часть сложностей с кодировками ушла в прошлое. Сейчас у нас есть Unicode. Он признаётся как универсальный стандарт всеми современными ОС.</p>
+<p>Да, сейчас не нужно часто думать про то, какая кодовая страница будет использоваться, какие локали нужно совместить и т.д.</p>
+<p>Проблема только в том, что Unicode имеет несколько актуальных видов, которыми он может быть закодирован. И всё же, жизнь стала значительно проще.</p>
+<p>Тематику Unicode затронул Джоэл Спольски ещё в далёком 2003 году, но она актуальна и на сегодняшний день.</p>
+<p>Его статью можно часто встретить как стартовую рекомендацию, когда речь заходит о Unicode. И к этой рекомендации я могу только присоединиться.</p>
+<p>Статья не просто имеет место быть, но обязательна для ознакомления, если Вы работаете с текстом на уровне байт.</p>
+
+<time datetime="2025-02-04T21:04:57+03:00">4 февраля 2025 г.</time>
+
+
+</article>
+
+<address class="contacts">
+    Если Вы хотите обсудить содержание заметки, задать вопросы или
+    предложить изменения, то со мной можно связаться в
+    <a href="https://t.me/tsb99x">Telegram</a>
+</address>
+
+<footer>
+    <span class="copyright">© 2019-2026</span> |
+    <a rel="license"
+        href="https://creativecommons.org/licenses/by/4.0/deed.ru">
+        CC BY 4.0
+    </a>
+</footer>
+
+</body>
+</html>

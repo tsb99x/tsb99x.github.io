@@ -1,6 +1,94 @@
-<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2025-04-16T15:32:07+03:00><meta name=description content="Выкладываем старый геймплей"><meta property=og:url content=https://tsb99x.github.io/notes/car-mechanic-simulator-timelapse.html><meta property=og:type content=article><meta property=og:title content="Таймлапс Car Mechanic Simulator"><meta property=og:description content="Выкладываем старый геймплей"><meta property=og:image content=https://tsb99x.github.io/res/avatar-512x512.png><title>Таймлапс Car Mechanic Simulator</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.github.io/notes/car-mechanic-simulator-timelapse.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> </nav> <article> <header id=title-block-header> <h1 class=title>Таймлапс Car Mechanic Simulator</h1> </header> <iframe class=rutube-player src=https://rutube.ru/play/embed/5c23df115559f20b49ff9e60184f389c frameborder=0 allow="clipboard-write; autoplay" webkitallowfullscreen mozallowfullscreen allowfullscreen> </iframe> <p>После работы с видео для <a href=/notes/programming-esp32-through-nodemcu.html>прошлых заметок</a> и небольших роликов <a href=https://t.me/s/generic_typewriter>в Telegram</a>, я быстро понял, что ни мой хостинг, ни Telegram не выдержат видео в формате 1080p60. Объём файлов слишком большой. Хороший повод поискать альтернативы.</p> <p>У меня уже было тестовое видео: в 2017 году я записал таймлапс восстановления Maluch в Car Mechanic Simulator. Это видео и решил взять для эксперимента, чтобы проверить процесс загрузки видео на RuTube и сравнить его с YouTube.</p> <p>Особенно меня интересовало, насколько сильно компрессия повлияет на качество видео и насколько отличаются шаги загрузки видео.</p> <p>Сжатие оказалось не таким сильным, как я ожидал. Несмотря на строгие требования к видеофайлам, оба сервиса оказались довольно гибкими к небольшим отклонениям, например, в битрейте аудио, количестве последовательных B-frame и расположении ключевых кадров (I-frame).</p> <p>К слову, вот ссылки на требования к видео:</p> <ul> <li><a href=https://support.google.com/youtube/answer/1722171>Требования YouTube</a>.</li> <li><a href=https://rutube.ru/info/upload/ >Требования RuTube</a>.</li> </ul> <p>Шаги для добавления видео есть следующие:</p> <ul> <li>Загрузка видео.</li> <li>Подготовка SD-версии.</li> <li>Подготовка HD-версии.</li> <li>Ручная модерация (только RuTube).</li> </ul> <p>Основное отличие RuTube от YouTube – наличие шага ручной модерации. Видео на RuTube мне одобрили довольно быстро, в рамках 30 минут. На YouTube же только обработка версии HD-видео заняла несколько часов, там ждать завершения процесса добавления видео пришлось значительно дольше.</p> <p>Что порадовало – оба сервиса сейчас предоставляют возможность использовать лицензию CC-BY 4.0.</p> <p>Загрузка видео – только одна часть задачи. Вторая – встраивание видео на сайт в заметки. Плеер от RuTube даёт возможность получить html для embed-версии. Эта версия, к сожалению, содержит заданную ширину и высоту плеера на странице.</p> <p>Мне же требуется подгонка под ширину текста. Но если установить <code>width=100%</code>, то высота плеера не соответствует соотношению сторон 16:9. Ответ, как всегда, есть на <a href=https://stackoverflow.com/questions/25302836/responsive-video-iframes-keeping-aspect-ratio-with-only-css>StackOverflow</a>. Описываем стиль для <code>iframe</code> от RuTube в CSS:</p> <div class=highlight><pre><span></span><code><span class=nt>iframe</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span><span class=k>width</span><span class=p>:</span><span class=w> </span><span class=mi>100</span><span class=kt>%</span><span class=p>;</span>
-<span class=w>    </span><span class=k>height</span><span class=p>:</span><span class=w> </span><span class=kc>unset</span><span class=p>;</span>
-<span class=w>    </span><span class=k>aspect-ratio</span><span class=p>:</span><span class=w> </span><span class=mi>16</span><span class=o>/</span><span class=mi>9</span><span class=p>;</span>
-<span class=p>}</span>
-</code></pre></div> <p>Такой вариант уже работает, пусть и требует достаточно новых браузеров.</p> <p>Вот, опыт получен и теперь на сайте можно размещать видео в нормальном качестве. Заодно достал из закромов ещё один старый проект, тоже польза.</p> <p>Финальную загрузку можно найти на <a href=https://rutube.ru/video/5c23df115559f20b49ff9e60184f389c/ >RuTube</a> и <a href=https://youtu.be/jbrMkmSfNIQ>YouTube</a>.</p> <time datetime=2025-04-16T15:32:07+03:00>16 апреля 2025 г.</time> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru" prefix="og: https://ogp.me/ns#">
+
+<head>
+
+<meta charset="utf-8">
+<meta name="generator" content="pandoc">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Антон Муравьев">
+<meta name="dcterms.date" content="2025-04-16T15:32:07+03:00">
+<meta name="description" content="Выкладываем старый геймплей">
+<meta property="og:url" content="https://tsb99x.github.io/notes/car-mechanic-simulator-timelapse.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Таймлапс Car Mechanic Simulator">
+<meta property="og:description" content="Выкладываем старый геймплей">
+<meta property="og:image" content="https://tsb99x.github.io/res/avatar-512x512.png">
+<title>Таймлапс Car Mechanic Simulator</title>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/normalize.css">
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/pygments.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="canonical" href="https://tsb99x.github.io/notes/car-mechanic-simulator-timelapse.html">
+
+</head>
+
+<body>
+
+<nav>
+    <a href="/">Обо мне</a>
+    <a href="/notes/">Заметки</a>
+</nav>
+
+<article>
+
+<header id="title-block-header">
+<h1 class="title">Таймлапс Car Mechanic Simulator</h1>
+</header>
+
+<iframe class="rutube-player" src="https://rutube.ru/play/embed/5c23df115559f20b49ff9e60184f389c" frameBorder="0" allow="clipboard-write; autoplay" webkitAllowFullScreen mozallowfullscreen allowFullScreen>
+</iframe>
+<p>После работы с видео для <a href="/notes/programming-esp32-through-nodemcu.html">прошлых заметок</a> и небольших роликов <a href="https://t.me/s/generic_typewriter">в Telegram</a>, я быстро понял, что ни мой хостинг, ни Telegram не выдержат видео в формате 1080p60. Объём файлов слишком большой. Хороший повод поискать альтернативы.</p>
+<p>У меня уже было тестовое видео: в 2017 году я записал таймлапс восстановления Maluch в Car Mechanic Simulator. Это видео и решил взять для эксперимента, чтобы проверить процесс загрузки видео на RuTube и сравнить его с YouTube.</p>
+<p>Особенно меня интересовало, насколько сильно компрессия повлияет на качество видео и насколько отличаются шаги загрузки видео.</p>
+<p>Сжатие оказалось не таким сильным, как я ожидал. Несмотря на строгие требования к видеофайлам, оба сервиса оказались довольно гибкими к небольшим отклонениям, например, в битрейте аудио, количестве последовательных B-frame и расположении ключевых кадров (I-frame).</p>
+<p>К слову, вот ссылки на требования к видео:</p>
+<ul>
+<li><a href="https://support.google.com/youtube/answer/1722171">Требования YouTube</a>.</li>
+<li><a href="https://rutube.ru/info/upload/">Требования RuTube</a>.</li>
+</ul>
+<p>Шаги для добавления видео есть следующие:</p>
+<ul>
+<li>Загрузка видео.</li>
+<li>Подготовка SD-версии.</li>
+<li>Подготовка HD-версии.</li>
+<li>Ручная модерация (только RuTube).</li>
+</ul>
+<p>Основное отличие RuTube от YouTube – наличие шага ручной модерации. Видео на RuTube мне одобрили довольно быстро, в рамках 30 минут. На YouTube же только обработка версии HD-видео заняла несколько часов, там ждать завершения процесса добавления видео пришлось значительно дольше.</p>
+<p>Что порадовало – оба сервиса сейчас предоставляют возможность использовать лицензию CC-BY 4.0.</p>
+<p>Загрузка видео – только одна часть задачи. Вторая – встраивание видео на сайт в заметки. Плеер от RuTube даёт возможность получить html для embed-версии. Эта версия, к сожалению, содержит заданную ширину и высоту плеера на странице.</p>
+<p>Мне же требуется подгонка под ширину текста. Но если установить <code>width=100%</code>, то высота плеера не соответствует соотношению сторон 16:9. Ответ, как всегда, есть на <a href="https://stackoverflow.com/questions/25302836/responsive-video-iframes-keeping-aspect-ratio-with-only-css">StackOverflow</a>. Описываем стиль для <code>iframe</code> от RuTube в CSS:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">iframe</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">width</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="kt">%</span><span class="p">;</span>
+<span class="w">    </span><span class="k">height</span><span class="p">:</span><span class="w"> </span><span class="kc">unset</span><span class="p">;</span>
+<span class="w">    </span><span class="k">aspect-ratio</span><span class="p">:</span><span class="w"> </span><span class="mi">16</span><span class="o">/</span><span class="mi">9</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Такой вариант уже работает, пусть и требует достаточно новых браузеров.</p>
+<p>Вот, опыт получен и теперь на сайте можно размещать видео в нормальном качестве. Заодно достал из закромов ещё один старый проект, тоже польза.</p>
+<p>Финальную загрузку можно найти на <a href="https://rutube.ru/video/5c23df115559f20b49ff9e60184f389c/">RuTube</a> и <a href="https://youtu.be/jbrMkmSfNIQ">YouTube</a>.</p>
+
+<time datetime="2025-04-16T15:32:07+03:00">16 апреля 2025 г.</time>
+
+
+</article>
+
+<address class="contacts">
+    Если Вы хотите обсудить содержание заметки, задать вопросы или
+    предложить изменения, то со мной можно связаться в
+    <a href="https://t.me/tsb99x">Telegram</a>
+</address>
+
+<footer>
+    <span class="copyright">© 2019-2026</span> |
+    <a rel="license"
+        href="https://creativecommons.org/licenses/by/4.0/deed.ru">
+        CC BY 4.0
+    </a>
+</footer>
+
+</body>
+</html>

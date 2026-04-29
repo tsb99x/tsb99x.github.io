@@ -1,27 +1,121 @@
-<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2024-01-21T20:52:00+03:00><meta name=description content="Наглядные примеры использования"><meta property=og:url content=https://tsb99x.github.io/notes/usefulness-of-find.html><meta property=og:type content=article><meta property=og:title content="Полезность утилиты find"><meta property=og:description content="Наглядные примеры использования"><meta property=og:image content=https://tsb99x.github.io/res/avatar-512x512.png><title>Полезность утилиты find</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.github.io/notes/usefulness-of-find.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> </nav> <article> <header id=title-block-header> <h1 class=title>Полезность утилиты find</h1> </header> <p>Утилита <code>find</code> занимает одно из почётнейших мест в моём инструментарии. Это обусловлено её удобством и многофункциональностью.</p> <p>С помощью <code>find</code> можно найти файл с определённым именем:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>find<span class=w> </span>/tmp<span class=w> </span>-type<span class=w> </span>f<span class=w> </span>-name<span class=w> </span><span class=s1>&#39;note.txt&#39;</span>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru" prefix="og: https://ogp.me/ns#">
 
-<span class=go>/tmp/note.txt</span>
-</code></pre></div> <p>Найти набор файлов с одним из расширений, <code>-o</code> тут заменяет логическое <code>ИЛИ</code>:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>find<span class=w> </span>src/<span class=w> </span>-type<span class=w> </span>f<span class=w> </span>-name<span class=w> </span><span class=s1>&#39;*.png&#39;</span><span class=w> </span>-o<span class=w> </span>-name<span class=w> </span><span class=s1>&#39;*.svg&#39;</span>
+<head>
 
-<span class=go>src/logo.svg</span>
-<span class=go>src/logo.png</span>
-</code></pre></div> <p>Если покопаться в <code>man</code>, есть огромное количество и других полезных аргументов и операторов. Один из них, <code>-executable</code>, позволит найти исполняемые файлы:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>find<span class=w> </span>Downloads/<span class=w> </span>-type<span class=w> </span>f<span class=w> </span>-executable
+<meta charset="utf-8">
+<meta name="generator" content="pandoc">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Антон Муравьев">
+<meta name="dcterms.date" content="2024-01-21T20:52:00+03:00">
+<meta name="description" content="Наглядные примеры использования">
+<meta property="og:url" content="https://tsb99x.github.io/notes/usefulness-of-find.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Полезность утилиты find">
+<meta property="og:description" content="Наглядные примеры использования">
+<meta property="og:image" content="https://tsb99x.github.io/res/avatar-512x512.png">
+<title>Полезность утилиты find</title>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/normalize.css">
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/pygments.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="canonical" href="https://tsb99x.github.io/notes/usefulness-of-find.html">
 
-<span class=go>Downloads/grpcurl_1.8.9_linux_x86_64/grpcurl</span>
-</code></pre></div> <p>Из альтернатив будет удобнее всего <code>tree</code>, но, скорее, для небольшого количества файлов:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>tree<span class=w> </span>-p<span class=w> </span>grpcurl_1.8.9_linux_x86_64
+</head>
 
-<span class=go>[drwxr-xr-x]  grpcurl_1.8.9_linux_x86_64</span>
-<span class=go>├── [-rwxr-xr-x]  grpcurl</span>
-<span class=go>└── [-rw-r--r--]  LICENSE</span>
+<body>
 
-<span class=go>1 directory, 2 files</span>
-</code></pre></div> <p>Стандартные права в Linux на директорию установлены как <code>755</code> или <code>drwxr-xr-x</code>, а стандартные права на файлы как <code>644</code> или <code>-rw-r--r--</code>. В примере выше директория <code>grpcurl_1.8.9_linux_x86_64</code> и файл <code>LICENSE</code> имеют как раз стандартные права. А вот <code>grpcurl</code> – исполняемый файл (программа).</p> <p>А что, если нужно дать всем файлам в папке и её подпапках стандартные права вида <code>644 -rw-r--r--</code>? И даже тут <code>find</code> с опцией <code>-exec</code> отлично поможет. Это опция позволяет передавать путь найденного файла другим программам, например, <code>chmod</code>:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>find<span class=w> </span>dir_from_ntfs/<span class=w> </span>-type<span class=w> </span>f<span class=w> </span>-exec<span class=w> </span>chmod<span class=w> </span><span class=m>644</span><span class=w> </span><span class=o>{}</span><span class=w> </span><span class=se>\;</span>
-</code></pre></div> <p>Вот и всё, теперь все файлы будут иметь установки доступа по-умолчанию. Конечно, есть возможность использовать и рекурсивный вариант <code>chmod</code>. Но, без <code>find</code>, эта задача имеет <a href=https://stackoverflow.com/a/41331598/3014642>нетривиальное решение</a>, не очевидное для начинающих:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>chmod<span class=w> </span>-R<span class=w> </span><span class=nv>a</span><span class=o>=</span>r,u+w,a+X<span class=w> </span>dir_from_ntfs/
-</code></pre></div> <p>Исполняемые биты можно установить для отдельных файлов по мере необходимости. Но, если Вы очень хотите найти все <code>.sh</code> без прав исполнения, то <code>find</code> с оператором <code>!</code> Вам точно поможет. <code>!</code>, как можно догадаться, будет означать логическое <code>НЕ</code>:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>find<span class=w> </span>dir_from_ntfs/<span class=w> </span>-type<span class=w> </span>f<span class=w> </span>-name<span class=w> </span><span class=s1>&#39;*.sh&#39;</span><span class=w> </span>!<span class=w> </span>-executable
+<nav>
+    <a href="/">Обо мне</a>
+    <a href="/notes/">Заметки</a>
+</nav>
 
-<span class=go>dir_from_ntfs/my-super-cool-old-script.sh</span>
-</code></pre></div> <p>Как найти все файлы-дубликаты, когда есть сложная структура файлов и папок? А именно, сравнить надо не 2 файла и не 2 папки? Утилита <code>find</code> в сочетании с <code>md5sum</code>, <code>sort</code> и <code>uniq</code> отлично подойдёт:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>find<span class=w> </span>.<span class=w> </span>-type<span class=w> </span>f<span class=w> </span>-exec<span class=w> </span>md5sum<span class=w> </span><span class=o>{}</span><span class=w> </span><span class=se>\;</span><span class=w> </span><span class=p>|</span><span class=w> </span>sort<span class=w> </span><span class=p>|</span><span class=w> </span>uniq<span class=w> </span>-w<span class=w> </span><span class=m>32</span><span class=w> </span>-D
+<article>
 
-<span class=go>e1bf26622aee5135236c71126e318f2d  ./some_cool_article_on_ddd.pdf</span>
-<span class=go>e1bf26622aee5135236c71126e318f2d  ./Vernon_2011_1.pdf</span>
-</code></pre></div> <p>Находим контрольную сумму MD5 для каждого файла, сортируем результаты и находим дубликаты с помощью проверки первых 32 символов на уникальность. 32 символа – результат свёртки MD5, оставшаяся часть строки – путь к файлу, что позволяет просто идентифицировать копии и выбрать, что нужно удалить.</p> <time datetime=2024-01-21T20:52:00+03:00>21 января 2024 г.</time> <div class=changelog> <h4>Журнал изменений</h4> <p><b>30 января 2024 г.</b>: добавил примеры с <code>chmod</code> для установки прав по-умолчанию.</p> <p><b>1 февраля 2024 г.</b>: убрал излишнюю лирику, заменил пример <code>chmod</code> на более лаконичный.</p> <p><b>24 февраля 2024 г.</b>: заменил информацию про NTFS полезной командой поиска дубликатов.</p> </div> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 
+<header id="title-block-header">
+<h1 class="title">Полезность утилиты find</h1>
+</header>
+
+<p>Утилита <code>find</code> занимает одно из почётнейших мест в моём инструментарии. Это обусловлено её удобством и многофункциональностью.</p>
+<p>С помощью <code>find</code> можно найти файл с определённым именем:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>find<span class="w"> </span>/tmp<span class="w"> </span>-type<span class="w"> </span>f<span class="w"> </span>-name<span class="w"> </span><span class="s1">&#39;note.txt&#39;</span>
+
+<span class="go">/tmp/note.txt</span>
+</code></pre></div>
+
+<p>Найти набор файлов с одним из расширений, <code>-o</code> тут заменяет логическое <code>ИЛИ</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>find<span class="w"> </span>src/<span class="w"> </span>-type<span class="w"> </span>f<span class="w"> </span>-name<span class="w"> </span><span class="s1">&#39;*.png&#39;</span><span class="w"> </span>-o<span class="w"> </span>-name<span class="w"> </span><span class="s1">&#39;*.svg&#39;</span>
+
+<span class="go">src/logo.svg</span>
+<span class="go">src/logo.png</span>
+</code></pre></div>
+
+<p>Если покопаться в <code>man</code>, есть огромное количество и других полезных аргументов и операторов. Один из них, <code>-executable</code>, позволит найти исполняемые файлы:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>find<span class="w"> </span>Downloads/<span class="w"> </span>-type<span class="w"> </span>f<span class="w"> </span>-executable
+
+<span class="go">Downloads/grpcurl_1.8.9_linux_x86_64/grpcurl</span>
+</code></pre></div>
+
+<p>Из альтернатив будет удобнее всего <code>tree</code>, но, скорее, для небольшого количества файлов:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>tree<span class="w"> </span>-p<span class="w"> </span>grpcurl_1.8.9_linux_x86_64
+
+<span class="go">[drwxr-xr-x]  grpcurl_1.8.9_linux_x86_64</span>
+<span class="go">├── [-rwxr-xr-x]  grpcurl</span>
+<span class="go">└── [-rw-r--r--]  LICENSE</span>
+
+<span class="go">1 directory, 2 files</span>
+</code></pre></div>
+
+<p>Стандартные права в Linux на директорию установлены как <code>755</code> или <code>drwxr-xr-x</code>, а стандартные права на файлы как <code>644</code> или <code>-rw-r--r--</code>. В примере выше директория <code>grpcurl_1.8.9_linux_x86_64</code> и файл <code>LICENSE</code> имеют как раз стандартные права. А вот <code>grpcurl</code> – исполняемый файл (программа).</p>
+<p>А что, если нужно дать всем файлам в папке и её подпапках стандартные права вида <code>644 -rw-r--r--</code>? И даже тут <code>find</code> с опцией <code>-exec</code> отлично поможет. Это опция позволяет передавать путь найденного файла другим программам, например, <code>chmod</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>find<span class="w"> </span>dir_from_ntfs/<span class="w"> </span>-type<span class="w"> </span>f<span class="w"> </span>-exec<span class="w"> </span>chmod<span class="w"> </span><span class="m">644</span><span class="w"> </span><span class="o">{}</span><span class="w"> </span><span class="se">\;</span>
+</code></pre></div>
+
+<p>Вот и всё, теперь все файлы будут иметь установки доступа по-умолчанию. Конечно, есть возможность использовать и рекурсивный вариант <code>chmod</code>. Но, без <code>find</code>, эта задача имеет <a href="https://stackoverflow.com/a/41331598/3014642">нетривиальное решение</a>, не очевидное для начинающих:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>chmod<span class="w"> </span>-R<span class="w"> </span><span class="nv">a</span><span class="o">=</span>r,u+w,a+X<span class="w"> </span>dir_from_ntfs/
+</code></pre></div>
+
+<p>Исполняемые биты можно установить для отдельных файлов по мере необходимости. Но, если Вы очень хотите найти все <code>.sh</code> без прав исполнения, то <code>find</code> с оператором <code>!</code> Вам точно поможет. <code>!</code>, как можно догадаться, будет означать логическое <code>НЕ</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>find<span class="w"> </span>dir_from_ntfs/<span class="w"> </span>-type<span class="w"> </span>f<span class="w"> </span>-name<span class="w"> </span><span class="s1">&#39;*.sh&#39;</span><span class="w"> </span>!<span class="w"> </span>-executable
+
+<span class="go">dir_from_ntfs/my-super-cool-old-script.sh</span>
+</code></pre></div>
+
+<p>Как найти все файлы-дубликаты, когда есть сложная структура файлов и папок? А именно, сравнить надо не 2 файла и не 2 папки? Утилита <code>find</code> в сочетании с <code>md5sum</code>, <code>sort</code> и <code>uniq</code> отлично подойдёт:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>find<span class="w"> </span>.<span class="w"> </span>-type<span class="w"> </span>f<span class="w"> </span>-exec<span class="w"> </span>md5sum<span class="w"> </span><span class="o">{}</span><span class="w"> </span><span class="se">\;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span><span class="p">|</span><span class="w"> </span>uniq<span class="w"> </span>-w<span class="w"> </span><span class="m">32</span><span class="w"> </span>-D
+
+<span class="go">e1bf26622aee5135236c71126e318f2d  ./some_cool_article_on_ddd.pdf</span>
+<span class="go">e1bf26622aee5135236c71126e318f2d  ./Vernon_2011_1.pdf</span>
+</code></pre></div>
+
+<p>Находим контрольную сумму MD5 для каждого файла, сортируем результаты и находим дубликаты с помощью проверки первых 32 символов на уникальность. 32 символа – результат свёртки MD5, оставшаяся часть строки – путь к файлу, что позволяет просто идентифицировать копии и выбрать, что нужно удалить.</p>
+
+<time datetime="2024-01-21T20:52:00+03:00">21 января 2024 г.</time>
+
+<div class="changelog">
+<h4>Журнал изменений</h4>
+<p><b>30 января 2024 г.</b>: добавил примеры с <code>chmod</code> для установки прав по-умолчанию.</p>
+<p><b>1 февраля 2024 г.</b>: убрал излишнюю лирику, заменил пример <code>chmod</code> на более лаконичный.</p>
+<p><b>24 февраля 2024 г.</b>: заменил информацию про NTFS полезной командой поиска дубликатов.</p>
+</div>
+
+</article>
+
+<address class="contacts">
+    Если Вы хотите обсудить содержание заметки, задать вопросы или
+    предложить изменения, то со мной можно связаться в
+    <a href="https://t.me/tsb99x">Telegram</a>
+</address>
+
+<footer>
+    <span class="copyright">© 2019-2026</span> |
+    <a rel="license"
+        href="https://creativecommons.org/licenses/by/4.0/deed.ru">
+        CC BY 4.0
+    </a>
+</footer>
+
+</body>
+</html>

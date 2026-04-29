@@ -1,120 +1,236 @@
-<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2025-03-13T15:31:47+03:00><meta name=description content="Санта майнит AdventCoin"><meta property=og:url content=https://tsb99x.github.io/notes/advent-of-code-2015-day-04.html><meta property=og:type content=article><meta property=og:title content="Advent of Code 2015, день 4"><meta property=og:description content="Санта майнит AdventCoin"><meta property=og:image content=https://tsb99x.github.io/res/avatar-512x512.png><title>Advent of Code 2015, день 4</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.github.io/notes/advent-of-code-2015-day-04.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> </nav> <article> <header id=title-block-header> <h1 class=title>Advent of Code 2015, день 4</h1> </header> <figure> <img src=res/advent-of-code-2015-day-04.webp alt="Восемь звёзд в копилке"> <figcaption aria-hidden=true>Восемь звёзд в копилке</figcaption> </figure> <p>И следующая задача Advent of Code 2015. Сегодня решаем <a href=https://adventofcode.com/2015/day/4>задачу четвёртого дня</a>.</p> <h2 id=задача>Задача</h2> <p>Санте нужна помощь с майнингом AdventCoin, которые похожи на Bitсoin. Он хочет использовать AdventCoin как подарки для финансово дальновидных детей.</p> <p>Чтобы накопать AdventCoin, нужно найти MD5-свёртку. Она должна начинаться <strong>с пяти нулей</strong> в шестнадцатеричном виде. На вход в MD5 хэш-функцию поступает секретный ключ, за которым идёт значение в десятичной системе (суффикс). Для Санты нужно найти наименьшее положительное значение суффикса (без ведущих нулей: 1, 2, 3…), которое даст искомую свёртку.</p> <p>Примеры:</p> <ul> <li>Если секретный ключ это abcdef, то ответ 609043, т.к. MD5 свёртка для abcdef609043 начинается с пяти нулей (000001dbbfa…) и это наименьший суффикс.</li> <li>Если секретный ключ это pqrstuv, то наименьший суффикс, с которым можно получить начинающуюся на пять нулей MD5 свёртку – это 1048970. MD5 свёртка для pqrstuv1048970 выглядит как 000006136ef…</li> </ul> <h2 id=решение-на-си>Решение на Си</h2> <p>Эта шуточная задача имеет требования к наличию функции для MD5 свёртки, но в стандартной библиотеке Си нет подобных алгоритмов. Хоть <a href=https://www.ietf.org/rfc/rfc1321.txt>RFC 1321</a> уже содержит референсную имплементацию MD5 на Си, копировать её смысла нет. Поскольку фокус задачи на расчёте суффикса, мы воспользуемся готовыми библиотеками.</p> <p>Устанавливаем пакет <code>libssl-dev</code>:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>apt<span class=w> </span>install<span class=w> </span>libssl-dev
-</code></pre></div> <p>После установки описываем функцию <code>find_five_zeroes</code>.</p> <div class=highlight><pre><span></span><code><span class=cp>#include</span><span class=w> </span><span class=cpf>&lt;openssl/err.h&gt;</span>
-<span class=cp>#include</span><span class=w> </span><span class=cpf>&lt;openssl/evp.h&gt;</span>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru" prefix="og: https://ogp.me/ns#">
 
-<span class=cp>#define BUF_SIZE 64</span>
+<head>
 
-<span class=k>static</span><span class=w> </span><span class=kt>long</span><span class=w> </span><span class=nf>find_five_zeroes</span><span class=p>(</span><span class=k>const</span><span class=w> </span><span class=kt>char</span><span class=w> </span><span class=n>prefix</span><span class=p>[])</span>
-<span class=p>{</span>
-<span class=w>        </span><span class=kt>char</span><span class=w> </span><span class=n>buf</span><span class=p>[</span><span class=n>BUF_SIZE</span><span class=p>]</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=p>{</span><span class=mi>0</span><span class=p>};</span>
-<span class=w>        </span><span class=kt>unsigned</span><span class=w> </span><span class=kt>char</span><span class=w> </span><span class=n>md</span><span class=p>[</span><span class=n>EVP_MAX_MD_SIZE</span><span class=p>]</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=p>{</span><span class=mi>0</span><span class=p>};</span>
-<span class=w>        </span><span class=kt>unsigned</span><span class=w> </span><span class=kt>int</span><span class=w> </span><span class=n>md_size</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=mi>0</span><span class=p>;</span>
+<meta charset="utf-8">
+<meta name="generator" content="pandoc">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Антон Муравьев">
+<meta name="dcterms.date" content="2025-03-13T15:31:47+03:00">
+<meta name="description" content="Санта майнит AdventCoin">
+<meta property="og:url" content="https://tsb99x.github.io/notes/advent-of-code-2015-day-04.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Advent of Code 2015, день 4">
+<meta property="og:description" content="Санта майнит AdventCoin">
+<meta property="og:image" content="https://tsb99x.github.io/res/avatar-512x512.png">
+<title>Advent of Code 2015, день 4</title>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/normalize.css">
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/pygments.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="canonical" href="https://tsb99x.github.io/notes/advent-of-code-2015-day-04.html">
 
-<span class=w>        </span><span class=k>for</span><span class=w> </span><span class=p>(</span><span class=kt>long</span><span class=w> </span><span class=n>i</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=mi>1</span><span class=p>;</span><span class=w> </span><span class=n>i</span><span class=w> </span><span class=o>&lt;</span><span class=w> </span><span class=n>LONG_MAX</span><span class=p>;</span><span class=w> </span><span class=n>i</span><span class=o>++</span><span class=p>)</span><span class=w> </span><span class=p>{</span>
-<span class=w>                </span><span class=kt>int</span><span class=w> </span><span class=n>chs</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>snprintf</span><span class=p>(</span><span class=n>buf</span><span class=p>,</span><span class=w> </span><span class=k>sizeof</span><span class=p>(</span><span class=n>buf</span><span class=p>),</span><span class=w> </span><span class=s>&quot;%s%ld&quot;</span><span class=p>,</span><span class=w> </span><span class=n>prefix</span><span class=p>,</span><span class=w> </span><span class=n>i</span><span class=p>);</span>
-<span class=w>                </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>chs</span><span class=w> </span><span class=o>&lt;</span><span class=w> </span><span class=mi>0</span><span class=p>)</span><span class=w> </span><span class=p>{</span>
-<span class=w>                        </span><span class=n>perror</span><span class=p>(</span><span class=s>&quot;Failed to snprintf&quot;</span><span class=p>);</span>
-<span class=w>                        </span><span class=n>exit</span><span class=p>(</span><span class=n>EXIT_FAILURE</span><span class=p>);</span>
-<span class=w>                </span><span class=p>}</span>
-<span class=w>                </span><span class=k>if</span><span class=w> </span><span class=p>((</span><span class=kt>size_t</span><span class=p>)</span><span class=n>chs</span><span class=w> </span><span class=o>&gt;=</span><span class=w> </span><span class=k>sizeof</span><span class=p>(</span><span class=n>buf</span><span class=p>))</span><span class=w> </span><span class=p>{</span>
-<span class=w>                        </span><span class=p>(</span><span class=kt>void</span><span class=p>)</span><span class=n>fputs</span><span class=p>(</span><span class=s>&quot;Failed to snprintf: Buffer overflow</span><span class=se>\n</span><span class=s>&quot;</span><span class=p>,</span>
-<span class=w>                                    </span><span class=n>stderr</span><span class=p>);</span>
-<span class=w>                        </span><span class=n>exit</span><span class=p>(</span><span class=n>EXIT_FAILURE</span><span class=p>);</span>
-<span class=w>                </span><span class=p>}</span>
+</head>
 
-<span class=w>                </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=o>!</span><span class=n>EVP_Digest</span><span class=p>(</span><span class=n>buf</span><span class=p>,</span><span class=w> </span><span class=n>strlen</span><span class=p>(</span><span class=n>buf</span><span class=p>),</span><span class=w> </span><span class=n>md</span><span class=p>,</span><span class=w> </span><span class=o>&amp;</span><span class=n>md_size</span><span class=p>,</span><span class=w> </span><span class=n>EVP_md5</span><span class=p>(),</span>
-<span class=w>                                </span><span class=nb>NULL</span><span class=p>))</span><span class=w> </span><span class=p>{</span>
-<span class=w>                        </span><span class=n>ERR_print_errors_fp</span><span class=p>(</span><span class=n>stderr</span><span class=p>);</span>
-<span class=w>                        </span><span class=n>exit</span><span class=p>(</span><span class=n>EXIT_FAILURE</span><span class=p>);</span>
-<span class=w>                </span><span class=p>}</span>
+<body>
 
-<span class=w>                </span><span class=c1>// NOLINTNEXTLINE</span>
-<span class=w>                </span><span class=k>if</span><span class=w> </span><span class=p>((</span><span class=n>md</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=mh>0x00U</span><span class=p>)</span><span class=w> </span><span class=o>&amp;&amp;</span><span class=w> </span><span class=p>(</span><span class=n>md</span><span class=p>[</span><span class=mi>1</span><span class=p>]</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=mh>0x00U</span><span class=p>)</span><span class=w> </span><span class=o>&amp;&amp;</span><span class=w> </span><span class=p>(</span><span class=n>md</span><span class=p>[</span><span class=mi>2</span><span class=p>]</span><span class=w> </span><span class=o>&lt;</span><span class=w> </span><span class=mh>0x10U</span><span class=p>))</span><span class=w> </span><span class=p>{</span>
-<span class=w>                        </span><span class=k>return</span><span class=w> </span><span class=n>i</span><span class=p>;</span>
-<span class=w>                </span><span class=p>}</span>
-<span class=w>        </span><span class=p>}</span>
+<nav>
+    <a href="/">Обо мне</a>
+    <a href="/notes/">Заметки</a>
+</nav>
 
-<span class=w>        </span><span class=k>return</span><span class=w> </span><span class=mi>-1</span><span class=p>;</span>
-<span class=p>}</span>
-</code></pre></div> <p>Функция принимает <code>prefix</code>, добавляет к нему суффикс <code>i</code> с помощью <code>snprintf</code>, рассчитывает MD5 свёртку с помощью <code>EVP_Digest</code> и проверяет наличие нулей в начале свёртки. <code>EVP_Digest</code> – высокоуровневый интерфейс openSSL для свёрток.</p> <p>Две проверки для результата <code>snprintf</code> нужны из-за двух проблемных сценариев: если печать не удалась из-за ошибок IO (системных) и если <code>snprintf</code> должен был напечатать больше символов, чем размер <code>sizeof(buf)</code>. Оба сценария маловероятны в данном случае, но универсальное правило для Си – проверять всё, что можно.</p> <p>Поскольку свёртка представлена байтами, то первые пять цифр шестнадцатеричного значения будут находится в первых трёх байтах (<code>md[0]</code>, <code>md[1]</code> и <code>md[2]</code>). На каждый байт приходится две шестнадцатеричных цифры. Трюк тут только в работе с <code>md[2]</code>. Нужно проверять, что <code>md[2] &lt; 0x10U</code>. Это будет гарантировать, что первая цифра из байта <code>md[2]</code> – ноль.</p> <p>Отдельно отметим <code>0x00U</code>. <code>U</code> отвечает за приведение литерала к виду unsigned, т.е. беззнакового. Это нужно, т.к. в массиве <code>md</code> находятся unsigned char. Сравнивать знаковые и беззнаковые типы – моветон, в этом нет никакого смысла. Линтеры вроде Cppcheck с флагом <code>--addon=misra</code> будут ругаться на такой код.</p> <p>Один из важных элементов цикла <code>for</code> – использование <code>long</code> как типа для <code>i</code>. Может возникнуть желание использовать <code>int</code>, но надо вспомнить: Си гарантирует диапазон значений <code>int</code> только в рамках [−32767, +32767]. В приведённых примерах уже есть цифры, выходящие за границы этого диапазона (609043, 1048970). Поэтому необходимо расширить диапазон, использовав <code>long</code>.</p> <p>Также в функции есть комментарий <code>// NOLINTNEXTLINE</code>. Это указание <code>clang-tidy</code> для игнорирования следующей строки. Если его не дать, то <code>clang-tidy</code> будет ругаться на использование “магических значений”. Отключать перманентно такую проверку не стоит, т.к. в большинстве случаев она оправдана. Тут она требует выделить какое-то имя для <code>0x10</code> и придумать его достаточно тяжело.</p> <p>Перейдём к <code>main</code>, она отличается от предыдущих задач.</p> <div class=highlight><pre><span></span><code><span class=cp>#define MAX_ARG_LEN 32U</span>
+<article>
 
-<span class=kt>int</span><span class=w> </span><span class=nf>main</span><span class=p>(</span><span class=kt>int</span><span class=w> </span><span class=n>argc</span><span class=p>,</span><span class=w> </span><span class=kt>char</span><span class=w> </span><span class=o>*</span><span class=n>argv</span><span class=p>[])</span>
-<span class=p>{</span>
-<span class=w>        </span><span class=kt>size_t</span><span class=w> </span><span class=n>arg_len</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=mi>0</span><span class=p>;</span>
-<span class=w>        </span><span class=kt>long</span><span class=w> </span><span class=n>suffix</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=mi>0</span><span class=p>;</span>
+<header id="title-block-header">
+<h1 class="title">Advent of Code 2015, день 4</h1>
+</header>
 
-<span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>argc</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=mi>2</span><span class=p>)</span><span class=w> </span><span class=p>{</span>
-<span class=w>                </span><span class=p>(</span><span class=kt>void</span><span class=p>)</span><span class=n>fprintf</span><span class=p>(</span><span class=n>stderr</span><span class=p>,</span>
-<span class=w>                              </span><span class=s>&quot;Only one argument is accepted!</span><span class=se>\n</span><span class=s>&quot;</span>
-<span class=w>                              </span><span class=s>&quot;Use like this: %s prefix</span><span class=se>\n</span><span class=s>&quot;</span><span class=p>,</span>
-<span class=w>                              </span><span class=n>argv</span><span class=p>[</span><span class=mi>0</span><span class=p>]);</span>
-<span class=w>                </span><span class=k>return</span><span class=w> </span><span class=n>EXIT_FAILURE</span><span class=p>;</span>
-<span class=w>        </span><span class=p>}</span>
+<figure>
+<img src="res/advent-of-code-2015-day-04.webp" alt="Восемь звёзд в копилке" />
+<figcaption aria-hidden="true">Восемь звёзд в копилке</figcaption>
+</figure>
+<p>И следующая задача Advent of Code 2015. Сегодня решаем <a href="https://adventofcode.com/2015/day/4">задачу четвёртого дня</a>.</p>
+<h2 id="задача">Задача</h2>
+<p>Санте нужна помощь с майнингом AdventCoin, которые похожи на Bitсoin. Он хочет использовать AdventCoin как подарки для финансово дальновидных детей.</p>
+<p>Чтобы накопать AdventCoin, нужно найти MD5-свёртку. Она должна начинаться <strong>с пяти нулей</strong> в шестнадцатеричном виде. На вход в MD5 хэш-функцию поступает секретный ключ, за которым идёт значение в десятичной системе (суффикс). Для Санты нужно найти наименьшее положительное значение суффикса (без ведущих нулей: 1, 2, 3…), которое даст искомую свёртку.</p>
+<p>Примеры:</p>
+<ul>
+<li>Если секретный ключ это abcdef, то ответ 609043, т.к. MD5 свёртка для abcdef609043 начинается с пяти нулей (000001dbbfa…) и это наименьший суффикс.</li>
+<li>Если секретный ключ это pqrstuv, то наименьший суффикс, с которым можно получить начинающуюся на пять нулей MD5 свёртку – это 1048970. MD5 свёртка для pqrstuv1048970 выглядит как 000006136ef…</li>
+</ul>
+<h2 id="решение-на-си">Решение на Си</h2>
+<p>Эта шуточная задача имеет требования к наличию функции для MD5 свёртки, но в стандартной библиотеке Си нет подобных алгоритмов. Хоть <a href="https://www.ietf.org/rfc/rfc1321.txt">RFC 1321</a> уже содержит референсную имплементацию MD5 на Си, копировать её смысла нет. Поскольку фокус задачи на расчёте суффикса, мы воспользуемся готовыми библиотеками.</p>
+<p>Устанавливаем пакет <code>libssl-dev</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>libssl-dev
+</code></pre></div>
 
-<span class=w>        </span><span class=n>arg_len</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>strlen</span><span class=p>(</span><span class=n>argv</span><span class=p>[</span><span class=mi>1</span><span class=p>]);</span>
-<span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>arg_len</span><span class=w> </span><span class=o>&gt;</span><span class=w> </span><span class=n>MAX_ARG_LEN</span><span class=p>)</span><span class=w> </span><span class=p>{</span>
-<span class=w>                </span><span class=p>(</span><span class=kt>void</span><span class=p>)</span><span class=n>fprintf</span><span class=p>(</span><span class=n>stderr</span><span class=p>,</span>
-<span class=w>                              </span><span class=s>&quot;Secret prefix argument must be less than %d &quot;</span>
-<span class=w>                              </span><span class=s>&quot;chars of length, but was %zu</span><span class=se>\n</span><span class=s>&quot;</span><span class=p>,</span>
-<span class=w>                              </span><span class=n>MAX_ARG_LEN</span><span class=p>,</span>
-<span class=w>                              </span><span class=n>arg_len</span><span class=p>);</span>
-<span class=w>                </span><span class=k>return</span><span class=w> </span><span class=n>EXIT_FAILURE</span><span class=p>;</span>
-<span class=w>        </span><span class=p>}</span>
+<p>После установки описываем функцию <code>find_five_zeroes</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;openssl/err.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;openssl/evp.h&gt;</span>
 
-<span class=w>        </span><span class=n>suffix</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>find_five_zeroes</span><span class=p>(</span><span class=n>argv</span><span class=p>[</span><span class=mi>1</span><span class=p>]);</span>
-<span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>suffix</span><span class=w> </span><span class=o>&lt;</span><span class=w> </span><span class=mi>0</span><span class=p>)</span><span class=w> </span><span class=p>{</span>
-<span class=w>                </span><span class=p>(</span><span class=kt>void</span><span class=p>)</span><span class=n>fprintf</span><span class=p>(</span><span class=n>stderr</span><span class=p>,</span>
-<span class=w>                              </span><span class=s>&quot;Failed to find MD5 with 5 zeroes for %s</span><span class=se>\n</span><span class=s>&quot;</span><span class=p>,</span>
-<span class=w>                              </span><span class=n>argv</span><span class=p>[</span><span class=mi>1</span><span class=p>]);</span>
-<span class=w>                </span><span class=k>return</span><span class=w> </span><span class=n>EXIT_FAILURE</span><span class=p>;</span>
-<span class=w>        </span><span class=p>}</span>
-<span class=w>        </span><span class=p>(</span><span class=kt>void</span><span class=p>)</span><span class=n>printf</span><span class=p>(</span><span class=s>&quot;%ld</span><span class=se>\n</span><span class=s>&quot;</span><span class=p>,</span><span class=w> </span><span class=n>suffix</span><span class=p>);</span>
+<span class="cp">#define BUF_SIZE 64</span>
 
-<span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>EXIT_SUCCESS</span><span class=p>;</span>
-<span class=p>}</span>
-</code></pre></div> <p>Для этой задачи нет отдельного файла <code>input</code>, который можно подать на вход. Advent of Code сразу выдаёт небольшую строчку, которая будет префиксом секретного ключа. Нет смысла писать функцию для считывания STDIN.</p> <p>Вся логика сводится в таком случае к: проверке наличия аргумента командной строки, передаваемой в программу (<code>argc == 2</code>); количества символов у этого аргумента (<code>strlen(argv[1])</code>); передачи аргумента в функцию <code>find_five_zeroes</code>.</p> <p>Длина аргумента требует ограничения, т.к. внутри функции для поиска свёртки будет выделяться буфер известного размера <code>BUF_SIZE</code>. Можно использовать и динамическое выделения памяти, но это нецелесообразно в такой задаче.</p> <p>Запускаем тесты:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>./test_i.sh
+<span class="k">static</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="nf">find_five_zeroes</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="n">prefix</span><span class="p">[])</span>
+<span class="p">{</span>
+<span class="w">        </span><span class="kt">char</span><span class="w"> </span><span class="n">buf</span><span class="p">[</span><span class="n">BUF_SIZE</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+<span class="w">        </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="n">md</span><span class="p">[</span><span class="n">EVP_MAX_MD_SIZE</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+<span class="w">        </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">md_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
-<span class=go>Checking part_i.c ...</span>
-<span class=go>Test abcdef =&gt; 609043 PASSED</span>
-<span class=go>Test pqrstuv =&gt; 1048970 PASSED</span>
-<span class=go>All tests are completed and passed!</span>
-<span class=go>Answer for input: 117946</span>
-</code></pre></div> <p>Advent of Code доволен, переходим к открывшейся части задачи.</p> <h2 id=вторая-часть>Вторая часть</h2> <p>Теперь найдите MD5 свёртку, начинающуюся <strong>с шести нулей</strong>.</p> <h2 id=изменения-в-исходном-решении>Изменения в исходном решении</h2> <p>Изменения в постановке тривиальны. Единственная вещь, которая должна измениться – проверка шестнадцатеричных цифр в начале свёртки, более ничего не меняется.</p> <p>Посмотрим на <code>diff -u part_{i,ii}.c</code>:</p> <div class=highlight><pre><span></span><code><span class=gd>--- part_i.c    2025-03-13 14:11:34.682639162 +0300</span>
-<span class=gi>+++ part_ii.c   2025-03-13 14:12:57.239963465 +0300</span>
-<span class=gu>@@ -8,7 +8,7 @@</span>
-<span class=w> </span>#define MAX_ARG_LEN 32U
-<span class=w> </span>#define BUF_SIZE 64
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">long</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">LONG_MAX</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="kt">int</span><span class="w"> </span><span class="n">chs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">snprintf</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">buf</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;%s%ld&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">prefix</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="p">);</span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">chs</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                        </span><span class="n">perror</span><span class="p">(</span><span class="s">&quot;Failed to snprintf&quot;</span><span class="p">);</span>
+<span class="w">                        </span><span class="n">exit</span><span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">);</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="kt">size_t</span><span class="p">)</span><span class="n">chs</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">buf</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                        </span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">fputs</span><span class="p">(</span><span class="s">&quot;Failed to snprintf: Buffer overflow</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span>
+<span class="w">                                    </span><span class="n">stderr</span><span class="p">);</span>
+<span class="w">                        </span><span class="n">exit</span><span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">);</span>
+<span class="w">                </span><span class="p">}</span>
 
-<span class=gd>-static long find_five_zeroes(const char prefix[])</span>
-<span class=gi>+static long find_six_zeroes(const char prefix[])</span>
-<span class=w> </span>{
-<span class=w> </span>        char buf[BUF_SIZE] = {0};
-<span class=w> </span>        unsigned char md[EVP_MAX_MD_SIZE] = {0};
-<span class=gu>@@ -32,8 +32,7 @@</span>
-<span class=w> </span>                        exit(EXIT_FAILURE);
-<span class=w> </span>                }
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">EVP_Digest</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span><span class="w"> </span><span class="n">strlen</span><span class="p">(</span><span class="n">buf</span><span class="p">),</span><span class="w"> </span><span class="n">md</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">md_size</span><span class="p">,</span><span class="w"> </span><span class="n">EVP_md5</span><span class="p">(),</span>
+<span class="w">                                </span><span class="nb">NULL</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                        </span><span class="n">ERR_print_errors_fp</span><span class="p">(</span><span class="n">stderr</span><span class="p">);</span>
+<span class="w">                        </span><span class="n">exit</span><span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">);</span>
+<span class="w">                </span><span class="p">}</span>
 
-<span class=gd>-                // NOLINTNEXTLINE</span>
-<span class=gd>-                if ((md[0] == 0x00U) &amp;&amp; (md[1] == 0x00U) &amp;&amp; (md[2] &lt; 0x10U)) {</span>
-<span class=gi>+                if ((md[0] == 0x00U) &amp;&amp; (md[1] == 0x00U) &amp;&amp; (md[2] == 0x00U)) {</span>
-<span class=w> </span>                        return i;
-<span class=w> </span>                }
-<span class=w> </span>        }
-<span class=gu>@@ -63,10 +62,10 @@</span>
-<span class=w> </span>                return EXIT_FAILURE;
-<span class=w> </span>        }
+<span class="w">                </span><span class="c1">// NOLINTNEXTLINE</span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">md</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">0x00U</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">md</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">0x00U</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">md</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mh">0x10U</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                        </span><span class="k">return</span><span class="w"> </span><span class="n">i</span><span class="p">;</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
 
-<span class=gd>-        suffix = find_five_zeroes(argv[1]);</span>
-<span class=gi>+        suffix = find_six_zeroes(argv[1]);</span>
-<span class=w> </span>        if (suffix &lt; 0) {
-<span class=w> </span>                (void)fprintf(stderr,
-<span class=gd>-                              &quot;Failed to find MD5 with 5 zeroes for %s\n&quot;,</span>
-<span class=gi>+                              &quot;Failed to find MD5 with 6 zeroes for %s\n&quot;,</span>
-<span class=w> </span>                              argv[1]);
-<span class=w> </span>                return EXIT_FAILURE;
-<span class=w> </span>        }
-</code></pre></div> <p>Была переименована функция <code>find_five_zeroes</code> в <code>find_six_zeroes</code>, а также изменена проверка <code>md[2]</code>. Теперь сравниваем равенство с <code>0x00</code>. Это решение даже чуть проще предыдущего.</p> <p>Снова запускаем тесты, но для второй части:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>./test_ii.sh
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
 
-<span class=go>Checking part_ii.c ...</span>
-<span class=go>Answer for input: 3938038</span>
-</code></pre></div> <p>Это то, что Advent of Code и ожидал. Задача решена.</p> <p>Решения задачек можно найти в <a href=https://github.com/tsb99x/solutions>репозитории</a> на GitHub.</p> <time datetime=2025-03-13T15:31:47+03:00>13 марта 2025 г.</time> <div class=changelog> <h4>Журнал изменений</h4> <p><b>19 марта 2025 г.</b>: добавил проверку переполнения буфера для <code>snprintf</code>.</p> <p><b>2 января 2026 г.</b>: перенёс исходный код на GitHub.</p> </div> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 
+<p>Функция принимает <code>prefix</code>, добавляет к нему суффикс <code>i</code> с помощью <code>snprintf</code>, рассчитывает MD5 свёртку с помощью <code>EVP_Digest</code> и проверяет наличие нулей в начале свёртки. <code>EVP_Digest</code> – высокоуровневый интерфейс openSSL для свёрток.</p>
+<p>Две проверки для результата <code>snprintf</code> нужны из-за двух проблемных сценариев: если печать не удалась из-за ошибок IO (системных) и если <code>snprintf</code> должен был напечатать больше символов, чем размер <code>sizeof(buf)</code>. Оба сценария маловероятны в данном случае, но универсальное правило для Си – проверять всё, что можно.</p>
+<p>Поскольку свёртка представлена байтами, то первые пять цифр шестнадцатеричного значения будут находится в первых трёх байтах (<code>md[0]</code>, <code>md[1]</code> и <code>md[2]</code>). На каждый байт приходится две шестнадцатеричных цифры. Трюк тут только в работе с <code>md[2]</code>. Нужно проверять, что <code>md[2] &lt; 0x10U</code>. Это будет гарантировать, что первая цифра из байта <code>md[2]</code> – ноль.</p>
+<p>Отдельно отметим <code>0x00U</code>. <code>U</code> отвечает за приведение литерала к виду unsigned, т.е. беззнакового. Это нужно, т.к. в массиве <code>md</code> находятся unsigned char. Сравнивать знаковые и беззнаковые типы – моветон, в этом нет никакого смысла. Линтеры вроде Cppcheck с флагом <code>--addon=misra</code> будут ругаться на такой код.</p>
+<p>Один из важных элементов цикла <code>for</code> – использование <code>long</code> как типа для <code>i</code>. Может возникнуть желание использовать <code>int</code>, но надо вспомнить: Си гарантирует диапазон значений <code>int</code> только в рамках [−32767, +32767]. В приведённых примерах уже есть цифры, выходящие за границы этого диапазона (609043, 1048970). Поэтому необходимо расширить диапазон, использовав <code>long</code>.</p>
+<p>Также в функции есть комментарий <code>// NOLINTNEXTLINE</code>. Это указание <code>clang-tidy</code> для игнорирования следующей строки. Если его не дать, то <code>clang-tidy</code> будет ругаться на использование “магических значений”. Отключать перманентно такую проверку не стоит, т.к. в большинстве случаев она оправдана. Тут она требует выделить какое-то имя для <code>0x10</code> и придумать его достаточно тяжело.</p>
+<p>Перейдём к <code>main</code>, она отличается от предыдущих задач.</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#define MAX_ARG_LEN 32U</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">argv</span><span class="p">[])</span>
+<span class="p">{</span>
+<span class="w">        </span><span class="kt">size_t</span><span class="w"> </span><span class="n">arg_len</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="kt">long</span><span class="w"> </span><span class="n">suffix</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">argc</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span>
+<span class="w">                              </span><span class="s">&quot;Only one argument is accepted!</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">                              </span><span class="s">&quot;Use like this: %s prefix</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span>
+<span class="w">                              </span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="n">EXIT_FAILURE</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="n">arg_len</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">strlen</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">arg_len</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">MAX_ARG_LEN</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span>
+<span class="w">                              </span><span class="s">&quot;Secret prefix argument must be less than %d &quot;</span>
+<span class="w">                              </span><span class="s">&quot;chars of length, but was %zu</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span>
+<span class="w">                              </span><span class="n">MAX_ARG_LEN</span><span class="p">,</span>
+<span class="w">                              </span><span class="n">arg_len</span><span class="p">);</span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="n">EXIT_FAILURE</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="n">suffix</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">find_five_zeroes</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">suffix</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span>
+<span class="w">                              </span><span class="s">&quot;Failed to find MD5 with 5 zeroes for %s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span>
+<span class="w">                              </span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="n">EXIT_FAILURE</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;%ld</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">suffix</span><span class="p">);</span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">EXIT_SUCCESS</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Для этой задачи нет отдельного файла <code>input</code>, который можно подать на вход. Advent of Code сразу выдаёт небольшую строчку, которая будет префиксом секретного ключа. Нет смысла писать функцию для считывания STDIN.</p>
+<p>Вся логика сводится в таком случае к: проверке наличия аргумента командной строки, передаваемой в программу (<code>argc == 2</code>); количества символов у этого аргумента (<code>strlen(argv[1])</code>); передачи аргумента в функцию <code>find_five_zeroes</code>.</p>
+<p>Длина аргумента требует ограничения, т.к. внутри функции для поиска свёртки будет выделяться буфер известного размера <code>BUF_SIZE</code>. Можно использовать и динамическое выделения памяти, но это нецелесообразно в такой задаче.</p>
+<p>Запускаем тесты:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>./test_i.sh
+
+<span class="go">Checking part_i.c ...</span>
+<span class="go">Test abcdef =&gt; 609043 PASSED</span>
+<span class="go">Test pqrstuv =&gt; 1048970 PASSED</span>
+<span class="go">All tests are completed and passed!</span>
+<span class="go">Answer for input: 117946</span>
+</code></pre></div>
+
+<p>Advent of Code доволен, переходим к открывшейся части задачи.</p>
+<h2 id="вторая-часть">Вторая часть</h2>
+<p>Теперь найдите MD5 свёртку, начинающуюся <strong>с шести нулей</strong>.</p>
+<h2 id="изменения-в-исходном-решении">Изменения в исходном решении</h2>
+<p>Изменения в постановке тривиальны. Единственная вещь, которая должна измениться – проверка шестнадцатеричных цифр в начале свёртки, более ничего не меняется.</p>
+<p>Посмотрим на <code>diff -u part_{i,ii}.c</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="gd">--- part_i.c    2025-03-13 14:11:34.682639162 +0300</span>
+<span class="gi">+++ part_ii.c   2025-03-13 14:12:57.239963465 +0300</span>
+<span class="gu">@@ -8,7 +8,7 @@</span>
+<span class="w"> </span>#define MAX_ARG_LEN 32U
+<span class="w"> </span>#define BUF_SIZE 64
+
+<span class="gd">-static long find_five_zeroes(const char prefix[])</span>
+<span class="gi">+static long find_six_zeroes(const char prefix[])</span>
+<span class="w"> </span>{
+<span class="w"> </span>        char buf[BUF_SIZE] = {0};
+<span class="w"> </span>        unsigned char md[EVP_MAX_MD_SIZE] = {0};
+<span class="gu">@@ -32,8 +32,7 @@</span>
+<span class="w"> </span>                        exit(EXIT_FAILURE);
+<span class="w"> </span>                }
+
+<span class="gd">-                // NOLINTNEXTLINE</span>
+<span class="gd">-                if ((md[0] == 0x00U) &amp;&amp; (md[1] == 0x00U) &amp;&amp; (md[2] &lt; 0x10U)) {</span>
+<span class="gi">+                if ((md[0] == 0x00U) &amp;&amp; (md[1] == 0x00U) &amp;&amp; (md[2] == 0x00U)) {</span>
+<span class="w"> </span>                        return i;
+<span class="w"> </span>                }
+<span class="w"> </span>        }
+<span class="gu">@@ -63,10 +62,10 @@</span>
+<span class="w"> </span>                return EXIT_FAILURE;
+<span class="w"> </span>        }
+
+<span class="gd">-        suffix = find_five_zeroes(argv[1]);</span>
+<span class="gi">+        suffix = find_six_zeroes(argv[1]);</span>
+<span class="w"> </span>        if (suffix &lt; 0) {
+<span class="w"> </span>                (void)fprintf(stderr,
+<span class="gd">-                              &quot;Failed to find MD5 with 5 zeroes for %s\n&quot;,</span>
+<span class="gi">+                              &quot;Failed to find MD5 with 6 zeroes for %s\n&quot;,</span>
+<span class="w"> </span>                              argv[1]);
+<span class="w"> </span>                return EXIT_FAILURE;
+<span class="w"> </span>        }
+</code></pre></div>
+
+<p>Была переименована функция <code>find_five_zeroes</code> в <code>find_six_zeroes</code>, а также изменена проверка <code>md[2]</code>. Теперь сравниваем равенство с <code>0x00</code>. Это решение даже чуть проще предыдущего.</p>
+<p>Снова запускаем тесты, но для второй части:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>./test_ii.sh
+
+<span class="go">Checking part_ii.c ...</span>
+<span class="go">Answer for input: 3938038</span>
+</code></pre></div>
+
+<p>Это то, что Advent of Code и ожидал. Задача решена.</p>
+<p>Решения задачек можно найти в <a href="https://github.com/tsb99x/solutions">репозитории</a> на GitHub.</p>
+
+<time datetime="2025-03-13T15:31:47+03:00">13 марта 2025 г.</time>
+
+<div class="changelog">
+<h4>Журнал изменений</h4>
+<p><b>19 марта 2025 г.</b>: добавил проверку переполнения буфера для <code>snprintf</code>.</p>
+<p><b>2 января 2026 г.</b>: перенёс исходный код на GitHub.</p>
+</div>
+
+</article>
+
+<address class="contacts">
+    Если Вы хотите обсудить содержание заметки, задать вопросы или
+    предложить изменения, то со мной можно связаться в
+    <a href="https://t.me/tsb99x">Telegram</a>
+</address>
+
+<footer>
+    <span class="copyright">© 2019-2026</span> |
+    <a rel="license"
+        href="https://creativecommons.org/licenses/by/4.0/deed.ru">
+        CC BY 4.0
+    </a>
+</footer>
+
+</body>
+</html>

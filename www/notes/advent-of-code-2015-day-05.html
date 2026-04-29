@@ -1,154 +1,296 @@
-<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2025-03-29T16:22:23+03:00><meta name=description content="Санта фильтрует слова"><meta property=og:url content=https://tsb99x.github.io/notes/advent-of-code-2015-day-05.html><meta property=og:type content=article><meta property=og:title content="Advent of Code 2015, день 5"><meta property=og:description content="Санта фильтрует слова"><meta property=og:image content=https://tsb99x.github.io/res/avatar-512x512.png><title>Advent of Code 2015, день 5</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.github.io/notes/advent-of-code-2015-day-05.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> </nav> <article> <header id=title-block-header> <h1 class=title>Advent of Code 2015, день 5</h1> </header> <figure> <img src=res/advent-of-code-2015-day-05.webp alt="Десяток звёзд есть"> <figcaption aria-hidden=true>Десяток звёзд есть</figcaption> </figure> <p>Очередная задача Advent of Code 2015. Сегодня решаем <a href=https://adventofcode.com/2015/day/5>задачу пятого дня</a>.</p> <h2 id=день-5-разве-у-него-нет-эльфов-стажёров-для-этого>День 5: Разве у него нет эльфов-стажёров для этого?</h2> <p>Санта нуждается в помощи, чтобы определить, какие строки в его текстовом файле хорошие или плохие.</p> <p><strong>Хорошей</strong> строкой считается строка, удовлетворяющая всем следующим условиям:</p> <ul> <li>Она содержит как минимум три гласные (только a, e, i, o, u), например, aei, xazegov или aeiouaeiouaeiou.</li> <li>Она содержит как минимум одну букву, которая встречается дважды подряд, например, xx, abcdde (dd) или aabbccdd (aa, bb, cc или dd).</li> <li>Она <strong>не</strong> содержит строки ab, cd, pq или xy, даже если они являются частью одного из других требований.</li> </ul> <p>Например:</p> <ul> <li>ugknbfddgicrmopn – хорошая, потому что в ней есть как минимум три гласные (u…i…o…), двойная буква (…dd…) и отсутствуют запрещенные подстроки.</li> <li>aaa – хорошая, потому что в ней есть как минимум три гласные и двойная буква, даже если буквы, используемые разными правилами, перекрываются.</li> <li>jchzalrnumimnmhp – плохая, потому что в ней нет двойной буквы.</li> <li>haegwjzuvuyypxyu – плохая, потому что она содержит строку xy.</li> <li>dvszwmarrgswjxmb – плохая, потому что она содержит только одну гласную.</li> </ul> <p>Сколько всего строк – хорошие?</p> <h2 id=решение-на-си>Решение на Си</h2> <p>Задача требует работы со строками, отдельными символами и подстроками. Для Си работа со строками подразумевает, высокоуровнево, выбор: работать со строками как с указателями или как с массивами. Моё предпочтение обычно падает на работу с массивами. По-моему, так логика выглядит чуть понятнее, но это дело вкуса.</p> <p>Одно из первых условий касается подсчёта гласных. Это значит, что нам надо пройтись по всем символам и посмотреть, попадает ли конкретный символ в набор “aeiou”. Функция <code>strchr</code> поможет с этим.</p> <p>Поскольку в будущих функциях нужно будет работать с той же строкой, то <code>len</code>, длину строки, я вынесу на уровень выше. Вот первая функция:</p> <div class=highlight><pre><span></span><code><span class=k>static</span><span class=w> </span><span class=kt>int</span><span class=w> </span><span class=nf>count_vowels</span><span class=p>(</span><span class=kt>size_t</span><span class=w> </span><span class=n>len</span><span class=p>,</span><span class=w> </span><span class=k>const</span><span class=w> </span><span class=kt>char</span><span class=w> </span><span class=n>sz</span><span class=p>[])</span>
-<span class=p>{</span>
-<span class=w>        </span><span class=kt>int</span><span class=w> </span><span class=n>vowels</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=mi>0</span><span class=p>;</span>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru" prefix="og: https://ogp.me/ns#">
 
-<span class=w>        </span><span class=k>for</span><span class=w> </span><span class=p>(</span><span class=kt>size_t</span><span class=w> </span><span class=n>i</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=mi>0</span><span class=p>;</span><span class=w> </span><span class=n>i</span><span class=w> </span><span class=o>&lt;</span><span class=w> </span><span class=n>len</span><span class=p>;</span><span class=w> </span><span class=n>i</span><span class=o>++</span><span class=p>)</span><span class=w> </span><span class=p>{</span>
-<span class=w>                </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>strchr</span><span class=p>(</span><span class=s>&quot;aeiou&quot;</span><span class=p>,</span><span class=w> </span><span class=n>sz</span><span class=p>[</span><span class=n>i</span><span class=p>])</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=nb>NULL</span><span class=p>)</span><span class=w> </span><span class=p>{</span>
-<span class=w>                        </span><span class=n>vowels</span><span class=o>++</span><span class=p>;</span>
-<span class=w>                </span><span class=p>}</span>
-<span class=w>        </span><span class=p>}</span>
+<head>
 
-<span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>vowels</span><span class=p>;</span>
-<span class=p>}</span>
-</code></pre></div> <p>Следующая проверка касается двух одинаковых букв подряд. Нужно пробежать по строке и сравнивать символ с предыдущим. При использовании строки как массива выглядит довольно просто:</p> <div class=highlight><pre><span></span><code><span class=k>static</span><span class=w> </span><span class=kt>bool</span><span class=w> </span><span class=nf>has_double_letter</span><span class=p>(</span><span class=kt>size_t</span><span class=w> </span><span class=n>len</span><span class=p>,</span><span class=w> </span><span class=k>const</span><span class=w> </span><span class=kt>char</span><span class=w> </span><span class=n>sz</span><span class=p>[])</span>
-<span class=p>{</span>
-<span class=w>        </span><span class=k>for</span><span class=w> </span><span class=p>(</span><span class=kt>size_t</span><span class=w> </span><span class=n>i</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=mi>1</span><span class=p>;</span><span class=w> </span><span class=n>i</span><span class=w> </span><span class=o>&lt;</span><span class=w> </span><span class=n>len</span><span class=p>;</span><span class=w> </span><span class=n>i</span><span class=o>++</span><span class=p>)</span><span class=w> </span><span class=p>{</span>
-<span class=w>                </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>sz</span><span class=p>[</span><span class=n>i</span><span class=p>]</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=n>sz</span><span class=p>[</span><span class=n>i</span><span class=w> </span><span class=o>-</span><span class=w> </span><span class=mi>1U</span><span class=p>])</span><span class=w> </span><span class=p>{</span>
-<span class=w>                        </span><span class=k>return</span><span class=w> </span><span class=nb>true</span><span class=p>;</span>
-<span class=w>                </span><span class=p>}</span>
-<span class=w>        </span><span class=p>}</span>
+<meta charset="utf-8">
+<meta name="generator" content="pandoc">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Антон Муравьев">
+<meta name="dcterms.date" content="2025-03-29T16:22:23+03:00">
+<meta name="description" content="Санта фильтрует слова">
+<meta property="og:url" content="https://tsb99x.github.io/notes/advent-of-code-2015-day-05.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Advent of Code 2015, день 5">
+<meta property="og:description" content="Санта фильтрует слова">
+<meta property="og:image" content="https://tsb99x.github.io/res/avatar-512x512.png">
+<title>Advent of Code 2015, день 5</title>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/normalize.css">
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/pygments.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="canonical" href="https://tsb99x.github.io/notes/advent-of-code-2015-day-05.html">
 
-<span class=w>        </span><span class=k>return</span><span class=w> </span><span class=nb>false</span><span class=p>;</span>
-<span class=p>}</span>
-</code></pre></div> <p>Третья часть про отсутствие подстрок решается с помощью цепочки <code>strstr</code>, связанной с помощью ИЛИ <code>||</code>. Есть более производительные варианты, но это достаточно простая задача и смысла с ней возиться нет.</p> <div class=highlight><pre><span></span><code><span class=k>static</span><span class=w> </span><span class=kt>bool</span><span class=w> </span><span class=nf>has_disallowed_substrings</span><span class=p>(</span><span class=k>const</span><span class=w> </span><span class=kt>char</span><span class=w> </span><span class=o>*</span><span class=n>sz</span><span class=p>)</span>
-<span class=p>{</span>
-<span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>strstr</span><span class=p>(</span><span class=n>sz</span><span class=p>,</span><span class=w> </span><span class=s>&quot;ab&quot;</span><span class=p>)</span><span class=w> </span><span class=o>||</span><span class=w> </span><span class=n>strstr</span><span class=p>(</span><span class=n>sz</span><span class=p>,</span><span class=w> </span><span class=s>&quot;cd&quot;</span><span class=p>)</span><span class=w> </span><span class=o>||</span><span class=w> </span><span class=n>strstr</span><span class=p>(</span><span class=n>sz</span><span class=p>,</span><span class=w> </span><span class=s>&quot;pq&quot;</span><span class=p>)</span>
-<span class=w>               </span><span class=o>||</span><span class=w> </span><span class=n>strstr</span><span class=p>(</span><span class=n>sz</span><span class=p>,</span><span class=w> </span><span class=s>&quot;xy&quot;</span><span class=p>);</span>
-<span class=p>}</span>
-</code></pre></div> <p>Все проверки удобно скомбинировать в функцию <code>is_string_nice</code>:</p> <div class=highlight><pre><span></span><code><span class=k>static</span><span class=w> </span><span class=kt>bool</span><span class=w> </span><span class=nf>is_string_nice</span><span class=p>(</span><span class=k>const</span><span class=w> </span><span class=kt>char</span><span class=w> </span><span class=o>*</span><span class=n>sz</span><span class=p>)</span>
-<span class=p>{</span>
-<span class=w>        </span><span class=kt>size_t</span><span class=w> </span><span class=n>len</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>strlen</span><span class=p>(</span><span class=n>sz</span><span class=p>);</span>
-<span class=w>        </span><span class=k>return</span><span class=w> </span><span class=p>(</span><span class=n>count_vowels</span><span class=p>(</span><span class=n>len</span><span class=p>,</span><span class=w> </span><span class=n>sz</span><span class=p>)</span><span class=w> </span><span class=o>&gt;=</span><span class=w> </span><span class=mi>3</span><span class=p>)</span><span class=w> </span><span class=o>&amp;&amp;</span><span class=w> </span><span class=n>has_double_letter</span><span class=p>(</span><span class=n>len</span><span class=p>,</span><span class=w> </span><span class=n>sz</span><span class=p>)</span>
-<span class=w>               </span><span class=o>&amp;&amp;</span><span class=w> </span><span class=o>!</span><span class=n>has_disallowed_substrings</span><span class=p>(</span><span class=n>sz</span><span class=p>);</span>
-<span class=p>}</span>
-</code></pre></div> <p>Advent of Code опять выдал файл <code>input</code> как набор строк, по которым нужно пробежаться. На этот раз используем функцию <code>fgets</code>, чтобы полностью поместить строку в буфер <code>buf</code>.</p> <p>Функция <code>fgets</code> имеет одну особенность – она оставляет <code>\n</code> как часть полученной строки. Кроме того, она никак не подсказывает, была ли вычитана полная строка или нет.</p> <p>Супротив этих двух проблем помогает функция <code>strcspn</code>. Используя функцию в виде <code>strcspn(buf, "\n")</code>, можно узнать полную длину строки до <code>\n</code>, если он есть или <code>\0</code>, если <code>\n</code> не нашёлся. <code>fgets</code> всегда добавит <code>\0</code> в конце строки, даже если не удалось вычитать все символы за раз, поэтому <code>strcspn</code> будет безопасен.</p> <p>Поняв истинную длину строки, можно сравнить её с размером буфера. Если строка меньше чем буфер всего на 1 символ – вероятно, мы не считали данные полностью.</p> <p>Отталкиваясь от этого, реализуем функцию для считывания строк, проверки того, является ли она “хорошей” и подсчёта общего количества “хороших” строк:</p> <div class=highlight><pre><span></span><code><span class=cp>#define BUF_SIZE 32</span>
+</head>
 
-<span class=k>static</span><span class=w> </span><span class=kt>int</span><span class=w> </span><span class=nf>count_nice_strings</span><span class=p>(</span><span class=kt>FILE</span><span class=w> </span><span class=o>*</span><span class=n>stream</span><span class=p>)</span>
-<span class=p>{</span>
-<span class=w>        </span><span class=kt>char</span><span class=w> </span><span class=n>buf</span><span class=p>[</span><span class=n>BUF_SIZE</span><span class=p>]</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=p>{</span><span class=mi>0</span><span class=p>};</span>
-<span class=w>        </span><span class=kt>int</span><span class=w> </span><span class=n>counter</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=mi>0</span><span class=p>;</span>
+<body>
 
-<span class=w>        </span><span class=k>while</span><span class=w> </span><span class=p>(</span><span class=n>fgets</span><span class=p>(</span><span class=n>buf</span><span class=p>,</span><span class=w> </span><span class=k>sizeof</span><span class=p>(</span><span class=n>buf</span><span class=p>),</span><span class=w> </span><span class=n>stream</span><span class=p>)</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=nb>NULL</span><span class=p>)</span><span class=w> </span><span class=p>{</span>
-<span class=w>                </span><span class=kt>size_t</span><span class=w> </span><span class=n>len</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>strcspn</span><span class=p>(</span><span class=n>buf</span><span class=p>,</span><span class=w> </span><span class=s>&quot;</span><span class=se>\n</span><span class=s>&quot;</span><span class=p>);</span>
-<span class=w>                </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>len</span><span class=w> </span><span class=o>&gt;=</span><span class=w> </span><span class=k>sizeof</span><span class=p>(</span><span class=n>buf</span><span class=p>)</span><span class=w> </span><span class=o>-</span><span class=w> </span><span class=mi>1U</span><span class=p>)</span><span class=w> </span><span class=p>{</span>
-<span class=w>                        </span><span class=p>(</span><span class=kt>void</span><span class=p>)</span><span class=n>fputs</span><span class=p>(</span><span class=s>&quot;Failed to fgets: Line is too long&quot;</span><span class=p>,</span>
-<span class=w>                                    </span><span class=n>stderr</span><span class=p>);</span>
-<span class=w>                        </span><span class=n>exit</span><span class=p>(</span><span class=n>EXIT_FAILURE</span><span class=p>);</span>
-<span class=w>                </span><span class=p>}</span>
-<span class=w>                </span><span class=n>buf</span><span class=p>[</span><span class=n>len</span><span class=p>]</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=sc>&#39;\0&#39;</span><span class=p>;</span>
+<nav>
+    <a href="/">Обо мне</a>
+    <a href="/notes/">Заметки</a>
+</nav>
 
-<span class=w>                </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>is_string_nice</span><span class=p>(</span><span class=n>buf</span><span class=p>))</span><span class=w> </span><span class=p>{</span>
-<span class=w>                        </span><span class=n>counter</span><span class=o>++</span><span class=p>;</span>
-<span class=w>                </span><span class=p>}</span>
-<span class=w>        </span><span class=p>}</span>
+<article>
 
-<span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=o>!</span><span class=n>feof</span><span class=p>(</span><span class=n>stream</span><span class=p>))</span><span class=w> </span><span class=p>{</span>
-<span class=w>                </span><span class=n>perror</span><span class=p>(</span><span class=s>&quot;Failed to fgets&quot;</span><span class=p>);</span>
-<span class=w>                </span><span class=n>exit</span><span class=p>(</span><span class=n>EXIT_FAILURE</span><span class=p>);</span>
-<span class=w>        </span><span class=p>}</span>
+<header id="title-block-header">
+<h1 class="title">Advent of Code 2015, день 5</h1>
+</header>
 
-<span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>counter</span><span class=p>;</span>
-<span class=p>}</span>
-</code></pre></div> <p>Завершает решение первой части уже традиционный <code>main</code>:</p> <div class=highlight><pre><span></span><code><span class=kt>int</span><span class=w> </span><span class=nf>main</span><span class=p>(</span><span class=kt>int</span><span class=w> </span><span class=n>argc</span><span class=p>,</span><span class=w> </span><span class=kt>char</span><span class=w> </span><span class=o>*</span><span class=n>argv</span><span class=p>[])</span>
-<span class=p>{</span>
-<span class=w>        </span><span class=kt>int</span><span class=w> </span><span class=n>nice_count</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=mi>0</span><span class=p>;</span>
+<figure>
+<img src="res/advent-of-code-2015-day-05.webp" alt="Десяток звёзд есть" />
+<figcaption aria-hidden="true">Десяток звёзд есть</figcaption>
+</figure>
+<p>Очередная задача Advent of Code 2015. Сегодня решаем <a href="https://adventofcode.com/2015/day/5">задачу пятого дня</a>.</p>
+<h2 id="день-5-разве-у-него-нет-эльфов-стажёров-для-этого">День 5: Разве у него нет эльфов-стажёров для этого?</h2>
+<p>Санта нуждается в помощи, чтобы определить, какие строки в его текстовом файле хорошие или плохие.</p>
+<p><strong>Хорошей</strong> строкой считается строка, удовлетворяющая всем следующим условиям:</p>
+<ul>
+<li>Она содержит как минимум три гласные (только a, e, i, o, u), например, aei, xazegov или aeiouaeiouaeiou.</li>
+<li>Она содержит как минимум одну букву, которая встречается дважды подряд, например, xx, abcdde (dd) или aabbccdd (aa, bb, cc или dd).</li>
+<li>Она <strong>не</strong> содержит строки ab, cd, pq или xy, даже если они являются частью одного из других требований.</li>
+</ul>
+<p>Например:</p>
+<ul>
+<li>ugknbfddgicrmopn – хорошая, потому что в ней есть как минимум три гласные (u…i…o…), двойная буква (…dd…) и отсутствуют запрещенные подстроки.</li>
+<li>aaa – хорошая, потому что в ней есть как минимум три гласные и двойная буква, даже если буквы, используемые разными правилами, перекрываются.</li>
+<li>jchzalrnumimnmhp – плохая, потому что в ней нет двойной буквы.</li>
+<li>haegwjzuvuyypxyu – плохая, потому что она содержит строку xy.</li>
+<li>dvszwmarrgswjxmb – плохая, потому что она содержит только одну гласную.</li>
+</ul>
+<p>Сколько всего строк – хорошие?</p>
+<h2 id="решение-на-си">Решение на Си</h2>
+<p>Задача требует работы со строками, отдельными символами и подстроками. Для Си работа со строками подразумевает, высокоуровнево, выбор: работать со строками как с указателями или как с массивами. Моё предпочтение обычно падает на работу с массивами. По-моему, так логика выглядит чуть понятнее, но это дело вкуса.</p>
+<p>Одно из первых условий касается подсчёта гласных. Это значит, что нам надо пройтись по всем символам и посмотреть, попадает ли конкретный символ в набор “aeiou”. Функция <code>strchr</code> поможет с этим.</p>
+<p>Поскольку в будущих функциях нужно будет работать с той же строкой, то <code>len</code>, длину строки, я вынесу на уровень выше. Вот первая функция:</p>
+<div class="highlight"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">count_vowels</span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">len</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="n">sz</span><span class="p">[])</span>
+<span class="p">{</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">vowels</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
-<span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>argc</span><span class=w> </span><span class=o>&gt;</span><span class=w> </span><span class=mi>1</span><span class=p>)</span><span class=w> </span><span class=p>{</span>
-<span class=w>                </span><span class=p>(</span><span class=kt>void</span><span class=p>)</span><span class=n>fprintf</span><span class=p>(</span><span class=n>stderr</span><span class=p>,</span>
-<span class=w>                              </span><span class=s>&quot;No arguments are accepted!</span><span class=se>\n</span><span class=s>&quot;</span>
-<span class=w>                              </span><span class=s>&quot;Use IO redirection: %s &lt; input</span><span class=se>\n</span><span class=s>&quot;</span><span class=p>,</span>
-<span class=w>                              </span><span class=n>argv</span><span class=p>[</span><span class=mi>0</span><span class=p>]);</span>
-<span class=w>                </span><span class=k>return</span><span class=w> </span><span class=n>EXIT_FAILURE</span><span class=p>;</span>
-<span class=w>        </span><span class=p>}</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">len</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">strchr</span><span class="p">(</span><span class="s">&quot;aeiou&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">sz</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                        </span><span class="n">vowels</span><span class="o">++</span><span class="p">;</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
 
-<span class=w>        </span><span class=n>nice_count</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>count_nice_strings</span><span class=p>(</span><span class=n>stdin</span><span class=p>);</span>
-<span class=w>        </span><span class=p>(</span><span class=kt>void</span><span class=p>)</span><span class=n>printf</span><span class=p>(</span><span class=s>&quot;%d</span><span class=se>\n</span><span class=s>&quot;</span><span class=p>,</span><span class=w> </span><span class=n>nice_count</span><span class=p>);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">vowels</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
 
-<span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>EXIT_SUCCESS</span><span class=p>;</span>
-<span class=p>}</span>
-</code></pre></div> <p>Запускаем тесты и получаем результат.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>./test_i.sh
+<p>Следующая проверка касается двух одинаковых букв подряд. Нужно пробежать по строке и сравнивать символ с предыдущим. При использовании строки как массива выглядит довольно просто:</p>
+<div class="highlight"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="nf">has_double_letter</span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">len</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="n">sz</span><span class="p">[])</span>
+<span class="p">{</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">len</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">sz</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">sz</span><span class="p">[</span><span class="n">i</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1U</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                        </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
 
-<span class=go>Test ugknbfddgicrmopn =&gt; 1 PASSED</span>
-<span class=go>Test aaa =&gt; 1 PASSED</span>
-<span class=go>Test jchzalrnumimnmhp =&gt; 0 PASSED</span>
-<span class=go>Test haegwjzuvuyypxyu =&gt; 0 PASSED</span>
-<span class=go>Test dvszwmarrgswjxmb =&gt; 0 PASSED</span>
-<span class=go>All tests are completed and passed!</span>
-<span class=go>Answer for input: 258</span>
-</code></pre></div> <p>Advent of Code такой результат устроил.</p> <h2 id=часть-вторая>Часть вторая</h2> <p>Поняв свою ошибку, Санта переключился на более совершенную модель определения того, является ли строка хорошей или плохой. Все старые правила не применяются, так как они все явно нелепы.</p> <p>Теперь хорошей строкой считается строка, удовлетворяющая всем следующим условиям:</p> <ul> <li>Она содержит пару любых двух букв, которая появляется в строке как минимум дважды без перекрытия, например, xyxy (xy) или aabcdefgaa (aa), но не как aaa (aa, но оно перекрывается).</li> <li>Она содержит как минимум одну букву, которая повторяется с ровно одной буквой между ними, например, xyx, abcdefeghi (efe) или даже aaa.</li> </ul> <p>Например:</p> <ul> <li>qjhvhtzxzqqjkmpb – хорошая, потому что в ней есть пара, которая появляется дважды (qj), и буква, которая повторяется с ровно одной буквой между ними (zxz).</li> <li>xxyxx – хорошая, потому что в ней есть пара, которая появляется дважды, и буква, которая повторяется с одной между ними, даже если буквы, используемые каждым правилом, перекрываются.</li> <li>uurcxstgmygtbstg – плохая, потому что в ней есть пара (tg), но нет повторения с одной буквой между ними.</li> <li>ieodomkazucvgmuy – плохая, потому что в ней есть повторяющаяся буква с одной между ними (odo), но нет пары, которая появляется дважды.</li> </ul> <p>Сколько строк являются хорошими по этим новым правилам?</p> <h2 id=изменения-в-исходном-решении>Изменения в исходном решении</h2> <p>Поглядим на <code>diff -u part_{i,ii}.c</code>:</p> <div class=highlight><pre><span></span><code><span class=gd>--- part_i.c    2025-03-20 19:31:52.313558912 +0300</span>
-<span class=gi>+++ part_ii.c   2025-03-20 19:22:26.303652143 +0300</span>
-<span class=gu>@@ -5,23 +5,26 @@</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
 
-<span class=w> </span>#define BUF_SIZE 32
+<p>Третья часть про отсутствие подстрок решается с помощью цепочки <code>strstr</code>, связанной с помощью ИЛИ <code>||</code>. Есть более производительные варианты, но это достаточно простая задача и смысла с ней возиться нет.</p>
+<div class="highlight"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="nf">has_disallowed_substrings</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">sz</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">strstr</span><span class="p">(</span><span class="n">sz</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;ab&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">strstr</span><span class="p">(</span><span class="n">sz</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;cd&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">strstr</span><span class="p">(</span><span class="n">sz</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;pq&quot;</span><span class="p">)</span>
+<span class="w">               </span><span class="o">||</span><span class="w"> </span><span class="n">strstr</span><span class="p">(</span><span class="n">sz</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;xy&quot;</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
 
-<span class=gd>-static int count_vowels(size_t len, const char sz[])</span>
-<span class=gi>+static bool has_pair_of_non_overlaping_duplicates(size_t len, const char sz[])</span>
-<span class=w> </span>{
-<span class=gd>-        int vowels = 0;</span>
-<span class=gi>+        char buf[3] = {0};</span>
+<p>Все проверки удобно скомбинировать в функцию <code>is_string_nice</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="nf">is_string_nice</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">sz</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">        </span><span class="kt">size_t</span><span class="w"> </span><span class="n">len</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">strlen</span><span class="p">(</span><span class="n">sz</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="n">count_vowels</span><span class="p">(</span><span class="n">len</span><span class="p">,</span><span class="w"> </span><span class="n">sz</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">has_double_letter</span><span class="p">(</span><span class="n">len</span><span class="p">,</span><span class="w"> </span><span class="n">sz</span><span class="p">)</span>
+<span class="w">               </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">has_disallowed_substrings</span><span class="p">(</span><span class="n">sz</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
 
-<span class=gd>-        for (size_t i = 0; i &lt; len; i++) {</span>
-<span class=gd>-                if (strchr(&quot;aeiou&quot;, sz[i]) != NULL) {</span>
-<span class=gd>-                        vowels++;</span>
-<span class=gi>+        for (size_t i = 1; i &lt; len; i++) {</span>
-<span class=gi>+                buf[0] = sz[i - 1U];</span>
-<span class=gi>+                buf[1] = sz[i];</span>
-<span class=gi>+</span>
-<span class=gi>+                if (strstr(&amp;sz[i + 1U], buf) != NULL) {</span>
-<span class=gi>+                        return true;</span>
-<span class=w> </span>                }
-<span class=w> </span>        }
+<p>Advent of Code опять выдал файл <code>input</code> как набор строк, по которым нужно пробежаться. На этот раз используем функцию <code>fgets</code>, чтобы полностью поместить строку в буфер <code>buf</code>.</p>
+<p>Функция <code>fgets</code> имеет одну особенность – она оставляет <code>\n</code> как часть полученной строки. Кроме того, она никак не подсказывает, была ли вычитана полная строка или нет.</p>
+<p>Супротив этих двух проблем помогает функция <code>strcspn</code>. Используя функцию в виде <code>strcspn(buf, "\n")</code>, можно узнать полную длину строки до <code>\n</code>, если он есть или <code>\0</code>, если <code>\n</code> не нашёлся. <code>fgets</code> всегда добавит <code>\0</code> в конце строки, даже если не удалось вычитать все символы за раз, поэтому <code>strcspn</code> будет безопасен.</p>
+<p>Поняв истинную длину строки, можно сравнить её с размером буфера. Если строка меньше чем буфер всего на 1 символ – вероятно, мы не считали данные полностью.</p>
+<p>Отталкиваясь от этого, реализуем функцию для считывания строк, проверки того, является ли она “хорошей” и подсчёта общего количества “хороших” строк:</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#define BUF_SIZE 32</span>
 
-<span class=gd>-        return vowels;</span>
-<span class=gi>+        return false;</span>
-<span class=w> </span>}
+<span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">count_nice_strings</span><span class="p">(</span><span class="kt">FILE</span><span class="w"> </span><span class="o">*</span><span class="n">stream</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">        </span><span class="kt">char</span><span class="w"> </span><span class="n">buf</span><span class="p">[</span><span class="n">BUF_SIZE</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">counter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
-<span class=gd>-static bool has_double_letter(size_t len, const char sz[])</span>
-<span class=gi>+static bool has_same_letter_with_spacing(size_t len, const char sz[])</span>
-<span class=w> </span>{
-<span class=gd>-        for (size_t i = 1; i &lt; len; i++) {</span>
-<span class=gd>-                if (sz[i] == sz[i - 1U]) {</span>
-<span class=gi>+        for (size_t i = 2; i &lt; len; i++) {</span>
-<span class=gi>+                if (sz[i] == sz[i - 2U]) {</span>
-<span class=w> </span>                        return true;
-<span class=w> </span>                }
-<span class=w> </span>        }
-<span class=gu>@@ -29,17 +32,11 @@</span>
-<span class=w> </span>        return false;
-<span class=w> </span>}
+<span class="w">        </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">fgets</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">buf</span><span class="p">),</span><span class="w"> </span><span class="n">stream</span><span class="p">)</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="kt">size_t</span><span class="w"> </span><span class="n">len</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">strcspn</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">len</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1U</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                        </span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">fputs</span><span class="p">(</span><span class="s">&quot;Failed to fgets: Line is too long&quot;</span><span class="p">,</span>
+<span class="w">                                    </span><span class="n">stderr</span><span class="p">);</span>
+<span class="w">                        </span><span class="n">exit</span><span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">);</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">                </span><span class="n">buf</span><span class="p">[</span><span class="n">len</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sc">&#39;\0&#39;</span><span class="p">;</span>
 
-<span class=gd>-static bool has_disallowed_substrings(const char *sz)</span>
-<span class=gd>-{</span>
-<span class=gd>-        return strstr(sz, &quot;ab&quot;) || strstr(sz, &quot;cd&quot;) || strstr(sz, &quot;pq&quot;)</span>
-<span class=gd>-               || strstr(sz, &quot;xy&quot;);</span>
-<span class=gd>-}</span>
-<span class=gd>-</span>
-<span class=w> </span>static bool is_string_nice(const char *sz)
-<span class=w> </span>{
-<span class=w> </span>        size_t len = strlen(sz);
-<span class=gd>-        return (count_vowels(len, sz) &gt;= 3) &amp;&amp; has_double_letter(len, sz)</span>
-<span class=gd>-               &amp;&amp; !has_disallowed_substrings(sz);</span>
-<span class=gi>+        return has_pair_of_non_overlaping_duplicates(len, sz)</span>
-<span class=gi>+               &amp;&amp; has_same_letter_with_spacing(len, sz);</span>
-<span class=w> </span>}
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">is_string_nice</span><span class="p">(</span><span class="n">buf</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                        </span><span class="n">counter</span><span class="o">++</span><span class="p">;</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
 
-<span class=w> </span>static int count_nice_strings(FILE *stream)
-</code></pre></div> <p>Самое сложное изменение – проверка, есть ли дубликаты подстрок, которые не пересекаются. Самое простое решение на мой вкус – сделать небольшой буфер на 3 символа (<code>buf[3]</code>), скопировать туда два соседних символа из строки (например, <code>sz[i - 1U]</code> и <code>sz[i]</code>). Затем можно применить <code>strstr</code> к строке, начиная со <strong>следующего</strong> символа по очереди (<code>&amp;sz[i + 1U]</code>). Это далеко не самый производительный, но достаточно наглядный код.</p> <p>Второе изменение, поиск символа через один – примитивная модификация функции <code>has_double_letter</code>. Достаточно сравнивать символы в виде <code>sz[i] == sz[i - 2U]</code> и начинать отсчёт <code>i</code> не с <code>1</code>, а в виде <code>i = 2</code>.</p> <p>Иных значимых изменений не понадобилось, запускаем тесты:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>./test_ii.sh
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">feof</span><span class="p">(</span><span class="n">stream</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">perror</span><span class="p">(</span><span class="s">&quot;Failed to fgets&quot;</span><span class="p">);</span>
+<span class="w">                </span><span class="n">exit</span><span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
 
-<span class=go>Test qjhvhtzxzqqjkmpb =&gt; 1 PASSED</span>
-<span class=go>Test xxyxx =&gt; 1 PASSED</span>
-<span class=go>Test uurcxstgmygtbstg =&gt; 0 PASSED</span>
-<span class=go>Test ieodomkazucvgmuy =&gt; 0 PASSED</span>
-<span class=go>All tests are completed and passed!</span>
-<span class=go>Answer for input: 53</span>
-</code></pre></div> <p>Решение подошло, ура!</p> <p>Решения задачек можно найти в <a href=https://github.com/tsb99x/solutions>репозитории</a> на GitHub.</p> <time datetime=2025-03-29T16:22:23+03:00>29 марта 2025 г.</time> <div class=changelog> <h4>Журнал изменений</h4> <p><b>2 января 2026 г.</b>: перенёс исходный код на GitHub.</p> </div> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">counter</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Завершает решение первой части уже традиционный <code>main</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">argv</span><span class="p">[])</span>
+<span class="p">{</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">nice_count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">argc</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span>
+<span class="w">                              </span><span class="s">&quot;No arguments are accepted!</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">                              </span><span class="s">&quot;Use IO redirection: %s &lt; input</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span>
+<span class="w">                              </span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="n">EXIT_FAILURE</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="n">nice_count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">count_nice_strings</span><span class="p">(</span><span class="n">stdin</span><span class="p">);</span>
+<span class="w">        </span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;%d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">nice_count</span><span class="p">);</span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">EXIT_SUCCESS</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Запускаем тесты и получаем результат.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>./test_i.sh
+
+<span class="go">Test ugknbfddgicrmopn =&gt; 1 PASSED</span>
+<span class="go">Test aaa =&gt; 1 PASSED</span>
+<span class="go">Test jchzalrnumimnmhp =&gt; 0 PASSED</span>
+<span class="go">Test haegwjzuvuyypxyu =&gt; 0 PASSED</span>
+<span class="go">Test dvszwmarrgswjxmb =&gt; 0 PASSED</span>
+<span class="go">All tests are completed and passed!</span>
+<span class="go">Answer for input: 258</span>
+</code></pre></div>
+
+<p>Advent of Code такой результат устроил.</p>
+<h2 id="часть-вторая">Часть вторая</h2>
+<p>Поняв свою ошибку, Санта переключился на более совершенную модель определения того, является ли строка хорошей или плохой. Все старые правила не применяются, так как они все явно нелепы.</p>
+<p>Теперь хорошей строкой считается строка, удовлетворяющая всем следующим условиям:</p>
+<ul>
+<li>Она содержит пару любых двух букв, которая появляется в строке как минимум дважды без перекрытия, например, xyxy (xy) или aabcdefgaa (aa), но не как aaa (aa, но оно перекрывается).</li>
+<li>Она содержит как минимум одну букву, которая повторяется с ровно одной буквой между ними, например, xyx, abcdefeghi (efe) или даже aaa.</li>
+</ul>
+<p>Например:</p>
+<ul>
+<li>qjhvhtzxzqqjkmpb – хорошая, потому что в ней есть пара, которая появляется дважды (qj), и буква, которая повторяется с ровно одной буквой между ними (zxz).</li>
+<li>xxyxx – хорошая, потому что в ней есть пара, которая появляется дважды, и буква, которая повторяется с одной между ними, даже если буквы, используемые каждым правилом, перекрываются.</li>
+<li>uurcxstgmygtbstg – плохая, потому что в ней есть пара (tg), но нет повторения с одной буквой между ними.</li>
+<li>ieodomkazucvgmuy – плохая, потому что в ней есть повторяющаяся буква с одной между ними (odo), но нет пары, которая появляется дважды.</li>
+</ul>
+<p>Сколько строк являются хорошими по этим новым правилам?</p>
+<h2 id="изменения-в-исходном-решении">Изменения в исходном решении</h2>
+<p>Поглядим на <code>diff -u part_{i,ii}.c</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="gd">--- part_i.c    2025-03-20 19:31:52.313558912 +0300</span>
+<span class="gi">+++ part_ii.c   2025-03-20 19:22:26.303652143 +0300</span>
+<span class="gu">@@ -5,23 +5,26 @@</span>
+
+<span class="w"> </span>#define BUF_SIZE 32
+
+<span class="gd">-static int count_vowels(size_t len, const char sz[])</span>
+<span class="gi">+static bool has_pair_of_non_overlaping_duplicates(size_t len, const char sz[])</span>
+<span class="w"> </span>{
+<span class="gd">-        int vowels = 0;</span>
+<span class="gi">+        char buf[3] = {0};</span>
+
+<span class="gd">-        for (size_t i = 0; i &lt; len; i++) {</span>
+<span class="gd">-                if (strchr(&quot;aeiou&quot;, sz[i]) != NULL) {</span>
+<span class="gd">-                        vowels++;</span>
+<span class="gi">+        for (size_t i = 1; i &lt; len; i++) {</span>
+<span class="gi">+                buf[0] = sz[i - 1U];</span>
+<span class="gi">+                buf[1] = sz[i];</span>
+<span class="gi">+</span>
+<span class="gi">+                if (strstr(&amp;sz[i + 1U], buf) != NULL) {</span>
+<span class="gi">+                        return true;</span>
+<span class="w"> </span>                }
+<span class="w"> </span>        }
+
+<span class="gd">-        return vowels;</span>
+<span class="gi">+        return false;</span>
+<span class="w"> </span>}
+
+<span class="gd">-static bool has_double_letter(size_t len, const char sz[])</span>
+<span class="gi">+static bool has_same_letter_with_spacing(size_t len, const char sz[])</span>
+<span class="w"> </span>{
+<span class="gd">-        for (size_t i = 1; i &lt; len; i++) {</span>
+<span class="gd">-                if (sz[i] == sz[i - 1U]) {</span>
+<span class="gi">+        for (size_t i = 2; i &lt; len; i++) {</span>
+<span class="gi">+                if (sz[i] == sz[i - 2U]) {</span>
+<span class="w"> </span>                        return true;
+<span class="w"> </span>                }
+<span class="w"> </span>        }
+<span class="gu">@@ -29,17 +32,11 @@</span>
+<span class="w"> </span>        return false;
+<span class="w"> </span>}
+
+<span class="gd">-static bool has_disallowed_substrings(const char *sz)</span>
+<span class="gd">-{</span>
+<span class="gd">-        return strstr(sz, &quot;ab&quot;) || strstr(sz, &quot;cd&quot;) || strstr(sz, &quot;pq&quot;)</span>
+<span class="gd">-               || strstr(sz, &quot;xy&quot;);</span>
+<span class="gd">-}</span>
+<span class="gd">-</span>
+<span class="w"> </span>static bool is_string_nice(const char *sz)
+<span class="w"> </span>{
+<span class="w"> </span>        size_t len = strlen(sz);
+<span class="gd">-        return (count_vowels(len, sz) &gt;= 3) &amp;&amp; has_double_letter(len, sz)</span>
+<span class="gd">-               &amp;&amp; !has_disallowed_substrings(sz);</span>
+<span class="gi">+        return has_pair_of_non_overlaping_duplicates(len, sz)</span>
+<span class="gi">+               &amp;&amp; has_same_letter_with_spacing(len, sz);</span>
+<span class="w"> </span>}
+
+<span class="w"> </span>static int count_nice_strings(FILE *stream)
+</code></pre></div>
+
+<p>Самое сложное изменение – проверка, есть ли дубликаты подстрок, которые не пересекаются. Самое простое решение на мой вкус – сделать небольшой буфер на 3 символа (<code>buf[3]</code>), скопировать туда два соседних символа из строки (например, <code>sz[i - 1U]</code> и <code>sz[i]</code>). Затем можно применить <code>strstr</code> к строке, начиная со <strong>следующего</strong> символа по очереди (<code>&amp;sz[i + 1U]</code>). Это далеко не самый производительный, но достаточно наглядный код.</p>
+<p>Второе изменение, поиск символа через один – примитивная модификация функции <code>has_double_letter</code>. Достаточно сравнивать символы в виде <code>sz[i] == sz[i - 2U]</code> и начинать отсчёт <code>i</code> не с <code>1</code>, а в виде <code>i = 2</code>.</p>
+<p>Иных значимых изменений не понадобилось, запускаем тесты:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>./test_ii.sh
+
+<span class="go">Test qjhvhtzxzqqjkmpb =&gt; 1 PASSED</span>
+<span class="go">Test xxyxx =&gt; 1 PASSED</span>
+<span class="go">Test uurcxstgmygtbstg =&gt; 0 PASSED</span>
+<span class="go">Test ieodomkazucvgmuy =&gt; 0 PASSED</span>
+<span class="go">All tests are completed and passed!</span>
+<span class="go">Answer for input: 53</span>
+</code></pre></div>
+
+<p>Решение подошло, ура!</p>
+<p>Решения задачек можно найти в <a href="https://github.com/tsb99x/solutions">репозитории</a> на GitHub.</p>
+
+<time datetime="2025-03-29T16:22:23+03:00">29 марта 2025 г.</time>
+
+<div class="changelog">
+<h4>Журнал изменений</h4>
+<p><b>2 января 2026 г.</b>: перенёс исходный код на GitHub.</p>
+</div>
+
+</article>
+
+<address class="contacts">
+    Если Вы хотите обсудить содержание заметки, задать вопросы или
+    предложить изменения, то со мной можно связаться в
+    <a href="https://t.me/tsb99x">Telegram</a>
+</address>
+
+<footer>
+    <span class="copyright">© 2019-2026</span> |
+    <a rel="license"
+        href="https://creativecommons.org/licenses/by/4.0/deed.ru">
+        CC BY 4.0
+    </a>
+</footer>
+
+</body>
+</html>

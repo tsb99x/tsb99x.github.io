@@ -1,16 +1,93 @@
-<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2024-10-08T21:19:53+03:00><meta name=description content="Базовое использование"><meta property=og:url content=https://tsb99x.github.io/notes/neovim-macros.html><meta property=og:type content=article><meta property=og:title content="Макросы в NeoVim"><meta property=og:description content="Базовое использование"><meta property=og:image content=https://tsb99x.github.io/res/avatar-512x512.png><title>Макросы в NeoVim</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.github.io/notes/neovim-macros.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> </nav> <article> <header id=title-block-header> <h1 class=title>Макросы в NeoVim</h1> </header> <p>Макросы в NeoVim не отличаются от Vim. Но, время от времени, я забываю как ими пользоваться. Куда чаще приходится работать с <code>sed</code> и другими инструментами. Чтобы лишний раз не искать в интернете, оставлю для себя заметку.</p> <p>Из документации рекомендую <a href=https://neovim.io/doc/user/repeat.html#complex-repeat>:help complex-repeat</a>. Приведу простой пример как пользоваться макросами. Представим, что есть список из элементов, которым нужно добавить <code>- [ ]</code> в начале строки. Может, я хочу сделать чек-лист для покупок.</p> <div class=highlight><pre><span></span><code>ананас
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru" prefix="og: https://ogp.me/ns#">
+
+<head>
+
+<meta charset="utf-8">
+<meta name="generator" content="pandoc">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Антон Муравьев">
+<meta name="dcterms.date" content="2024-10-08T21:19:53+03:00">
+<meta name="description" content="Базовое использование">
+<meta property="og:url" content="https://tsb99x.github.io/notes/neovim-macros.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Макросы в NeoVim">
+<meta property="og:description" content="Базовое использование">
+<meta property="og:image" content="https://tsb99x.github.io/res/avatar-512x512.png">
+<title>Макросы в NeoVim</title>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/normalize.css">
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/pygments.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="canonical" href="https://tsb99x.github.io/notes/neovim-macros.html">
+
+</head>
+
+<body>
+
+<nav>
+    <a href="/">Обо мне</a>
+    <a href="/notes/">Заметки</a>
+</nav>
+
+<article>
+
+<header id="title-block-header">
+<h1 class="title">Макросы в NeoVim</h1>
+</header>
+
+<p>Макросы в NeoVim не отличаются от Vim. Но, время от времени, я забываю как ими пользоваться. Куда чаще приходится работать с <code>sed</code> и другими инструментами. Чтобы лишний раз не искать в интернете, оставлю для себя заметку.</p>
+<p>Из документации рекомендую <a href="https://neovim.io/doc/user/repeat.html#complex-repeat">:help complex-repeat</a>. Приведу простой пример как пользоваться макросами. Представим, что есть список из элементов, которым нужно добавить <code>- [ ]</code> в начале строки. Может, я хочу сделать чек-лист для покупок.</p>
+<div class="highlight"><pre><span></span><code>ананас
 апельсин
 вишня
 лимон
 слива
-</code></pre></div> <p>Чтобы записать нужный макрос, перехожу на первую изменяемую строку и нажимаю <code>qq</code> в NORMAL режиме. Первая <code>q</code> означает начало записи макроса. Вторая – имя регистра, в который макрос будет помещён.</p> <p>Теперь в командной строке Vim будет написано <code>recording q</code>.</p> <p>Нажимаю <code>0</code> чтобы перейти на начало строки. Вхожу в режим INSERT с помощью <code>i</code>. Добавляю новый префикс <code>- [ ]</code>. Выхожу в NORMAL режим с помощью <code>CTRL + [</code>. Перехожу на следующую строку нажатием <code>j</code>.</p> <p>Особо отмечу переход на начало строки. Это якорь, который позволит выполнение макроса на любой строке вне зависимости от стартовой позиции курсора.</p> <p>Ту же роль имеет и переход на следующую строку, без него нельзя будет сочетать несколько макросов подряд. Они будут модифицировать одну и ту же строку.</p> <p>Заканчиваю запись макроса нажатием <code>q</code>. Надпись <code>recording q</code> должна пропасть из командной строки. Файл теперь должен выглядеть так.</p> <div class=highlight><pre><span></span><code><span class=k>- [ ]</span> ананас
+</code></pre></div>
+
+<p>Чтобы записать нужный макрос, перехожу на первую изменяемую строку и нажимаю <code>qq</code> в NORMAL режиме. Первая <code>q</code> означает начало записи макроса. Вторая – имя регистра, в который макрос будет помещён.</p>
+<p>Теперь в командной строке Vim будет написано <code>recording q</code>.</p>
+<p>Нажимаю <code>0</code> чтобы перейти на начало строки. Вхожу в режим INSERT с помощью <code>i</code>. Добавляю новый префикс <code>- [ ]</code>. Выхожу в NORMAL режим с помощью <code>CTRL + [</code>. Перехожу на следующую строку нажатием <code>j</code>.</p>
+<p>Особо отмечу переход на начало строки. Это якорь, который позволит выполнение макроса на любой строке вне зависимости от стартовой позиции курсора.</p>
+<p>Ту же роль имеет и переход на следующую строку, без него нельзя будет сочетать несколько макросов подряд. Они будут модифицировать одну и ту же строку.</p>
+<p>Заканчиваю запись макроса нажатием <code>q</code>. Надпись <code>recording q</code> должна пропасть из командной строки. Файл теперь должен выглядеть так.</p>
+<div class="highlight"><pre><span></span><code><span class="k">- [ ]</span> ананас
 апельсин
 вишня
 лимон
 слива
-</code></pre></div> <p>Чтобы использовать записанный макрос на оставшихся строках, ввожу <code>4@q</code>. Это значит 4 раза применить макрос из регистра <code>q</code>. Альтернативным способом будет выделение всех нужных строк в режиме VISUAL LINE и выполнение <code>@q</code>.</p> <div class=highlight><pre><span></span><code><span class=k>- [ ]</span> ананас
-<span class=k>- [ ]</span> апельсин
-<span class=k>- [ ]</span> вишня
-<span class=k>- [ ]</span> лимон
-<span class=k>- [ ]</span> слива
-</code></pre></div> <p>И да, я знаю, что можно просто воспользоваться <code>:%s/^/- [ ] /</code>.</p> <time datetime=2024-10-08T21:19:53+03:00>8 октября 2024 г.</time> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 
+</code></pre></div>
+
+<p>Чтобы использовать записанный макрос на оставшихся строках, ввожу <code>4@q</code>. Это значит 4 раза применить макрос из регистра <code>q</code>. Альтернативным способом будет выделение всех нужных строк в режиме VISUAL LINE и выполнение <code>@q</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="k">- [ ]</span> ананас
+<span class="k">- [ ]</span> апельсин
+<span class="k">- [ ]</span> вишня
+<span class="k">- [ ]</span> лимон
+<span class="k">- [ ]</span> слива
+</code></pre></div>
+
+<p>И да, я знаю, что можно просто воспользоваться <code>:%s/^/- [ ] /</code>.</p>
+
+<time datetime="2024-10-08T21:19:53+03:00">8 октября 2024 г.</time>
+
+
+</article>
+
+<address class="contacts">
+    Если Вы хотите обсудить содержание заметки, задать вопросы или
+    предложить изменения, то со мной можно связаться в
+    <a href="https://t.me/tsb99x">Telegram</a>
+</address>
+
+<footer>
+    <span class="copyright">© 2019-2026</span> |
+    <a rel="license"
+        href="https://creativecommons.org/licenses/by/4.0/deed.ru">
+        CC BY 4.0
+    </a>
+</footer>
+
+</body>
+</html>

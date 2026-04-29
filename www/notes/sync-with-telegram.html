@@ -1,1 +1,71 @@
-<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2025-06-22T17:55:07+03:00><meta name=description content="Сделал копию постов на сайт"><meta property=og:url content=https://tsb99x.github.io/notes/sync-with-telegram.html><meta property=og:type content=article><meta property=og:title content="Синхронизация с Telegram"><meta property=og:description content="Сделал копию постов на сайт"><meta property=og:image content=https://tsb99x.github.io/res/avatar-512x512.png><title>Синхронизация с Telegram</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.github.io/notes/sync-with-telegram.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> </nav> <article> <header id=title-block-header> <h1 class=title>Синхронизация с Telegram</h1> </header> <p>В <a href=/notes/video-format.html>предыдущей заметке</a> я отмечал, что формат видео мне пока не очень подходит и я решил сфокусироваться на сайте и канале в Telegram. Я вёл эти два ресурса по-разному. Ретроспекция показывает, что это усложняет работу с материалами.</p> <p>Если у меня совсем маленькая заметочка, то я её положу в Telegram? Или же она достаточно профессиональная, чтобы оформить как материал на сайт? Если заметка не касается профессии, но просто большая для Telegram? Смешно, но про эти проблемы я уже писал в записках о том, <a href=/notes/hello-blog-world.html>зачем вести блог на своём сайте</a>.</p> <p>Изначально я хотел вести сайт исключительно как профессиональный, но сейчас отказался от этой идее. Одна из значимых причин – большая часть моих работ находится под NDA, это коммерческий код проприетарного ПО. Это программные решения, информацию о которых нельзя просто как есть выкладывать в Сеть.</p> <p>Валяется у меня уже как почти четыре года (!) заметка про оптимизацию запросов в PostgreSQL. Чтобы её можно было опубликовать, нужно убрать всё, что связано с реальным продуктом. Это долго и муторно, настолько, что до сих пор не сделал…</p> <p>Вторая причина – часто хочется рассказывать о чём-то ином, нежели около-рабочая деятельность. Хобби, увлечения и просто то, что нравится. Книги, музыка, игры, кино… Да что угодно. Даже просто, чтобы оставить себе на память заметку. Дабы посмотреть через год: а чем я в это время занимался и что мне было интересно.</p> <p>Ну а третья – поиск в Telegram не работает так, как в Google или Яндекс. Он там есть, да. Но Telegram не охватывает веб-сайты. А это значимая часть ресурсов.</p> <p>Многие компьютерные проблемы я решал, найдя заметку всего из 5-10 строк в блоге абсолютно незнакомого мне милчеловека, который не поленился оставить буковенки для других любителей, например, компьютерной техники, софта или Linux.</p> <p>В общем, решил синхронизировать Telegram и сайт путём миграции всех постов из Telegram как заметок на сайт. Занимался этим последние несколько дней, готово. Заметки на сайте теперь будут играть роль основного блога, а Telegram будет в роли RSS, в который я буду помещать готовые материалы с сайта.</p> <p>В конце-концов, в современном мире бесконечного продакт-плейсмента и текстов, генерированных направо и налево нейронками, хочется видеть больше заметок о простых человеческих радостях, написанных людьми, а не машинами. Handmade.</p> <time datetime=2025-06-22T17:55:07+03:00>22 июня 2025 г.</time> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru" prefix="og: https://ogp.me/ns#">
+
+<head>
+
+<meta charset="utf-8">
+<meta name="generator" content="pandoc">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Антон Муравьев">
+<meta name="dcterms.date" content="2025-06-22T17:55:07+03:00">
+<meta name="description" content="Сделал копию постов на сайт">
+<meta property="og:url" content="https://tsb99x.github.io/notes/sync-with-telegram.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Синхронизация с Telegram">
+<meta property="og:description" content="Сделал копию постов на сайт">
+<meta property="og:image" content="https://tsb99x.github.io/res/avatar-512x512.png">
+<title>Синхронизация с Telegram</title>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/normalize.css">
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/pygments.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="canonical" href="https://tsb99x.github.io/notes/sync-with-telegram.html">
+
+</head>
+
+<body>
+
+<nav>
+    <a href="/">Обо мне</a>
+    <a href="/notes/">Заметки</a>
+</nav>
+
+<article>
+
+<header id="title-block-header">
+<h1 class="title">Синхронизация с Telegram</h1>
+</header>
+
+<p>В <a href="/notes/video-format.html">предыдущей заметке</a> я отмечал, что формат видео мне пока не очень подходит и я решил сфокусироваться на сайте и канале в Telegram. Я вёл эти два ресурса по-разному. Ретроспекция показывает, что это усложняет работу с материалами.</p>
+<p>Если у меня совсем маленькая заметочка, то я её положу в Telegram? Или же она достаточно профессиональная, чтобы оформить как материал на сайт? Если заметка не касается профессии, но просто большая для Telegram? Смешно, но про эти проблемы я уже писал в записках о том, <a href="/notes/hello-blog-world.html">зачем вести блог на своём сайте</a>.</p>
+<p>Изначально я хотел вести сайт исключительно как профессиональный, но сейчас отказался от этой идее. Одна из значимых причин – большая часть моих работ находится под NDA, это коммерческий код проприетарного ПО. Это программные решения, информацию о которых нельзя просто как есть выкладывать в Сеть.</p>
+<p>Валяется у меня уже как почти четыре года (!) заметка про оптимизацию запросов в PostgreSQL. Чтобы её можно было опубликовать, нужно убрать всё, что связано с реальным продуктом. Это долго и муторно, настолько, что до сих пор не сделал…</p>
+<p>Вторая причина – часто хочется рассказывать о чём-то ином, нежели около-рабочая деятельность. Хобби, увлечения и просто то, что нравится. Книги, музыка, игры, кино… Да что угодно. Даже просто, чтобы оставить себе на память заметку. Дабы посмотреть через год: а чем я в это время занимался и что мне было интересно.</p>
+<p>Ну а третья – поиск в Telegram не работает так, как в Google или Яндекс. Он там есть, да. Но Telegram не охватывает веб-сайты. А это значимая часть ресурсов.</p>
+<p>Многие компьютерные проблемы я решал, найдя заметку всего из 5-10 строк в блоге абсолютно незнакомого мне милчеловека, который не поленился оставить буковенки для других любителей, например, компьютерной техники, софта или Linux.</p>
+<p>В общем, решил синхронизировать Telegram и сайт путём миграции всех постов из Telegram как заметок на сайт. Занимался этим последние несколько дней, готово. Заметки на сайте теперь будут играть роль основного блога, а Telegram будет в роли RSS, в который я буду помещать готовые материалы с сайта.</p>
+<p>В конце-концов, в современном мире бесконечного продакт-плейсмента и текстов, генерированных направо и налево нейронками, хочется видеть больше заметок о простых человеческих радостях, написанных людьми, а не машинами. Handmade.</p>
+
+<time datetime="2025-06-22T17:55:07+03:00">22 июня 2025 г.</time>
+
+
+</article>
+
+<address class="contacts">
+    Если Вы хотите обсудить содержание заметки, задать вопросы или
+    предложить изменения, то со мной можно связаться в
+    <a href="https://t.me/tsb99x">Telegram</a>
+</address>
+
+<footer>
+    <span class="copyright">© 2019-2026</span> |
+    <a rel="license"
+        href="https://creativecommons.org/licenses/by/4.0/deed.ru">
+        CC BY 4.0
+    </a>
+</footer>
+
+</body>
+</html>

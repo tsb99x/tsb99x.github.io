@@ -1,27 +1,130 @@
-<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2019-12-23T21:00:00+03:00><meta name=description content="О чрезмерно используемом инструменте"><meta property=og:url content=https://tsb99x.github.io/notes/why-java-annotations-are-bad.html><meta property=og:type content=article><meta property=og:title content="Чем плохи аннотации Java"><meta property=og:description content="О чрезмерно используемом инструменте"><meta property=og:image content=https://tsb99x.github.io/res/avatar-512x512.png><title>Чем плохи аннотации Java</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.github.io/notes/why-java-annotations-are-bad.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> </nav> <article> <header id=title-block-header> <h1 class=title>Чем плохи аннотации Java</h1> </header> <blockquote> <p>Я впервые опубликовал эту заметку на <a href=https://medium.com/ >Medium</a> в декабре 2019 года. За прошедшие три года я много работал с Java, но мое отношение к аннотациям осталось прежним: считаю, что они часто усложняют код. Medium же мне больше не подходит, поэтому решил перенести статью сюда.</p> </blockquote> <p>Аннотации появились в Java в 2004 году и применяются на всех этапах разработки:</p> <ul> <li>Документирование: Стандартные аннотации <a href=https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Deprecated.html>@Deprecated</a> и <a href=https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Override.html>@Override</a> предоставляют лишь базовую информацию для разработчиков.</li> <li>Статический анализ: Инструменты, такие как IntelliJ IDEA, используют аннотации <a href=https://www.jetbrains.com/help/idea/annotating-source-code.html>для анализа кода</a>.</li> <li>Компиляция: <a href=https://projectlombok.org/ >Lombok</a>, <a href=https://dagger.dev/ >Dagger</a> и <a href=https://mapstruct.org/ >MapStruct</a> изменяют или генерируют код на этапе компиляции, сокращая объем шаблонного кода.</li> <li>Выполнение: Фреймворки <a href=https://docs.oracle.com/javaee/6/tutorial/doc/gilik.html>Java EE</a>, <a href=https://docs.spring.io/spring-framework/docs/current/javadoc-api/index.html?org/springframework/web/servlet/mvc/Controller.html>Spring</a> и <a href=https://docs.micronaut.io/latest/api/io/micronaut/http/annotation/Controller.html>Micronaut</a> используют аннотации для подключения контроллеров, внедрения зависимостей и других задач.</li> </ul> <p>Сама по себе аннотация ничего не делает – это просто метка. Чтобы она заработала, нужен специальный обработчик. Из-за этого бывает сложно понять, как работают аннотации: нужно знать, какие библиотеки подключены к проекту и как настроены зависимости в Maven или Gradle для аннотационного процессора.</p> <p>Усложняет ситуацию и обилие схожих аннотаций, которые обрабатываются по-разному. Классический пример – аннотация <code>@NotNull</code>:</p> <ul> <li><a href=https://docs.oracle.com/javaee/7/api/javax/validation/constraints/NotNull.html>javax.validation.constraints.NotNull</a> – обрабатывается только во время выполнения с использованием валидационных интерфейсов.</li> <li><a href=https://www.jetbrains.com/help/idea/nullable-and-notnull-annotations.html#notnull>org.jetbrains.annotations.NotNull</a> – служит маркером для статического анализа в IDE.</li> <li><a href=https://projectlombok.org/features/NonNull>lombok.NonNull</a> – позволяет Lombok вставлять код во время компиляции для проверки аннотированного параметра метода.</li> <li>И <a href=https://stackoverflow.com/questions/4963300/which-notnull-java-annotation-should-i-use>другие</a>.</li> </ul> <p>Этот хаос затрудняет работу не только начинающих, но и опытных разработчиков. Иногда приходится использовать несколько видов <code>@NotNull</code> в одном приложении. Отладка ситуаций, когда IDE импортирует не ту аннотацию, становится болезненной, долгой и дорогостоящей.</p> <p>Особенно сложно отследить, правильно ли обрабатывается аннотация во время выполнения. Например, для <code>@Bean</code> из Spring требуются тесты, учитывающие контекст исполнения – такие, которые запускают Spring Context. В противном случае придется, по старинке, полностью запускать приложение и проверять работоспособность вручную.</p> <p>Аннотации времени исполнения особенно болезненны для сторонников явной строгой типизации, коих большинство в мире Java. Компилятор не сможет выявить проблемы, поскольку они не связаны с системой типов. Аннотации – инструмент, пришедший из мира неявной слабой типизации или её полного отсутствия. Это противоречит основным принципам типизации Java.</p> <p>Если взглянуть на ситуацию в более широком масштабе, становится очевидно, что механизм аннотаций в Java – это уникальный пример неудачного языкового дизайна, попытка совместить несовместимые вещи в одном инструменте.</p> <p>Другие языки программирования четко разделяются на те, что имеют аналоги аннотаций для времени компиляции: C и Rust с их <code>macro</code> функциональностью, C++ с <code>template</code> и <code>constexpr</code>. Или аналоги аннотаций времени исполнения: декораторы Python, теги Go.</p> <p>Совмещение всего в одном инструменте вынуждает разработчика изучать практически другой язык программирования в рамках Java и одного из многочисленных громоздких фреймворков. Если серьезно, аннотации вообще-то являются тьюринг-полными: достаточно взглянуть на <a href=https://docs.oracle.com/javase/tutorial/java/annotations/repeating.html>repeating annotations</a> и <a href=https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/core/annotation/AliasFor.html>AliasFor</a>!</p> <p>К счастью, сегодня у нас есть альтернативы. Простой пример – лямбды. Сравните примеры минимального контроллера на Spring MVC:</p> <div class=highlight><pre><span></span><code><span class=kn>package</span><span class=w> </span><span class=nn>example</span><span class=p>;</span>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru" prefix="og: https://ogp.me/ns#">
 
-<span class=kn>import</span><span class=w> </span><span class=nn>org.springframework.web.bind.annotation.GetMapping</span><span class=p>;</span>
-<span class=kn>import</span><span class=w> </span><span class=nn>org.springframework.web.bind.annotation.RestController</span><span class=p>;</span>
+<head>
 
-<span class=nd>@RestController</span>
-<span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>HelloController</span><span class=w> </span><span class=p>{</span>
+<meta charset="utf-8">
+<meta name="generator" content="pandoc">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Антон Муравьев">
+<meta name="dcterms.date" content="2019-12-23T21:00:00+03:00">
+<meta name="description" content="О чрезмерно используемом инструменте">
+<meta property="og:url" content="https://tsb99x.github.io/notes/why-java-annotations-are-bad.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Чем плохи аннотации Java">
+<meta property="og:description" content="О чрезмерно используемом инструменте">
+<meta property="og:image" content="https://tsb99x.github.io/res/avatar-512x512.png">
+<title>Чем плохи аннотации Java</title>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/normalize.css">
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/pygments.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="canonical" href="https://tsb99x.github.io/notes/why-java-annotations-are-bad.html">
 
-<span class=w>    </span><span class=nd>@GetMapping</span><span class=p>(</span><span class=s>&quot;/&quot;</span><span class=p>)</span>
-<span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=nf>index</span><span class=p>()</span><span class=w> </span><span class=p>{</span>
-<span class=w>        </span><span class=k>return</span><span class=w> </span><span class=s>&quot;Hello World&quot;</span><span class=p>;</span>
-<span class=w>    </span><span class=p>}</span>
+</head>
 
-<span class=p>}</span>
-</code></pre></div> <p>И <a href=https://javalin.io/ >Javalin</a>:</p> <div class=highlight><pre><span></span><code><span class=kn>package</span><span class=w> </span><span class=nn>example</span><span class=p>;</span>
+<body>
 
-<span class=kn>import</span><span class=w> </span><span class=nn>io.javalin.Javalin</span><span class=p>;</span>
+<nav>
+    <a href="/">Обо мне</a>
+    <a href="/notes/">Заметки</a>
+</nav>
 
-<span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>HelloWorld</span><span class=w> </span><span class=p>{</span>
+<article>
 
-<span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>main</span><span class=p>(</span><span class=n>String</span><span class=o>[]</span><span class=w> </span><span class=n>args</span><span class=p>)</span><span class=w> </span><span class=p>{</span>
-<span class=w>        </span><span class=n>Javalin</span><span class=w> </span><span class=n>app</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>Javalin</span><span class=p>.</span><span class=na>create</span><span class=p>().</span><span class=na>start</span><span class=p>();</span>
-<span class=w>        </span><span class=n>app</span><span class=p>.</span><span class=na>get</span><span class=p>(</span><span class=s>&quot;/&quot;</span><span class=p>,</span><span class=w> </span><span class=n>ctx</span><span class=w> </span><span class=o>-&gt;</span><span class=w> </span><span class=n>ctx</span><span class=p>.</span><span class=na>result</span><span class=p>(</span><span class=s>&quot;Hello World&quot;</span><span class=p>));</span>
-<span class=w>    </span><span class=p>}</span>
+<header id="title-block-header">
+<h1 class="title">Чем плохи аннотации Java</h1>
+</header>
 
-<span class=p>}</span>
-</code></pre></div> <p>В Spring мы видим, как контроллер и путь для GET-запроса описываются декларативно. Проблема в том, что мы не видим, как именно происходит связывание – это скрытая информация. Нам будет сложно изменить поведение этих аннотаций без глубокого изучения того, как они работают. Нужно погружение в документацию.</p> <p>В Javalin, напротив, все прозрачно и предельно ясно, как создается привязка маршрута для GET-запроса. У нас есть полный контроль над тем, как эта привязка будет работать, и мы можем управлять ей с помощью своего кода. К тому же, можно просто перейти к описанию <code>app.get</code> в IDE и изучить код библиотеки Javalin.</p> <p>Радует, что некоторые проекты в мире Kotlin также идут по альтернативному пути, используя DSL. <a href=https://insert-koin.io/ >Koin</a> представляет собой альтернативу Dagger и Spring, обходясь без аннотаций. В результате, он также прост в понимании и работе, как и подход Javalin.</p> <p>В заключение: если внимательно разобраться в каждом случае, становится ясно, что аннотации далеко не всегда являются единственным способом достижения цели. Существуют более перспективные альтернативы, которые упростят понимание приложения как для автора кода, так и для его читателя.</p> <p>И, конечно, есть области, где аннотации вполне оправданы. Это схожий с подходом Go способ тегирования для (де)сериализации данных. Важно отметить, что это точечное применение, которое не создает серьезных препятствий в работе.</p> <hr> <p>В конечном счете, выбор инструментов Java всегда остается за Вами. Но, честно говоря, Java напоминает мне шведский стол, где можно легко затеряться, даже если Вы опытный разработчик. Если у Вас будет возможность, изучите альтернативы аннотациям – результаты могут Вас удивить.</p> <time datetime=2019-12-23T21:00:00+03:00>23 декабря 2019 г.</time> <div class=changelog> <h4>Журнал изменений</h4> <p><b>16 сентября 2022 г.</b>: перевел и перенес заметку с Medium.</p> <p><b>28 марта 2025 г.</b>: стилистически обновил текст.</p> </div> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 
+<blockquote>
+<p>Я впервые опубликовал эту заметку на <a href="https://medium.com/">Medium</a> в декабре 2019 года. За прошедшие три года я много работал с Java, но мое отношение к аннотациям осталось прежним: считаю, что они часто усложняют код. Medium же мне больше не подходит, поэтому решил перенести статью сюда.</p>
+</blockquote>
+<p>Аннотации появились в Java в 2004 году и применяются на всех этапах разработки:</p>
+<ul>
+<li>Документирование: Стандартные аннотации <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Deprecated.html">@Deprecated</a> и <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Override.html">@Override</a> предоставляют лишь базовую информацию для разработчиков.</li>
+<li>Статический анализ: Инструменты, такие как IntelliJ IDEA, используют аннотации <a href="https://www.jetbrains.com/help/idea/annotating-source-code.html">для анализа кода</a>.</li>
+<li>Компиляция: <a href="https://projectlombok.org/">Lombok</a>, <a href="https://dagger.dev/">Dagger</a> и <a href="https://mapstruct.org/">MapStruct</a> изменяют или генерируют код на этапе компиляции, сокращая объем шаблонного кода.</li>
+<li>Выполнение: Фреймворки <a href="https://docs.oracle.com/javaee/6/tutorial/doc/gilik.html">Java EE</a>, <a href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/index.html?org/springframework/web/servlet/mvc/Controller.html">Spring</a> и <a href="https://docs.micronaut.io/latest/api/io/micronaut/http/annotation/Controller.html">Micronaut</a> используют аннотации для подключения контроллеров, внедрения зависимостей и других задач.</li>
+</ul>
+<p>Сама по себе аннотация ничего не делает – это просто метка. Чтобы она заработала, нужен специальный обработчик. Из-за этого бывает сложно понять, как работают аннотации: нужно знать, какие библиотеки подключены к проекту и как настроены зависимости в Maven или Gradle для аннотационного процессора.</p>
+<p>Усложняет ситуацию и обилие схожих аннотаций, которые обрабатываются по-разному. Классический пример – аннотация <code>@NotNull</code>:</p>
+<ul>
+<li><a href="https://docs.oracle.com/javaee/7/api/javax/validation/constraints/NotNull.html">javax.validation.constraints.NotNull</a> – обрабатывается только во время выполнения с использованием валидационных интерфейсов.</li>
+<li><a href="https://www.jetbrains.com/help/idea/nullable-and-notnull-annotations.html#notnull">org.jetbrains.annotations.NotNull</a> – служит маркером для статического анализа в IDE.</li>
+<li><a href="https://projectlombok.org/features/NonNull">lombok.NonNull</a> – позволяет Lombok вставлять код во время компиляции для проверки аннотированного параметра метода.</li>
+<li>И <a href="https://stackoverflow.com/questions/4963300/which-notnull-java-annotation-should-i-use">другие</a>.</li>
+</ul>
+<p>Этот хаос затрудняет работу не только начинающих, но и опытных разработчиков. Иногда приходится использовать несколько видов <code>@NotNull</code> в одном приложении. Отладка ситуаций, когда IDE импортирует не ту аннотацию, становится болезненной, долгой и дорогостоящей.</p>
+<p>Особенно сложно отследить, правильно ли обрабатывается аннотация во время выполнения. Например, для <code>@Bean</code> из Spring требуются тесты, учитывающие контекст исполнения – такие, которые запускают Spring Context. В противном случае придется, по старинке, полностью запускать приложение и проверять работоспособность вручную.</p>
+<p>Аннотации времени исполнения особенно болезненны для сторонников явной строгой типизации, коих большинство в мире Java. Компилятор не сможет выявить проблемы, поскольку они не связаны с системой типов. Аннотации – инструмент, пришедший из мира неявной слабой типизации или её полного отсутствия. Это противоречит основным принципам типизации Java.</p>
+<p>Если взглянуть на ситуацию в более широком масштабе, становится очевидно, что механизм аннотаций в Java – это уникальный пример неудачного языкового дизайна, попытка совместить несовместимые вещи в одном инструменте.</p>
+<p>Другие языки программирования четко разделяются на те, что имеют аналоги аннотаций для времени компиляции: C и Rust с их <code>macro</code> функциональностью, C++ с <code>template</code> и <code>constexpr</code>. Или аналоги аннотаций времени исполнения: декораторы Python, теги Go.</p>
+<p>Совмещение всего в одном инструменте вынуждает разработчика изучать практически другой язык программирования в рамках Java и одного из многочисленных громоздких фреймворков. Если серьезно, аннотации вообще-то являются тьюринг-полными: достаточно взглянуть на <a href="https://docs.oracle.com/javase/tutorial/java/annotations/repeating.html">repeating annotations</a> и <a href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/core/annotation/AliasFor.html">AliasFor</a>!</p>
+<p>К счастью, сегодня у нас есть альтернативы. Простой пример – лямбды. Сравните примеры минимального контроллера на Spring MVC:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">example</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.web.bind.annotation.GetMapping</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.springframework.web.bind.annotation.RestController</span><span class="p">;</span>
+
+<span class="nd">@RestController</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">HelloController</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="nd">@GetMapping</span><span class="p">(</span><span class="s">&quot;/&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">index</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="s">&quot;Hello World&quot;</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="p">}</span>
+</code></pre></div>
+
+<p>И <a href="https://javalin.io/">Javalin</a>:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">example</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.javalin.Javalin</span><span class="p">;</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">HelloWorld</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">Javalin</span><span class="w"> </span><span class="n">app</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Javalin</span><span class="p">.</span><span class="na">create</span><span class="p">().</span><span class="na">start</span><span class="p">();</span>
+<span class="w">        </span><span class="n">app</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">&quot;/&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">ctx</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">ctx</span><span class="p">.</span><span class="na">result</span><span class="p">(</span><span class="s">&quot;Hello World&quot;</span><span class="p">));</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="p">}</span>
+</code></pre></div>
+
+<p>В Spring мы видим, как контроллер и путь для GET-запроса описываются декларативно. Проблема в том, что мы не видим, как именно происходит связывание – это скрытая информация. Нам будет сложно изменить поведение этих аннотаций без глубокого изучения того, как они работают. Нужно погружение в документацию.</p>
+<p>В Javalin, напротив, все прозрачно и предельно ясно, как создается привязка маршрута для GET-запроса. У нас есть полный контроль над тем, как эта привязка будет работать, и мы можем управлять ей с помощью своего кода. К тому же, можно просто перейти к описанию <code>app.get</code> в IDE и изучить код библиотеки Javalin.</p>
+<p>Радует, что некоторые проекты в мире Kotlin также идут по альтернативному пути, используя DSL. <a href="https://insert-koin.io/">Koin</a> представляет собой альтернативу Dagger и Spring, обходясь без аннотаций. В результате, он также прост в понимании и работе, как и подход Javalin.</p>
+<p>В заключение: если внимательно разобраться в каждом случае, становится ясно, что аннотации далеко не всегда являются единственным способом достижения цели. Существуют более перспективные альтернативы, которые упростят понимание приложения как для автора кода, так и для его читателя.</p>
+<p>И, конечно, есть области, где аннотации вполне оправданы. Это схожий с подходом Go способ тегирования для (де)сериализации данных. Важно отметить, что это точечное применение, которое не создает серьезных препятствий в работе.</p>
+<hr />
+<p>В конечном счете, выбор инструментов Java всегда остается за Вами. Но, честно говоря, Java напоминает мне шведский стол, где можно легко затеряться, даже если Вы опытный разработчик. Если у Вас будет возможность, изучите альтернативы аннотациям – результаты могут Вас удивить.</p>
+
+<time datetime="2019-12-23T21:00:00+03:00">23 декабря 2019 г.</time>
+
+<div class="changelog">
+<h4>Журнал изменений</h4>
+<p><b>16 сентября 2022 г.</b>: перевел и перенес заметку с Medium.</p>
+<p><b>28 марта 2025 г.</b>: стилистически обновил текст.</p>
+</div>
+
+</article>
+
+<address class="contacts">
+    Если Вы хотите обсудить содержание заметки, задать вопросы или
+    предложить изменения, то со мной можно связаться в
+    <a href="https://t.me/tsb99x">Telegram</a>
+</address>
+
+<footer>
+    <span class="copyright">© 2019-2026</span> |
+    <a rel="license"
+        href="https://creativecommons.org/licenses/by/4.0/deed.ru">
+        CC BY 4.0
+    </a>
+</footer>
+
+</body>
+</html>

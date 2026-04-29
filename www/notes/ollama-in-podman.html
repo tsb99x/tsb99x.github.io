@@ -1,81 +1,169 @@
-<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2025-07-20T10:37:42+03:00><meta name=description content="Локальная LLM на Linux"><meta property=og:url content=https://tsb99x.github.io/notes/ollama-in-podman.html><meta property=og:type content=article><meta property=og:title content="Запускаем Ollama в Podman"><meta property=og:description content="Локальная LLM на Linux"><meta property=og:image content=https://tsb99x.github.io/res/avatar-512x512.png><title>Запускаем Ollama в Podman</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.github.io/notes/ollama-in-podman.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> </nav> <article> <header id=title-block-header> <h1 class=title>Запускаем Ollama в Podman</h1> </header> <p>Из каждого утюга слышно про LLM. Их нынче называют AI, хотя я сомневаюсь в этом. Мне, как любителю Open Source и Self Hosted, претит мысль пользоваться облачными решениями. Поэтому LLM’ки, чтобы не отставать от моды, я разворачиваю локально.</p> <p><a href=https://ollama.com/ >Ollama</a> – простейшее решение для развёртывания LLM в контейнере. Это тулза, которая позволит загружать LLM, запускать её и взаимодействовать через CLI. Доки <a href=https://hub.docker.com/r/ollama/ollama>Ollama на Docker Hub</a> дают понять, что для исполнения LLM на GPU от AMD мне нужно загружать тег <code>rocm</code>. Начинаем с этого. Пользуюсь, по традиции, Podman.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>podman<span class=w> </span>pull<span class=w> </span>docker.io/ollama/ollama:rocm
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru" prefix="og: https://ogp.me/ns#">
 
-<span class=go>Trying to pull docker.io/ollama/ollama:rocm...</span>
-<span class=go>Getting image source signatures</span>
-<span class=go>Copying blob a1a22aa331e6 done</span>
-<span class=go>Copying blob b08e2ff4391e done</span>
-<span class=go>Copying blob bdf13fb94fec done</span>
-<span class=go>Copying blob 3fd4deb1a79f done</span>
-<span class=go>Copying config d466fc07e3 done</span>
-<span class=go>Writing manifest to image destination</span>
-<span class=go>Storing signatures</span>
-<span class=go>d466fc07e32ed2f07fa1c9de9e4fe48d5d4b1aab72a9083d3809018cce5f76c6</span>
+<head>
 
-<span class=gp>$ </span>podman<span class=w> </span>image<span class=w> </span>ls<span class=w> </span>ollama
+<meta charset="utf-8">
+<meta name="generator" content="pandoc">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Антон Муравьев">
+<meta name="dcterms.date" content="2025-07-20T10:37:42+03:00">
+<meta name="description" content="Локальная LLM на Linux">
+<meta property="og:url" content="https://tsb99x.github.io/notes/ollama-in-podman.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Запускаем Ollama в Podman">
+<meta property="og:description" content="Локальная LLM на Linux">
+<meta property="og:image" content="https://tsb99x.github.io/res/avatar-512x512.png">
+<title>Запускаем Ollama в Podman</title>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/normalize.css">
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/pygments.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="canonical" href="https://tsb99x.github.io/notes/ollama-in-podman.html">
 
-<span class=go>REPOSITORY               TAG         IMAGE ID      CREATED      SIZE</span>
-<span class=go>docker.io/ollama/ollama  rocm        d466fc07e32e  11 days ago  6.42 GB</span>
-</code></pre></div> <p>Да, образ толстенький. Теперь его надо запустить. На странице Docker Hub есть команда для запуска на AMD GPU. Немного её модифицируем, добавив права опцией <code>container_runtime_t</code> и сохраняя пользовательские группы опцией <code>keep-groups</code>. Это нужно для Podman, ведь он выдаёт контейнерам меньше прав по-умолчанию.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>podman<span class=w> </span>run<span class=w> </span>-d<span class=w> </span><span class=se>\</span>
-<span class=w>    </span>--device<span class=w> </span>/dev/kfd<span class=w> </span><span class=se>\</span>
-<span class=w>    </span>--device<span class=w> </span>/dev/dri<span class=w> </span><span class=se>\</span>
-<span class=w>    </span>-v<span class=w> </span>ollama:/root/.ollama<span class=w> </span><span class=se>\</span>
-<span class=w>    </span>-p<span class=w> </span><span class=m>11434</span>:11434<span class=w> </span><span class=se>\</span>
-<span class=w>    </span>--name<span class=w> </span>ollama<span class=w> </span><span class=se>\</span>
-<span class=w>    </span>--security-opt<span class=w> </span><span class=nv>label</span><span class=o>=</span>type:container_runtime_t<span class=w> </span><span class=se>\</span>
-<span class=w>    </span>--group-add<span class=w> </span>keep-groups<span class=w> </span><span class=se>\</span>
-<span class=w>    </span>ollama/ollama:rocm
+</head>
 
-<span class=go>f864498e8c3df755b854527e393f1372fb25dc3405374fdc75a8abf2a30c2e9b</span>
-</code></pre></div> <p>Запустилось! Посмотрим на версию Ollama, заодно поймём как пользоваться CLI.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>podman<span class=w> </span><span class=nb>exec</span><span class=w> </span>-it<span class=w> </span>ollama<span class=w> </span>ollama<span class=w> </span>--version
+<body>
 
-<span class=go>ollama version is 0.9.6</span>
-</code></pre></div> <p>Чтобы не писать каждый раз <code>podman exec -it ollama ollama</code>, делаем <code>alias</code>.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span><span class=nb>alias</span><span class=w> </span><span class=nv>ollama</span><span class=o>=</span><span class=s1>&#39;podman exec -it ollama ollama&#39;</span>
-</code></pre></div> <p>Загружаем какие-нибудь модели. Возмём <a href=https://ollama.com/library/deepseek-r1>дистиллят попсового DeepSeek-R1</a> на 8 миллиардов параметров. Это не настоящая архитектура R1, но локально пойдёт.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>ollama<span class=w> </span>pull<span class=w> </span>deepseek-r1:8b
+<nav>
+    <a href="/">Обо мне</a>
+    <a href="/notes/">Заметки</a>
+</nav>
 
-<span class=go>pulling manifest</span>
-<span class=go>pulling e6a7edc1a4d7: 100% ▕██████████████████▏ 5.2 GB</span>
-<span class=go>pulling c5ad996bda6e: 100% ▕██████████████████▏  556 B</span>
-<span class=go>pulling 6e4c38e1172f: 100% ▕██████████████████▏ 1.1 KB</span>
-<span class=go>pulling ed8474dc73db: 100% ▕██████████████████▏  179 B</span>
-<span class=go>pulling f64cd5418e4b: 100% ▕██████████████████▏  487 B</span>
-<span class=go>verifying sha256 digest</span>
-<span class=go>writing manifest</span>
-<span class=go>success</span>
+<article>
 
-<span class=gp>$ </span>ollama<span class=w> </span>ls
+<header id="title-block-header">
+<h1 class="title">Запускаем Ollama в Podman</h1>
+</header>
 
-<span class=go>NAME                     ID              SIZE      MODIFIED</span>
-<span class=go>deepseek-r1:8b           6995872bfe4c    5.2 GB    9 seconds ago</span>
-</code></pre></div> <p>Ух, и это не самая большая модель! Запускаем интерактивный CLI с помощью <code>run</code>.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>ollama<span class=w> </span>run<span class=w> </span>deepseek-r1:8b
+<p>Из каждого утюга слышно про LLM. Их нынче называют AI, хотя я сомневаюсь в этом. Мне, как любителю Open Source и Self Hosted, претит мысль пользоваться облачными решениями. Поэтому LLM’ки, чтобы не отставать от моды, я разворачиваю локально.</p>
+<p><a href="https://ollama.com/">Ollama</a> – простейшее решение для развёртывания LLM в контейнере. Это тулза, которая позволит загружать LLM, запускать её и взаимодействовать через CLI. Доки <a href="https://hub.docker.com/r/ollama/ollama">Ollama на Docker Hub</a> дают понять, что для исполнения LLM на GPU от AMD мне нужно загружать тег <code>rocm</code>. Начинаем с этого. Пользуюсь, по традиции, Podman.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>podman<span class="w"> </span>pull<span class="w"> </span>docker.io/ollama/ollama:rocm
 
-<span class=go>&gt;&gt;&gt; Hello there</span>
+<span class="go">Trying to pull docker.io/ollama/ollama:rocm...</span>
+<span class="go">Getting image source signatures</span>
+<span class="go">Copying blob a1a22aa331e6 done</span>
+<span class="go">Copying blob b08e2ff4391e done</span>
+<span class="go">Copying blob bdf13fb94fec done</span>
+<span class="go">Copying blob 3fd4deb1a79f done</span>
+<span class="go">Copying config d466fc07e3 done</span>
+<span class="go">Writing manifest to image destination</span>
+<span class="go">Storing signatures</span>
+<span class="go">d466fc07e32ed2f07fa1c9de9e4fe48d5d4b1aab72a9083d3809018cce5f76c6</span>
 
-<span class=go>Thinking...</span>
-<span class=go>Okay, the user just said “Hello there” – that&#39;s a pretty neutral and</span>
-<span class=go>friendly opening.</span>
+<span class="gp">$ </span>podman<span class="w"> </span>image<span class="w"> </span>ls<span class="w"> </span>ollama
 
-<span class=go>Hmm, they didn&#39;t specify their name or what they want to talk about yet.</span>
-<span class=go>Maybe they&#39;re just testing how I respond before diving into something more</span>
-<span class=go>substantial? Or perhaps they&#39;re in a greeting mode checking if it&#39;s an</span>
-<span class=go>appropriate time to interact.</span>
+<span class="go">REPOSITORY               TAG         IMAGE ID      CREATED      SIZE</span>
+<span class="go">docker.io/ollama/ollama  rocm        d466fc07e32e  11 days ago  6.42 GB</span>
+</code></pre></div>
 
-<span class=go>Their message length suggests they might prefer concise responses too, but</span>
-<span class=go>I&#39;ll keep monitoring that as the conversation develops. For now, this</span>
-<span class=go>balanced approach should work well – friendly enough without being</span>
-<span class=go>overbearing.</span>
-<span class=go>...done thinking.</span>
+<p>Да, образ толстенький. Теперь его надо запустить. На странице Docker Hub есть команда для запуска на AMD GPU. Немного её модифицируем, добавив права опцией <code>container_runtime_t</code> и сохраняя пользовательские группы опцией <code>keep-groups</code>. Это нужно для Podman, ведь он выдаёт контейнерам меньше прав по-умолчанию.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>podman<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--device<span class="w"> </span>/dev/kfd<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--device<span class="w"> </span>/dev/dri<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-v<span class="w"> </span>ollama:/root/.ollama<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-p<span class="w"> </span><span class="m">11434</span>:11434<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--name<span class="w"> </span>ollama<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--security-opt<span class="w"> </span><span class="nv">label</span><span class="o">=</span>type:container_runtime_t<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--group-add<span class="w"> </span>keep-groups<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>ollama/ollama:rocm
 
-<span class=go>Hello! Hi there,</span>
+<span class="go">f864498e8c3df755b854527e393f1372fb25dc3405374fdc75a8abf2a30c2e9b</span>
+</code></pre></div>
 
-<span class=go>How can I help you today?</span>
+<p>Запустилось! Посмотрим на версию Ollama, заодно поймём как пользоваться CLI.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>ollama<span class="w"> </span>ollama<span class="w"> </span>--version
 
-<span class=go>&gt;&gt;&gt; Send a message (/? for help)</span>
-</code></pre></div> <p>CLI даже показывает блок thinking, отражающего псевдо-мыслительный процесс LLM. В целом бывает удобно для отладки промпта, если нейронка несёт полную чушь.</p> <p>Чтобы погасить LLM, пользуемся <code>/bye</code> в чате и <code>podman stop</code> опосля.</p> <div class=highlight><pre><span></span><code><span class=go>&gt;&gt;&gt; /bye</span>
+<span class="go">ollama version is 0.9.6</span>
+</code></pre></div>
 
-<span class=gp>$ </span>podman<span class=w> </span>stop<span class=w> </span>ollama
+<p>Чтобы не писать каждый раз <code>podman exec -it ollama ollama</code>, делаем <code>alias</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span><span class="nb">alias</span><span class="w"> </span><span class="nv">ollama</span><span class="o">=</span><span class="s1">&#39;podman exec -it ollama ollama&#39;</span>
+</code></pre></div>
 
-<span class=go>ollama</span>
-</code></pre></div> <p>Чтобы обратно запустить Ollama, достаточно использовать <code>podman start</code>.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>podman<span class=w> </span>start<span class=w> </span>ollama
+<p>Загружаем какие-нибудь модели. Возмём <a href="https://ollama.com/library/deepseek-r1">дистиллят попсового DeepSeek-R1</a> на 8 миллиардов параметров. Это не настоящая архитектура R1, но локально пойдёт.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>ollama<span class="w"> </span>pull<span class="w"> </span>deepseek-r1:8b
 
-<span class=go>ollama</span>
-</code></pre></div> <p>На этом quick start можно завершать. Оставлю только одну ремарку – все LLM’ки, с которыми я пока поработал, несут полнейшую чушь время от времени, особенно относительно фактической информации. Будьте внимательны и проверяйте ответы :)</p> <time datetime=2025-07-20T10:37:42+03:00>20 июля 2025 г.</time> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 
+<span class="go">pulling manifest</span>
+<span class="go">pulling e6a7edc1a4d7: 100% ▕██████████████████▏ 5.2 GB</span>
+<span class="go">pulling c5ad996bda6e: 100% ▕██████████████████▏  556 B</span>
+<span class="go">pulling 6e4c38e1172f: 100% ▕██████████████████▏ 1.1 KB</span>
+<span class="go">pulling ed8474dc73db: 100% ▕██████████████████▏  179 B</span>
+<span class="go">pulling f64cd5418e4b: 100% ▕██████████████████▏  487 B</span>
+<span class="go">verifying sha256 digest</span>
+<span class="go">writing manifest</span>
+<span class="go">success</span>
+
+<span class="gp">$ </span>ollama<span class="w"> </span>ls
+
+<span class="go">NAME                     ID              SIZE      MODIFIED</span>
+<span class="go">deepseek-r1:8b           6995872bfe4c    5.2 GB    9 seconds ago</span>
+</code></pre></div>
+
+<p>Ух, и это не самая большая модель! Запускаем интерактивный CLI с помощью <code>run</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>ollama<span class="w"> </span>run<span class="w"> </span>deepseek-r1:8b
+
+<span class="go">&gt;&gt;&gt; Hello there</span>
+
+<span class="go">Thinking...</span>
+<span class="go">Okay, the user just said “Hello there” – that&#39;s a pretty neutral and</span>
+<span class="go">friendly opening.</span>
+
+<span class="go">Hmm, they didn&#39;t specify their name or what they want to talk about yet.</span>
+<span class="go">Maybe they&#39;re just testing how I respond before diving into something more</span>
+<span class="go">substantial? Or perhaps they&#39;re in a greeting mode checking if it&#39;s an</span>
+<span class="go">appropriate time to interact.</span>
+
+<span class="go">Their message length suggests they might prefer concise responses too, but</span>
+<span class="go">I&#39;ll keep monitoring that as the conversation develops. For now, this</span>
+<span class="go">balanced approach should work well – friendly enough without being</span>
+<span class="go">overbearing.</span>
+<span class="go">...done thinking.</span>
+
+<span class="go">Hello! Hi there,</span>
+
+<span class="go">How can I help you today?</span>
+
+<span class="go">&gt;&gt;&gt; Send a message (/? for help)</span>
+</code></pre></div>
+
+<p>CLI даже показывает блок thinking, отражающего псевдо-мыслительный процесс LLM. В целом бывает удобно для отладки промпта, если нейронка несёт полную чушь.</p>
+<p>Чтобы погасить LLM, пользуемся <code>/bye</code> в чате и <code>podman stop</code> опосля.</p>
+<div class="highlight"><pre><span></span><code><span class="go">&gt;&gt;&gt; /bye</span>
+
+<span class="gp">$ </span>podman<span class="w"> </span>stop<span class="w"> </span>ollama
+
+<span class="go">ollama</span>
+</code></pre></div>
+
+<p>Чтобы обратно запустить Ollama, достаточно использовать <code>podman start</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>podman<span class="w"> </span>start<span class="w"> </span>ollama
+
+<span class="go">ollama</span>
+</code></pre></div>
+
+<p>На этом quick start можно завершать. Оставлю только одну ремарку – все LLM’ки, с которыми я пока поработал, несут полнейшую чушь время от времени, особенно относительно фактической информации. Будьте внимательны и проверяйте ответы :)</p>
+
+<time datetime="2025-07-20T10:37:42+03:00">20 июля 2025 г.</time>
+
+
+</article>
+
+<address class="contacts">
+    Если Вы хотите обсудить содержание заметки, задать вопросы или
+    предложить изменения, то со мной можно связаться в
+    <a href="https://t.me/tsb99x">Telegram</a>
+</address>
+
+<footer>
+    <span class="copyright">© 2019-2026</span> |
+    <a rel="license"
+        href="https://creativecommons.org/licenses/by/4.0/deed.ru">
+        CC BY 4.0
+    </a>
+</footer>
+
+</body>
+</html>

@@ -1,21 +1,110 @@
-<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2025-02-10T21:12:41+03:00><meta name=description content="Обновляем проекты на Си"><meta property=og:url content=https://tsb99x.github.io/notes/work-on-mistakes.html><meta property=og:type content=article><meta property=og:title content="Работа над ошибками"><meta property=og:description content="Обновляем проекты на Си"><meta property=og:image content=https://tsb99x.github.io/res/avatar-512x512.png><title>Работа над ошибками</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.github.io/notes/work-on-mistakes.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> </nav> <article> <header id=title-block-header> <h1 class=title>Работа над ошибками</h1> </header> <p>Настоящая разработка это не только про то, чтобы написать программу. Программу ещё нужно поддерживать. Только поддержка покажет, насколько код удобен в работе.</p> <p>Хороший тон поддержки – не сломать старые функции, а только улучшить софт. Немного решил поработать над парой своих “игрушечных” проектов на Си. Обе программы предельно просты, но имеют несколько недостатков.</p> <p>Первым делом, включил в работу <a href=https://clang.llvm.org/docs/ClangFormat.html>ClangFormat</a>. Инструмент не самый простой, но позволяет добиться унифицированного форматирования. Меня особо заинтересовала возможность автоматического оборачивания в скобки кода в <code>if</code> и <code>else</code>. История показывает, что это источник некоторых очевидных ошибок, включая <a href=https://www.imperialviolet.org/2014/02/22/applebug.html>баг Apple</a>.</p> <p>Кроме этого, подключил компиляцию с помощью Clang и MSVC 2010. Польза Clang – он предоставляет замечательный флаг <code>-Weverything</code>. Не все предупреждения будут ошибками, но дают повод задуматься. Мне очень не хватает такого флага для GCC.</p> <p>С MSVC 2010 иная ситуация. Я хотел получить универсальный код. Windows оказался хорошим тестом. Особенно Windows XP, где MSVC 2010 – последний релиз MSVC. Да, мало кто будет сейчас его использовать. Но, если проект компилируется и там, то скомпилируется практически везде. <a href=https://bellard.org/tcc/ >Tiny C Compiler</a> в этих целях тоже подходит.</p> <p>По тулчейну понятно, теперь к деталям.</p> <p>Начнём с <a href=https://github.com/tsb99x/access-log-tabulator>Access Log Tabulator</a>. Проблемы, которые я решал – поиск альтернативы для нестандартной функции <code>strptime</code> и что делать с оффсетами в <code>struct tm</code>.</p> <p>Предельно наивная имплементация <code>strptime</code> для формата даты-времени Apache не вызвала проблем. Достаточно использовать стандартный <code>sscanf</code>.</p> <p>А вот пример структуры <code>tm</code> в заголовочных файлах у Clang и GCC на моём Debian:</p> <div class=highlight><pre><span></span><code><span class=k>struct</span><span class=w> </span><span class=nc>tm</span>
-<span class=p>{</span>
-<span class=w>  </span><span class=kt>int</span><span class=w> </span><span class=n>tm_sec</span><span class=p>;</span><span class=w>           </span><span class=cm>/* Seconds. [0-60] (1 leap second) */</span>
-<span class=w>  </span><span class=kt>int</span><span class=w> </span><span class=n>tm_min</span><span class=p>;</span><span class=w>           </span><span class=cm>/* Minutes. [0-59] */</span>
-<span class=w>  </span><span class=kt>int</span><span class=w> </span><span class=n>tm_hour</span><span class=p>;</span><span class=w>          </span><span class=cm>/* Hours.   [0-23] */</span>
-<span class=w>  </span><span class=kt>int</span><span class=w> </span><span class=n>tm_mday</span><span class=p>;</span><span class=w>          </span><span class=cm>/* Day.     [1-31] */</span>
-<span class=w>  </span><span class=kt>int</span><span class=w> </span><span class=n>tm_mon</span><span class=p>;</span><span class=w>           </span><span class=cm>/* Month.   [0-11] */</span>
-<span class=w>  </span><span class=kt>int</span><span class=w> </span><span class=n>tm_year</span><span class=p>;</span><span class=w>          </span><span class=cm>/* Year - 1900.  */</span>
-<span class=w>  </span><span class=kt>int</span><span class=w> </span><span class=n>tm_wday</span><span class=p>;</span><span class=w>          </span><span class=cm>/* Day of week. [0-6] */</span>
-<span class=w>  </span><span class=kt>int</span><span class=w> </span><span class=n>tm_yday</span><span class=p>;</span><span class=w>          </span><span class=cm>/* Days in year.[0-365] */</span>
-<span class=w>  </span><span class=kt>int</span><span class=w> </span><span class=n>tm_isdst</span><span class=p>;</span><span class=w>         </span><span class=cm>/* DST.     [-1/0/1]*/</span>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru" prefix="og: https://ogp.me/ns#">
 
-<span class=cp># ifdef __USE_MISC</span>
-<span class=w>  </span><span class=kt>long</span><span class=w> </span><span class=kt>int</span><span class=w> </span><span class=n>tm_gmtoff</span><span class=p>;</span><span class=w>       </span><span class=cm>/* Seconds east of UTC.  */</span>
-<span class=w>  </span><span class=k>const</span><span class=w> </span><span class=kt>char</span><span class=w> </span><span class=o>*</span><span class=n>tm_zone</span><span class=p>;</span><span class=w>      </span><span class=cm>/* Timezone abbreviation.  */</span>
-<span class=cp># else</span>
-<span class=w>  </span><span class=kt>long</span><span class=w> </span><span class=kt>int</span><span class=w> </span><span class=n>__tm_gmtoff</span><span class=p>;</span><span class=w>     </span><span class=cm>/* Seconds east of UTC.  */</span>
-<span class=w>  </span><span class=k>const</span><span class=w> </span><span class=kt>char</span><span class=w> </span><span class=o>*</span><span class=n>__tm_zone</span><span class=p>;</span><span class=w>    </span><span class=cm>/* Timezone abbreviation.  */</span>
-<span class=cp># endif</span>
-<span class=p>};</span>
-</code></pre></div> <p>Стандарт Си совсем не предусматривает использование оффсетов относительно GMT. То есть, поле <code>tm_gmtoff</code> – нестандартное расширение и на MSVC его нет. Оффсет пришлось вынести за пределы структуры <code>tm</code> отдельной переменной, но не беда.</p> <p>Результат – полностью совместимая с C89/C90 версия программы.</p> <p>Обновил и <a href=https://github.com/tsb99x/utf8-range-checker>UTF8 Range Checker</a>. Самая большая боль там – размерность переменной для Unicode codepoint. Такая переменная должна иметь как минимум 32 битный беззнаковый тип. Я же использовал <code>unsigned int</code>. Теоретически это проблема.</p> <p>Да-да, я знаю, это неправильно. Стандарт Си гарантирует размерность <code>int</code> не менее 16 бит. То есть, для некоторых платформ невозможно будет получить корректный codepoint, ведь размерность будет меньше 32. Программа выдаст мусор.</p> <figure> <img src=res/work-on-mistakes-00-turbo-vision.webp alt="Старый добрый Turbo Vision"> <figcaption aria-hidden=true>Старый добрый Turbo Vision</figcaption> </figure> <p>Ради интереса, постарался найти такую платформу и компилятор. Из тех пар, что пробовал, только <a href=https://github.com/tkchia/gcc-ia16/ >i16gcc</a> на <a href=https://www.freedos.org/ >FreeDOS</a> 1.3 или <a href=https://en.wikipedia.org/wiki/Turbo_C>Turbo C</a> на <a href=https://www.dosbox.com/ >DOSBox</a> показали проблему с битностью. У них <code>int</code> занимает 16 бит, а не 32.</p> <p>Не беда, меняем <code>unsigned int</code> на <code>unsigned long</code> и дело в шляпе!</p> <p>Что же, опробовал вторые версии программ на DOS, мои тесты проходят. Прекрасно!</p> <p>P.S.: переносы строк постоянно приходилось менять при переходе из Unix окружения в Win или DOS. В Vim есть опция для установки окончания строк, <code>:set ff=dos</code> или <code>:set ff=unix</code>. Очень удобно. Применил опцию, сохраняешь файл и готово.</p> <time datetime=2025-02-10T21:12:41+03:00>10 февраля 2025 г.</time> <div class=changelog> <h4>Журнал изменений</h4> <p><b>11 февраля 2025 г.</b>: добавил пример <code>struct tm</code> и скриншот Turbo Vision.</p> <p><b>1 января 2026 г.</b>: перенёс исходники на GitHub.</p> </div> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 
+<head>
+
+<meta charset="utf-8">
+<meta name="generator" content="pandoc">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Антон Муравьев">
+<meta name="dcterms.date" content="2025-02-10T21:12:41+03:00">
+<meta name="description" content="Обновляем проекты на Си">
+<meta property="og:url" content="https://tsb99x.github.io/notes/work-on-mistakes.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Работа над ошибками">
+<meta property="og:description" content="Обновляем проекты на Си">
+<meta property="og:image" content="https://tsb99x.github.io/res/avatar-512x512.png">
+<title>Работа над ошибками</title>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/normalize.css">
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/pygments.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="canonical" href="https://tsb99x.github.io/notes/work-on-mistakes.html">
+
+</head>
+
+<body>
+
+<nav>
+    <a href="/">Обо мне</a>
+    <a href="/notes/">Заметки</a>
+</nav>
+
+<article>
+
+<header id="title-block-header">
+<h1 class="title">Работа над ошибками</h1>
+</header>
+
+<p>Настоящая разработка это не только про то, чтобы написать программу. Программу ещё нужно поддерживать. Только поддержка покажет, насколько код удобен в работе.</p>
+<p>Хороший тон поддержки – не сломать старые функции, а только улучшить софт. Немного решил поработать над парой своих “игрушечных” проектов на Си. Обе программы предельно просты, но имеют несколько недостатков.</p>
+<p>Первым делом, включил в работу <a href="https://clang.llvm.org/docs/ClangFormat.html">ClangFormat</a>. Инструмент не самый простой, но позволяет добиться унифицированного форматирования. Меня особо заинтересовала возможность автоматического оборачивания в скобки кода в <code>if</code> и <code>else</code>. История показывает, что это источник некоторых очевидных ошибок, включая <a href="https://www.imperialviolet.org/2014/02/22/applebug.html">баг Apple</a>.</p>
+<p>Кроме этого, подключил компиляцию с помощью Clang и MSVC 2010. Польза Clang – он предоставляет замечательный флаг <code>-Weverything</code>. Не все предупреждения будут ошибками, но дают повод задуматься. Мне очень не хватает такого флага для GCC.</p>
+<p>С MSVC 2010 иная ситуация. Я хотел получить универсальный код. Windows оказался хорошим тестом. Особенно Windows XP, где MSVC 2010 – последний релиз MSVC. Да, мало кто будет сейчас его использовать. Но, если проект компилируется и там, то скомпилируется практически везде. <a href="https://bellard.org/tcc/">Tiny C Compiler</a> в этих целях тоже подходит.</p>
+<p>По тулчейну понятно, теперь к деталям.</p>
+<p>Начнём с <a href="https://github.com/tsb99x/access-log-tabulator">Access Log Tabulator</a>. Проблемы, которые я решал – поиск альтернативы для нестандартной функции <code>strptime</code> и что делать с оффсетами в <code>struct tm</code>.</p>
+<p>Предельно наивная имплементация <code>strptime</code> для формата даты-времени Apache не вызвала проблем. Достаточно использовать стандартный <code>sscanf</code>.</p>
+<p>А вот пример структуры <code>tm</code> в заголовочных файлах у Clang и GCC на моём Debian:</p>
+<div class="highlight"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">tm</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">tm_sec</span><span class="p">;</span><span class="w">           </span><span class="cm">/* Seconds. [0-60] (1 leap second) */</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">tm_min</span><span class="p">;</span><span class="w">           </span><span class="cm">/* Minutes. [0-59] */</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">tm_hour</span><span class="p">;</span><span class="w">          </span><span class="cm">/* Hours.   [0-23] */</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">tm_mday</span><span class="p">;</span><span class="w">          </span><span class="cm">/* Day.     [1-31] */</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">tm_mon</span><span class="p">;</span><span class="w">           </span><span class="cm">/* Month.   [0-11] */</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">tm_year</span><span class="p">;</span><span class="w">          </span><span class="cm">/* Year - 1900.  */</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">tm_wday</span><span class="p">;</span><span class="w">          </span><span class="cm">/* Day of week. [0-6] */</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">tm_yday</span><span class="p">;</span><span class="w">          </span><span class="cm">/* Days in year.[0-365] */</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">tm_isdst</span><span class="p">;</span><span class="w">         </span><span class="cm">/* DST.     [-1/0/1]*/</span>
+
+<span class="cp"># ifdef __USE_MISC</span>
+<span class="w">  </span><span class="kt">long</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tm_gmtoff</span><span class="p">;</span><span class="w">       </span><span class="cm">/* Seconds east of UTC.  */</span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">tm_zone</span><span class="p">;</span><span class="w">      </span><span class="cm">/* Timezone abbreviation.  */</span>
+<span class="cp"># else</span>
+<span class="w">  </span><span class="kt">long</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">__tm_gmtoff</span><span class="p">;</span><span class="w">     </span><span class="cm">/* Seconds east of UTC.  */</span>
+<span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">__tm_zone</span><span class="p">;</span><span class="w">    </span><span class="cm">/* Timezone abbreviation.  */</span>
+<span class="cp"># endif</span>
+<span class="p">};</span>
+</code></pre></div>
+
+<p>Стандарт Си совсем не предусматривает использование оффсетов относительно GMT. То есть, поле <code>tm_gmtoff</code> – нестандартное расширение и на MSVC его нет. Оффсет пришлось вынести за пределы структуры <code>tm</code> отдельной переменной, но не беда.</p>
+<p>Результат – полностью совместимая с C89/C90 версия программы.</p>
+<p>Обновил и <a href="https://github.com/tsb99x/utf8-range-checker">UTF8 Range Checker</a>. Самая большая боль там – размерность переменной для Unicode codepoint. Такая переменная должна иметь как минимум 32 битный беззнаковый тип. Я же использовал <code>unsigned int</code>. Теоретически это проблема.</p>
+<p>Да-да, я знаю, это неправильно. Стандарт Си гарантирует размерность <code>int</code> не менее 16 бит. То есть, для некоторых платформ невозможно будет получить корректный codepoint, ведь размерность будет меньше 32. Программа выдаст мусор.</p>
+<figure>
+<img src="res/work-on-mistakes-00-turbo-vision.webp" alt="Старый добрый Turbo Vision" />
+<figcaption aria-hidden="true">Старый добрый Turbo Vision</figcaption>
+</figure>
+<p>Ради интереса, постарался найти такую платформу и компилятор. Из тех пар, что пробовал, только <a href="https://github.com/tkchia/gcc-ia16/">i16gcc</a> на <a href="https://www.freedos.org/">FreeDOS</a> 1.3 или <a href="https://en.wikipedia.org/wiki/Turbo_C">Turbo C</a> на <a href="https://www.dosbox.com/">DOSBox</a> показали проблему с битностью. У них <code>int</code> занимает 16 бит, а не 32.</p>
+<p>Не беда, меняем <code>unsigned int</code> на <code>unsigned long</code> и дело в шляпе!</p>
+<p>Что же, опробовал вторые версии программ на DOS, мои тесты проходят. Прекрасно!</p>
+<p>P.S.: переносы строк постоянно приходилось менять при переходе из Unix окружения в Win или DOS. В Vim есть опция для установки окончания строк, <code>:set ff=dos</code> или <code>:set ff=unix</code>. Очень удобно. Применил опцию, сохраняешь файл и готово.</p>
+
+<time datetime="2025-02-10T21:12:41+03:00">10 февраля 2025 г.</time>
+
+<div class="changelog">
+<h4>Журнал изменений</h4>
+<p><b>11 февраля 2025 г.</b>: добавил пример <code>struct tm</code> и скриншот Turbo Vision.</p>
+<p><b>1 января 2026 г.</b>: перенёс исходники на GitHub.</p>
+</div>
+
+</article>
+
+<address class="contacts">
+    Если Вы хотите обсудить содержание заметки, задать вопросы или
+    предложить изменения, то со мной можно связаться в
+    <a href="https://t.me/tsb99x">Telegram</a>
+</address>
+
+<footer>
+    <span class="copyright">© 2019-2026</span> |
+    <a rel="license"
+        href="https://creativecommons.org/licenses/by/4.0/deed.ru">
+        CC BY 4.0
+    </a>
+</footer>
+
+</body>
+</html>

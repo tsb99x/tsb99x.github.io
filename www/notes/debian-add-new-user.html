@@ -1,29 +1,118 @@
-<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2024-10-03T21:01:42+03:00><meta name=description content="Программы useradd и usermod"><meta property=og:url content=https://tsb99x.github.io/notes/debian-add-new-user.html><meta property=og:type content=article><meta property=og:title content="Добавление пользователя в Debian"><meta property=og:description content="Программы useradd и usermod"><meta property=og:image content=https://tsb99x.github.io/res/avatar-512x512.png><title>Добавление пользователя в Debian</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.github.io/notes/debian-add-new-user.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> </nav> <article> <header id=title-block-header> <h1 class=title>Добавление пользователя в Debian</h1> </header> <p>Добавление пользователя в Debian – достаточно простая задача. В зависимости от целей, можно создать пользователя с кастомной домашней директорией, с особым комментарием или с нужной оболочкой. Читать <a href=https://manpages.debian.org/bookworm/passwd/useradd.8.en.html>man useradd</a> и <a href=https://manpages.debian.org/bookworm/passwd/usermod.8.en.html>man usermod</a>.</p> <p>Обычно мне достаточно создавать пользователя a-la стандартного. Такого же, какого создаст Debian в процессе установки. Простой пример выглядит так.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>useradd<span class=w> </span>bob<span class=w> </span>-m<span class=w> </span>-c<span class=w> </span><span class=s1>&#39;Bob,,,&#39;</span><span class=w> </span>-s<span class=w> </span>/bin/bash
-<span class=gp>$ </span>sudo<span class=w> </span>usermod<span class=w> </span>-a<span class=w> </span>-G<span class=w> </span>users<span class=w> </span>bob
-</code></pre></div> <p>Первая команда создаст пользователя <code>bob</code> с домашней директорией в <code>/home/bob</code>, установит комментарий как <code>Bob,,,</code> и shell как <code>/bin/bash</code>. Также по-умолчанию будет создана группа <code>bob</code>, в которую будет включен один пользователь <code>bob</code>.</p> <p>Комментарий содержит три запятых, т.к. он выполнен в стандарте <a href=https://en.wikipedia.org/wiki/Gecos_field>GECOS</a>.</p> <p>Вторая команда добавит <code>bob</code> в группу <code>users</code>. Наличие этой группы у обычного пользователя – старая традиция. На практике общая группа полезна для передачи файлов между пользователями через папку в ФС. Достаточно такой папке указать группу владельца как <code>users</code> и дать права всей группе на чтение.</p> <p>Проверить как выглядят новые данные о пользователе можно с помощью <code>getent</code>. Можно заглядывать и в <code>/etc/passwd</code> вместе с <code>/etc/group</code>, но эти файлы не отражают полную картину мира в случае, если нужно работать с LDAP и иными сервисами. Правилом хорошего тона является использование именно <code>getent</code>.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>getent<span class=w> </span>passwd<span class=w> </span><span class=p>|</span><span class=w> </span>grep<span class=w> </span>bob
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru" prefix="og: https://ogp.me/ns#">
 
-<span class=go>bob:x:1001:1001:Bob,,,:/home/bob:/bin/bash</span>
+<head>
 
-<span class=gp>$ </span>getent<span class=w> </span>group<span class=w> </span><span class=p>|</span><span class=w> </span>grep<span class=w> </span>bob
+<meta charset="utf-8">
+<meta name="generator" content="pandoc">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Антон Муравьев">
+<meta name="dcterms.date" content="2024-10-03T21:01:42+03:00">
+<meta name="description" content="Программы useradd и usermod">
+<meta property="og:url" content="https://tsb99x.github.io/notes/debian-add-new-user.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Добавление пользователя в Debian">
+<meta property="og:description" content="Программы useradd и usermod">
+<meta property="og:image" content="https://tsb99x.github.io/res/avatar-512x512.png">
+<title>Добавление пользователя в Debian</title>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/normalize.css">
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/pygments.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="canonical" href="https://tsb99x.github.io/notes/debian-add-new-user.html">
 
-<span class=go>users:x:100:vm,bob</span>
-<span class=go>bob:x:1001:</span>
-</code></pre></div> <p>После создания пользователя имеет смысл сразу задать для него пароль.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>passwd<span class=w> </span>bob
-</code></pre></div> <p>Если при создании были забыты какие-то поля, то можно использовать <code>usermod</code>.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>usermod<span class=w> </span>-m<span class=w> </span>-d<span class=w> </span>/tmp/bob<span class=w> </span>bob
-<span class=gp>$ </span>sudo<span class=w> </span>usermod<span class=w> </span>-c<span class=w> </span><span class=s1>&#39;NotBob,,,&#39;</span><span class=w> </span>bob
-<span class=gp>$ </span>sudo<span class=w> </span>usermod<span class=w> </span>-s<span class=w> </span>/bin/dash<span class=w> </span>bob
-<span class=gp>$ </span>getent<span class=w> </span>passwd<span class=w> </span><span class=p>|</span><span class=w> </span>grep<span class=w> </span>bob
+</head>
 
-<span class=go>bob:x:1001:1001:NotBob,,,:/tmp/bob:/bin/dash</span>
-</code></pre></div> <p>Первая команда <strong>переместит</strong> домашнюю директорию в <code>/tmp/bob</code>, вторая заменит комментарий, а третья изменит shell по-умолчанию на <code>/bin/dash</code>.</p> <p>Конечно, если новый пользователь должен что-то администрировать, то его нужно добавить в группу <code>sudo</code>, иначе <code>sudo</code> не разрешит исполнение команд.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>usermod<span class=w> </span>-a<span class=w> </span>-G<span class=w> </span>sudo<span class=w> </span>bob
-<span class=gp>$ </span>getent<span class=w> </span>group<span class=w> </span><span class=p>|</span><span class=w> </span>grep<span class=w> </span>bob
+<body>
 
-<span class=go>sudo:x:27:vm,bob</span>
-<span class=go>users:x:100:vm,bob</span>
-<span class=go>bob:x:1001:</span>
-</code></pre></div> <p>Для удаления пользователя из группы можно использовать флаг <code>-r</code>.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>usermod<span class=w> </span>-r<span class=w> </span>-G<span class=w> </span>sudo<span class=w> </span>bob
-<span class=gp>$ </span>getent<span class=w> </span>group<span class=w> </span><span class=p>|</span><span class=w> </span>grep<span class=w> </span>bob
+<nav>
+    <a href="/">Обо мне</a>
+    <a href="/notes/">Заметки</a>
+</nav>
 
-<span class=go>users:x:100:vm,bob</span>
-<span class=go>bob:x:1001:</span>
-</code></pre></div> <p>Это основные сценарии работы с пользователями. Есть и ряд других инструментов, например, <code>chsh</code>. Но в сейчас они дублируют возможности <code>useradd</code> и <code>usermod</code>.</p> <time datetime=2024-10-03T21:01:42+03:00>3 октября 2024 г.</time> <div class=changelog> <h4>Журнал изменений</h4> <p><b>28 октября 2024 г.</b>: добавил информацию о группе <code>users</code>.</p> </div> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 
+<article>
+
+<header id="title-block-header">
+<h1 class="title">Добавление пользователя в Debian</h1>
+</header>
+
+<p>Добавление пользователя в Debian – достаточно простая задача. В зависимости от целей, можно создать пользователя с кастомной домашней директорией, с особым комментарием или с нужной оболочкой. Читать <a href="https://manpages.debian.org/bookworm/passwd/useradd.8.en.html">man useradd</a> и <a href="https://manpages.debian.org/bookworm/passwd/usermod.8.en.html">man usermod</a>.</p>
+<p>Обычно мне достаточно создавать пользователя a-la стандартного. Такого же, какого создаст Debian в процессе установки. Простой пример выглядит так.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>useradd<span class="w"> </span>bob<span class="w"> </span>-m<span class="w"> </span>-c<span class="w"> </span><span class="s1">&#39;Bob,,,&#39;</span><span class="w"> </span>-s<span class="w"> </span>/bin/bash
+<span class="gp">$ </span>sudo<span class="w"> </span>usermod<span class="w"> </span>-a<span class="w"> </span>-G<span class="w"> </span>users<span class="w"> </span>bob
+</code></pre></div>
+
+<p>Первая команда создаст пользователя <code>bob</code> с домашней директорией в <code>/home/bob</code>, установит комментарий как <code>Bob,,,</code> и shell как <code>/bin/bash</code>. Также по-умолчанию будет создана группа <code>bob</code>, в которую будет включен один пользователь <code>bob</code>.</p>
+<p>Комментарий содержит три запятых, т.к. он выполнен в стандарте <a href="https://en.wikipedia.org/wiki/Gecos_field">GECOS</a>.</p>
+<p>Вторая команда добавит <code>bob</code> в группу <code>users</code>. Наличие этой группы у обычного пользователя – старая традиция. На практике общая группа полезна для передачи файлов между пользователями через папку в ФС. Достаточно такой папке указать группу владельца как <code>users</code> и дать права всей группе на чтение.</p>
+<p>Проверить как выглядят новые данные о пользователе можно с помощью <code>getent</code>. Можно заглядывать и в <code>/etc/passwd</code> вместе с <code>/etc/group</code>, но эти файлы не отражают полную картину мира в случае, если нужно работать с LDAP и иными сервисами. Правилом хорошего тона является использование именно <code>getent</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>getent<span class="w"> </span>passwd<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>bob
+
+<span class="go">bob:x:1001:1001:Bob,,,:/home/bob:/bin/bash</span>
+
+<span class="gp">$ </span>getent<span class="w"> </span>group<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>bob
+
+<span class="go">users:x:100:vm,bob</span>
+<span class="go">bob:x:1001:</span>
+</code></pre></div>
+
+<p>После создания пользователя имеет смысл сразу задать для него пароль.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>passwd<span class="w"> </span>bob
+</code></pre></div>
+
+<p>Если при создании были забыты какие-то поля, то можно использовать <code>usermod</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>usermod<span class="w"> </span>-m<span class="w"> </span>-d<span class="w"> </span>/tmp/bob<span class="w"> </span>bob
+<span class="gp">$ </span>sudo<span class="w"> </span>usermod<span class="w"> </span>-c<span class="w"> </span><span class="s1">&#39;NotBob,,,&#39;</span><span class="w"> </span>bob
+<span class="gp">$ </span>sudo<span class="w"> </span>usermod<span class="w"> </span>-s<span class="w"> </span>/bin/dash<span class="w"> </span>bob
+<span class="gp">$ </span>getent<span class="w"> </span>passwd<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>bob
+
+<span class="go">bob:x:1001:1001:NotBob,,,:/tmp/bob:/bin/dash</span>
+</code></pre></div>
+
+<p>Первая команда <strong>переместит</strong> домашнюю директорию в <code>/tmp/bob</code>, вторая заменит комментарий, а третья изменит shell по-умолчанию на <code>/bin/dash</code>.</p>
+<p>Конечно, если новый пользователь должен что-то администрировать, то его нужно добавить в группу <code>sudo</code>, иначе <code>sudo</code> не разрешит исполнение команд.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>usermod<span class="w"> </span>-a<span class="w"> </span>-G<span class="w"> </span>sudo<span class="w"> </span>bob
+<span class="gp">$ </span>getent<span class="w"> </span>group<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>bob
+
+<span class="go">sudo:x:27:vm,bob</span>
+<span class="go">users:x:100:vm,bob</span>
+<span class="go">bob:x:1001:</span>
+</code></pre></div>
+
+<p>Для удаления пользователя из группы можно использовать флаг <code>-r</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>usermod<span class="w"> </span>-r<span class="w"> </span>-G<span class="w"> </span>sudo<span class="w"> </span>bob
+<span class="gp">$ </span>getent<span class="w"> </span>group<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>bob
+
+<span class="go">users:x:100:vm,bob</span>
+<span class="go">bob:x:1001:</span>
+</code></pre></div>
+
+<p>Это основные сценарии работы с пользователями. Есть и ряд других инструментов, например, <code>chsh</code>. Но в сейчас они дублируют возможности <code>useradd</code> и <code>usermod</code>.</p>
+
+<time datetime="2024-10-03T21:01:42+03:00">3 октября 2024 г.</time>
+
+<div class="changelog">
+<h4>Журнал изменений</h4>
+<p><b>28 октября 2024 г.</b>: добавил информацию о группе <code>users</code>.</p>
+</div>
+
+</article>
+
+<address class="contacts">
+    Если Вы хотите обсудить содержание заметки, задать вопросы или
+    предложить изменения, то со мной можно связаться в
+    <a href="https://t.me/tsb99x">Telegram</a>
+</address>
+
+<footer>
+    <span class="copyright">© 2019-2026</span> |
+    <a rel="license"
+        href="https://creativecommons.org/licenses/by/4.0/deed.ru">
+        CC BY 4.0
+    </a>
+</footer>
+
+</body>
+</html>

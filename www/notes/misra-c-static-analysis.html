@@ -1,2 +1,77 @@
-<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2025-02-26T20:45:21+03:00><meta name=description content="Статический анализ для Си"><meta property=og:url content=https://tsb99x.github.io/notes/misra-c-static-analysis.html><meta property=og:type content=article><meta property=og:title content="Power of Ten, JPL, MISRA-C"><meta property=og:description content="Статический анализ для Си"><meta property=og:image content=https://tsb99x.github.io/res/avatar-512x512.png><title>Power of Ten, JPL, MISRA-C</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.github.io/notes/misra-c-static-analysis.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> </nav> <article> <header id=title-block-header> <h1 class=title>Power of Ten, JPL, MISRA-C</h1> </header> <figure> <img src=res/misra-c-static-analysis-jpl-guide-preview.webp alt="Превью стандарта JPL из Wayback Machine"> <figcaption aria-hidden=true>Превью стандарта JPL из Wayback Machine</figcaption> </figure> <p>Пытаюсь собрать мысли, что есть в голове, о безопасном Си. Нюанс: я не профессионал именно Си. Чтобы не изобретать сломанный велосипед, решил покопать материал в общедоступных источниках от известных авторов.</p> <p>Одна из самых интересных работ по теме безопасного использования Си, которая попадалась мне на глаза в прошлом, была от Джерарда Гольцманна из JPL. JPL разрабатывает софт для NASA, требования к качеству там высокие.</p> <p>Работа Гольцманна <a href=https://spinroot.com/gerard/pdf/P10.pdf>“The Power of 10”</a> даёт хороший базис, но это далеко не исчерпывающее руководство. У JPL, как оказалось, есть отдельный <a href=https://web.archive.org/web/20111015064908/http://lars-lab.jpl.nasa.gov/JPL_Coding_Standard_C.pdf>документ-стандарт разработки на Си</a>. Он комбинирует рекомендации “The Power of 10” с отдельными требованиями MISRA-C.</p> <p>И пусть MISRA-C — проприетарный стандарт разработки на Си, его правила представлены в некоторых статических анализаторах кода, включая Cppcheck. А это значит, что можно использовать автоматизированные инструменты!</p> <p>То есть, для реализации части правил из документа JPL по Си, достаточно начать делать проверки MISRA-C:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>cppcheck<span class=w> </span>--addon<span class=o>=</span>misra<span class=w> </span>main.c
-</code></pre></div> <p>Что интересно, я сначала посчитал большое количество диагностических сообщений за ложно-положительные, но при доскональном изучении каждой ошибки прояснял — проверка имеет место быть.</p> <p>Собственно, вот, как и всегда, учёные уже сделали огромную работу, нужно только учиться у них и больше применять правильные флажки для инструментов статического анализа.</p> <p>Работы Гольцмана и JPL очень рекомендую почитать и применять в меру возможности.</p> <time datetime=2025-02-26T20:45:21+03:00>26 февраля 2025 г.</time> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru" prefix="og: https://ogp.me/ns#">
+
+<head>
+
+<meta charset="utf-8">
+<meta name="generator" content="pandoc">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Антон Муравьев">
+<meta name="dcterms.date" content="2025-02-26T20:45:21+03:00">
+<meta name="description" content="Статический анализ для Си">
+<meta property="og:url" content="https://tsb99x.github.io/notes/misra-c-static-analysis.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Power of Ten, JPL, MISRA-C">
+<meta property="og:description" content="Статический анализ для Си">
+<meta property="og:image" content="https://tsb99x.github.io/res/avatar-512x512.png">
+<title>Power of Ten, JPL, MISRA-C</title>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/normalize.css">
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/pygments.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="canonical" href="https://tsb99x.github.io/notes/misra-c-static-analysis.html">
+
+</head>
+
+<body>
+
+<nav>
+    <a href="/">Обо мне</a>
+    <a href="/notes/">Заметки</a>
+</nav>
+
+<article>
+
+<header id="title-block-header">
+<h1 class="title">Power of Ten, JPL, MISRA-C</h1>
+</header>
+
+<figure>
+<img src="res/misra-c-static-analysis-jpl-guide-preview.webp" alt="Превью стандарта JPL из Wayback Machine" />
+<figcaption aria-hidden="true">Превью стандарта JPL из Wayback Machine</figcaption>
+</figure>
+<p>Пытаюсь собрать мысли, что есть в голове, о безопасном Си. Нюанс: я не профессионал именно Си. Чтобы не изобретать сломанный велосипед, решил покопать материал в общедоступных источниках от известных авторов.</p>
+<p>Одна из самых интересных работ по теме безопасного использования Си, которая попадалась мне на глаза в прошлом, была от Джерарда Гольцманна из JPL. JPL разрабатывает софт для NASA, требования к качеству там высокие.</p>
+<p>Работа Гольцманна <a href="https://spinroot.com/gerard/pdf/P10.pdf">“The Power of 10”</a> даёт хороший базис, но это далеко не исчерпывающее руководство. У JPL, как оказалось, есть отдельный <a href="https://web.archive.org/web/20111015064908/http://lars-lab.jpl.nasa.gov/JPL_Coding_Standard_C.pdf">документ-стандарт разработки на Си</a>. Он комбинирует рекомендации “The Power of 10” с отдельными требованиями MISRA-C.</p>
+<p>И пусть MISRA-C — проприетарный стандарт разработки на Си, его правила представлены в некоторых статических анализаторах кода, включая Cppcheck. А это значит, что можно использовать автоматизированные инструменты!</p>
+<p>То есть, для реализации части правил из документа JPL по Си, достаточно начать делать проверки MISRA-C:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>cppcheck<span class="w"> </span>--addon<span class="o">=</span>misra<span class="w"> </span>main.c
+</code></pre></div>
+
+<p>Что интересно, я сначала посчитал большое количество диагностических сообщений за ложно-положительные, но при доскональном изучении каждой ошибки прояснял — проверка имеет место быть.</p>
+<p>Собственно, вот, как и всегда, учёные уже сделали огромную работу, нужно только учиться у них и больше применять правильные флажки для инструментов статического анализа.</p>
+<p>Работы Гольцмана и JPL очень рекомендую почитать и применять в меру возможности.</p>
+
+<time datetime="2025-02-26T20:45:21+03:00">26 февраля 2025 г.</time>
+
+
+</article>
+
+<address class="contacts">
+    Если Вы хотите обсудить содержание заметки, задать вопросы или
+    предложить изменения, то со мной можно связаться в
+    <a href="https://t.me/tsb99x">Telegram</a>
+</address>
+
+<footer>
+    <span class="copyright">© 2019-2026</span> |
+    <a rel="license"
+        href="https://creativecommons.org/licenses/by/4.0/deed.ru">
+        CC BY 4.0
+    </a>
+</footer>
+
+</body>
+</html>

@@ -1,27 +1,107 @@
-<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2024-01-27T21:40:21+03:00><meta name=description content="Используем образы из VBox в QEMU"><meta property=og:url content=https://tsb99x.github.io/notes/vdi-to-qcow2.html><meta property=og:type content=article><meta property=og:title content="Превращаем VDI в QCOW2"><meta property=og:description content="Используем образы из VBox в QEMU"><meta property=og:image content=https://tsb99x.github.io/res/avatar-512x512.png><title>Превращаем VDI в QCOW2</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.github.io/notes/vdi-to-qcow2.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> </nav> <article> <header id=title-block-header> <h1 class=title>Превращаем VDI в QCOW2</h1> </header> <p>Как бывший пользователь VirtualBox, я храню несколько VDI, которые мне дороги. На Linux я сейчас пользуюсь Virt-Manager, QEMU и KVM как основными инструментами для виртуализации. И, поскольку VirtualBox мне больше не нужен, я всё-же решил конвертировать VDI образы в QCOW2.</p> <p>В сети можно найти много советов по такой конвертации. Но почти каждый совет почему-то использует <code>VBoxManage</code> для конвертации из VDI в RAW. Потом нужно использовать <code>qemu-img</code> для конвертации из RAW в QCOW2.</p> <p>Есть нюанс. RAW не поддерживает динамическое выделение пространства. Если диск в VM мог хранить 128G, а использовано только 32G, то VDI и QCOW2 (в идеале) будут использовать всего 32G. RAW во всех случаях будет занимать 128G, а сколько было реально использовано не имеет никакого значения. В результате, для конвертации нужно больше свободного места на диске. Вот объёмы одного и того же образа в разных форматах (расширение <code>.img</code> отвечает за RAW формат):</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>du<span class=w> </span>-h<span class=w> </span>lubuntu.*
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru" prefix="og: https://ogp.me/ns#">
 
-<span class=go>129G    lubuntu.img</span>
-<span class=go>40G     lubuntu.qcow2</span>
-<span class=go>42G     lubuntu.vdi</span>
-</code></pre></div> <p>Подобные советы по конвертации совсем игнорирует поддержку VDI со стороны QEMU. Хотя для QEMU есть <a href=https://www.qemu.org/docs/master/system/images.html#cmdoption-image-formats-arg-vdi>документированная поддержка VDI</a>. А ведь QEMU – не только интерфейс для эмуляции и запуска VM через CLI, но и другой инструментарий, включая упомянутый <code>qemu-img</code> для работы с образами дисков. Будь это создание, изменение или конвертация, <code>qemu-img</code> поддерживает VDI.</p> <p>Расставим последние точки над И. Вам не нужно конвертировать VDI образ диска для перехода с VirtualBox на QEMU. Virt-Manager и CLI QEMU <strong>позволяют</strong> запускать системы с VDI образов. Никаких проблем при этом я не замечал. Вот пример простой команды для запуска моего VDI образа с Lubuntu:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>qemu-system-x86_64<span class=w> </span>-enable-kvm<span class=w> </span>-m<span class=w> </span>1G<span class=w> </span>lubuntu.vdi
-</code></pre></div> <p>А для конвертации не требуется <code>VBoxManage</code>, нужен только <code>qemu-img</code>. К примеру, конвертирую старый образ Lubuntu в QCOW2:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>qemu-img<span class=w> </span>convert<span class=w> </span>lubuntu.vdi<span class=w> </span>-O<span class=w> </span>qcow2<span class=w> </span>lubuntu.qcow2
-</code></pre></div> <p>Это всё, что требуется. Можно дополнительно проверить, что это действительно QCOW2, а не RAW:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>qemu-img<span class=w> </span>info<span class=w> </span>lubuntu.qcow2
+<head>
 
-<span class=go>image: lubuntu.qcow2</span>
-<span class=go>file format: qcow2</span>
-<span class=go>virtual size: 128 GiB (137438953472 bytes)</span>
-<span class=go>disk size: 40 GiB</span>
-<span class=go>cluster_size: 65536</span>
-<span class=go>Format specific information:</span>
-<span class=go>    compat: 1.1</span>
-<span class=go>    compression type: zlib</span>
-<span class=go>    lazy refcounts: false</span>
-<span class=go>    refcount bits: 16</span>
-<span class=go>    corrupt: false</span>
-<span class=go>    extended l2: false</span>
-</code></pre></div> <p>И, поскольку это действительно QCOW, можно сделать проверку образа на ошибки:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>qemu-img<span class=w> </span>check<span class=w> </span>lubuntu.qcow2
+<meta charset="utf-8">
+<meta name="generator" content="pandoc">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Антон Муравьев">
+<meta name="dcterms.date" content="2024-01-27T21:40:21+03:00">
+<meta name="description" content="Используем образы из VBox в QEMU">
+<meta property="og:url" content="https://tsb99x.github.io/notes/vdi-to-qcow2.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Превращаем VDI в QCOW2">
+<meta property="og:description" content="Используем образы из VBox в QEMU">
+<meta property="og:image" content="https://tsb99x.github.io/res/avatar-512x512.png">
+<title>Превращаем VDI в QCOW2</title>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/normalize.css">
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/pygments.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="canonical" href="https://tsb99x.github.io/notes/vdi-to-qcow2.html">
 
-<span class=go>No errors were found on the image.</span>
-<span class=go>654308/2097152 = 31.20% allocated, 0.00% fragmented, 0.00% compressed clusters</span>
-<span class=go>Image end offset: 42895933440</span>
-</code></pre></div> <p>Никаких дополнительных пакетов или программ, как видите, не требуется. Ну вот, теперь образы VM полноценно соответствуют линуксоидному “фэншую”.</p> <time datetime=2024-01-27T21:40:21+03:00>27 января 2024 г.</time> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 
+</head>
+
+<body>
+
+<nav>
+    <a href="/">Обо мне</a>
+    <a href="/notes/">Заметки</a>
+</nav>
+
+<article>
+
+<header id="title-block-header">
+<h1 class="title">Превращаем VDI в QCOW2</h1>
+</header>
+
+<p>Как бывший пользователь VirtualBox, я храню несколько VDI, которые мне дороги. На Linux я сейчас пользуюсь Virt-Manager, QEMU и KVM как основными инструментами для виртуализации. И, поскольку VirtualBox мне больше не нужен, я всё-же решил конвертировать VDI образы в QCOW2.</p>
+<p>В сети можно найти много советов по такой конвертации. Но почти каждый совет почему-то использует <code>VBoxManage</code> для конвертации из VDI в RAW. Потом нужно использовать <code>qemu-img</code> для конвертации из RAW в QCOW2.</p>
+<p>Есть нюанс. RAW не поддерживает динамическое выделение пространства. Если диск в VM мог хранить 128G, а использовано только 32G, то VDI и QCOW2 (в идеале) будут использовать всего 32G. RAW во всех случаях будет занимать 128G, а сколько было реально использовано не имеет никакого значения. В результате, для конвертации нужно больше свободного места на диске. Вот объёмы одного и того же образа в разных форматах (расширение <code>.img</code> отвечает за RAW формат):</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>du<span class="w"> </span>-h<span class="w"> </span>lubuntu.*
+
+<span class="go">129G    lubuntu.img</span>
+<span class="go">40G     lubuntu.qcow2</span>
+<span class="go">42G     lubuntu.vdi</span>
+</code></pre></div>
+
+<p>Подобные советы по конвертации совсем игнорирует поддержку VDI со стороны QEMU. Хотя для QEMU есть <a href="https://www.qemu.org/docs/master/system/images.html#cmdoption-image-formats-arg-vdi">документированная поддержка VDI</a>. А ведь QEMU – не только интерфейс для эмуляции и запуска VM через CLI, но и другой инструментарий, включая упомянутый <code>qemu-img</code> для работы с образами дисков. Будь это создание, изменение или конвертация, <code>qemu-img</code> поддерживает VDI.</p>
+<p>Расставим последние точки над И. Вам не нужно конвертировать VDI образ диска для перехода с VirtualBox на QEMU. Virt-Manager и CLI QEMU <strong>позволяют</strong> запускать системы с VDI образов. Никаких проблем при этом я не замечал. Вот пример простой команды для запуска моего VDI образа с Lubuntu:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>qemu-system-x86_64<span class="w"> </span>-enable-kvm<span class="w"> </span>-m<span class="w"> </span>1G<span class="w"> </span>lubuntu.vdi
+</code></pre></div>
+
+<p>А для конвертации не требуется <code>VBoxManage</code>, нужен только <code>qemu-img</code>. К примеру, конвертирую старый образ Lubuntu в QCOW2:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>qemu-img<span class="w"> </span>convert<span class="w"> </span>lubuntu.vdi<span class="w"> </span>-O<span class="w"> </span>qcow2<span class="w"> </span>lubuntu.qcow2
+</code></pre></div>
+
+<p>Это всё, что требуется. Можно дополнительно проверить, что это действительно QCOW2, а не RAW:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>qemu-img<span class="w"> </span>info<span class="w"> </span>lubuntu.qcow2
+
+<span class="go">image: lubuntu.qcow2</span>
+<span class="go">file format: qcow2</span>
+<span class="go">virtual size: 128 GiB (137438953472 bytes)</span>
+<span class="go">disk size: 40 GiB</span>
+<span class="go">cluster_size: 65536</span>
+<span class="go">Format specific information:</span>
+<span class="go">    compat: 1.1</span>
+<span class="go">    compression type: zlib</span>
+<span class="go">    lazy refcounts: false</span>
+<span class="go">    refcount bits: 16</span>
+<span class="go">    corrupt: false</span>
+<span class="go">    extended l2: false</span>
+</code></pre></div>
+
+<p>И, поскольку это действительно QCOW, можно сделать проверку образа на ошибки:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>qemu-img<span class="w"> </span>check<span class="w"> </span>lubuntu.qcow2
+
+<span class="go">No errors were found on the image.</span>
+<span class="go">654308/2097152 = 31.20% allocated, 0.00% fragmented, 0.00% compressed clusters</span>
+<span class="go">Image end offset: 42895933440</span>
+</code></pre></div>
+
+<p>Никаких дополнительных пакетов или программ, как видите, не требуется. Ну вот, теперь образы VM полноценно соответствуют линуксоидному “фэншую”.</p>
+
+<time datetime="2024-01-27T21:40:21+03:00">27 января 2024 г.</time>
+
+
+</article>
+
+<address class="contacts">
+    Если Вы хотите обсудить содержание заметки, задать вопросы или
+    предложить изменения, то со мной можно связаться в
+    <a href="https://t.me/tsb99x">Telegram</a>
+</address>
+
+<footer>
+    <span class="copyright">© 2019-2026</span> |
+    <a rel="license"
+        href="https://creativecommons.org/licenses/by/4.0/deed.ru">
+        CC BY 4.0
+    </a>
+</footer>
+
+</body>
+</html>

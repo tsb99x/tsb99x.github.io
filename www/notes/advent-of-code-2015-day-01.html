@@ -1,116 +1,240 @@
-<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2025-03-05T15:25:17+03:00><meta name=description content="Санта путешествует по Гигахрущу"><meta property=og:url content=https://tsb99x.github.io/notes/advent-of-code-2015-day-01.html><meta property=og:type content=article><meta property=og:title content="Advent of Code 2015, день 1"><meta property=og:description content="Санта путешествует по Гигахрущу"><meta property=og:image content=https://tsb99x.github.io/res/avatar-512x512.png><title>Advent of Code 2015, день 1</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.github.io/notes/advent-of-code-2015-day-01.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> </nav> <article> <header id=title-block-header> <h1 class=title>Advent of Code 2015, день 1</h1> </header> <figure> <img src=res/advent-of-code-2015-day-01.webp alt="Две первые звезды получены"> <figcaption aria-hidden=true>Две первые звезды получены</figcaption> </figure> <p>Сегодня разберём <a href=https://adventofcode.com/2015/day/1>задачу первого дня</a> из Advent of Code 2015. Постановка довольно интересная. Вот вольный перевод для упрощения понимания.</p> <h2 id=задача>Задача</h2> <p>Санта должен доставить подарки в большом здании, но не может найти нужный этаж. Он начинает на этаже 0 и следует указаниям, куда двигаться дальше по этажам. Санта перемещается согласно одному символу за раз.</p> <p>Открывающая скобка ( означает Санта должен двигаться на один этаж вверх. Закрывающая скобка ) – движение на один этаж вниз.</p> <p>Здание такое большое, что ни дна, ни крыши у него нет.</p> <p>Примеры:</p> <ul> <li>(()) и ()() приведут на этаж 0.</li> <li>((( и (()(()( приведут на этаж 3.</li> <li>))((((( тоже приведёт на 3-й этаж.</li> <li>()) и ))( приведут на этаж -1 (первый уровень подвала).</li> <li>))) и )())()) приведут на этаж -3.</li> </ul> <p>На <strong>какой этаж</strong> приведут Санту инструкции?</p> <h2 id=код-программы-на-си>Код программы на Си</h2> <p>Рассмотрим по кусочкам исходный код программы на Си в файле <code>part_i.c</code>.</p> <p>В описании задачи есть указание того, как скобки будут отражаться на направлении движения. Любые иные символы игнорируем. Достаточно примитивной функции-маппера с единственной задачей: конвертировать символ в направление движения.</p> <div class=highlight><pre><span></span><code><span class=k>static</span><span class=w> </span><span class=kt>int</span><span class=w> </span><span class=nf>char_to_movement</span><span class=p>(</span><span class=kt>char</span><span class=w> </span><span class=n>ch</span><span class=p>)</span>
-<span class=p>{</span>
-<span class=w>        </span><span class=k>switch</span><span class=w> </span><span class=p>(</span><span class=n>ch</span><span class=p>)</span><span class=w> </span><span class=p>{</span>
-<span class=w>        </span><span class=k>case</span><span class=w> </span><span class=sc>&#39;(&#39;</span><span class=p>:</span>
-<span class=w>                </span><span class=k>return</span><span class=w> </span><span class=mi>1</span><span class=p>;</span>
-<span class=w>        </span><span class=k>case</span><span class=w> </span><span class=sc>&#39;)&#39;</span><span class=p>:</span>
-<span class=w>                </span><span class=k>return</span><span class=w> </span><span class=mi>-1</span><span class=p>;</span>
-<span class=w>        </span><span class=k>default</span><span class=o>:</span>
-<span class=w>                </span><span class=k>return</span><span class=w> </span><span class=mi>0</span><span class=p>;</span>
-<span class=w>        </span><span class=p>}</span>
-<span class=p>}</span>
-</code></pre></div> <p>Дальше в задачке есть указание на последовательное чтение символов-команд. Используя <code>fgetc</code>, можно последовательно считать поток из <code>FILE*</code>. В случае ошибки считывания потока нужно прекратить работу программы, предварительно отобразив ошибку в STDERR с помощью <code>perror</code>.</p> <p>Проверка <code>!feof(stream)</code> после получения <code>EOF</code> от <code>fgetc(stream)</code> выглядит, на первый взгляд, странно. Тонкость в том, что результат <code>EOF</code> у <code>fgetc</code> отвечает не только за истинный <code>EOF</code>, но и за ситуации общих ошибок. Поэтому проверка <code>!feof</code> подчёркивает: если файл не закончился, а мы уже вышли из <code>while</code> – точно произошла какая-то значимая ошибка считывания.</p> <div class=highlight><pre><span></span><code><span class=k>static</span><span class=w> </span><span class=kt>int</span><span class=w> </span><span class=nf>what_floor</span><span class=p>(</span><span class=kt>FILE</span><span class=w> </span><span class=o>*</span><span class=n>stream</span><span class=p>)</span>
-<span class=p>{</span>
-<span class=w>        </span><span class=kt>int</span><span class=w> </span><span class=n>floor</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=mi>0</span><span class=p>;</span>
-<span class=w>        </span><span class=kt>int</span><span class=w> </span><span class=n>ch</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=mi>0</span><span class=p>;</span>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru" prefix="og: https://ogp.me/ns#">
 
-<span class=w>        </span><span class=k>while</span><span class=w> </span><span class=p>((</span><span class=n>ch</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>fgetc</span><span class=p>(</span><span class=n>stream</span><span class=p>))</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=n>EOF</span><span class=p>)</span><span class=w> </span><span class=p>{</span>
-<span class=w>                </span><span class=n>floor</span><span class=w> </span><span class=o>+=</span><span class=w> </span><span class=n>char_to_movement</span><span class=p>((</span><span class=kt>char</span><span class=p>)</span><span class=n>ch</span><span class=p>);</span>
-<span class=w>        </span><span class=p>}</span>
+<head>
 
-<span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=o>!</span><span class=n>feof</span><span class=p>(</span><span class=n>stream</span><span class=p>))</span><span class=w> </span><span class=p>{</span>
-<span class=w>                </span><span class=n>perror</span><span class=p>(</span><span class=s>&quot;Failed to fgetc&quot;</span><span class=p>);</span>
-<span class=w>                </span><span class=n>exit</span><span class=p>(</span><span class=n>EXIT_FAILURE</span><span class=p>);</span>
-<span class=w>        </span><span class=p>}</span>
+<meta charset="utf-8">
+<meta name="generator" content="pandoc">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Антон Муравьев">
+<meta name="dcterms.date" content="2025-03-05T15:25:17+03:00">
+<meta name="description" content="Санта путешествует по Гигахрущу">
+<meta property="og:url" content="https://tsb99x.github.io/notes/advent-of-code-2015-day-01.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Advent of Code 2015, день 1">
+<meta property="og:description" content="Санта путешествует по Гигахрущу">
+<meta property="og:image" content="https://tsb99x.github.io/res/avatar-512x512.png">
+<title>Advent of Code 2015, день 1</title>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/normalize.css">
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/pygments.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="canonical" href="https://tsb99x.github.io/notes/advent-of-code-2015-day-01.html">
 
-<span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>floor</span><span class=p>;</span>
-<span class=p>}</span>
-</code></pre></div> <p>Завершающий элемент – <code>main</code>. Он предельно простой, делегирует работу <code>what_floor</code> и только отображает результат с помощью <code>printf</code>.</p> <div class=highlight><pre><span></span><code><span class=kt>int</span><span class=w> </span><span class=nf>main</span><span class=p>(</span><span class=kt>int</span><span class=w> </span><span class=n>argc</span><span class=p>,</span><span class=w> </span><span class=kt>char</span><span class=w> </span><span class=o>*</span><span class=n>argv</span><span class=p>[])</span>
-<span class=p>{</span>
-<span class=w>        </span><span class=kt>int</span><span class=w> </span><span class=n>floor</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=mi>0</span><span class=p>;</span>
+</head>
 
-<span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>argc</span><span class=w> </span><span class=o>&gt;</span><span class=w> </span><span class=mi>1</span><span class=p>)</span><span class=w> </span><span class=p>{</span>
-<span class=w>                </span><span class=p>(</span><span class=kt>void</span><span class=p>)</span><span class=n>fprintf</span><span class=p>(</span><span class=n>stderr</span><span class=p>,</span>
-<span class=w>                              </span><span class=s>&quot;No arguments are accepted!</span><span class=se>\n</span><span class=s>&quot;</span>
-<span class=w>                              </span><span class=s>&quot;Use IO redirection: %s &lt; input</span><span class=se>\n</span><span class=s>&quot;</span><span class=p>,</span>
-<span class=w>                              </span><span class=n>argv</span><span class=p>[</span><span class=mi>0</span><span class=p>]);</span>
-<span class=w>                </span><span class=k>return</span><span class=w> </span><span class=n>EXIT_FAILURE</span><span class=p>;</span>
-<span class=w>        </span><span class=p>}</span>
+<body>
 
-<span class=w>        </span><span class=n>floor</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>what_floor</span><span class=p>(</span><span class=n>stdin</span><span class=p>);</span>
-<span class=w>        </span><span class=p>(</span><span class=kt>void</span><span class=p>)</span><span class=n>printf</span><span class=p>(</span><span class=s>&quot;%d</span><span class=se>\n</span><span class=s>&quot;</span><span class=p>,</span><span class=w> </span><span class=n>floor</span><span class=p>);</span>
+<nav>
+    <a href="/">Обо мне</a>
+    <a href="/notes/">Заметки</a>
+</nav>
 
-<span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>EXIT_SUCCESS</span><span class=p>;</span>
-<span class=p>}</span>
-</code></pre></div> <p>Отдельно отметим приведение к <code>(void)</code>. Смысл этой конструкции в том, чтобы дать компилятору или линтеру понять, что мы что-то сознательно игнорируем. В данном случае такое приведение нужно для <code>printf</code> и <code>fprintf</code>, т.к. мы не обрабатываем результат, который возвращают эти функции. На это будет ругаться Clang с флагом <code>-Weverything</code> или Cppcheck с параметром <code>--addon=misra</code>.</p> <p>Запускаем тесты (подробнее про скрипт тестирования в <a href=/notes/bash-script-for-solutions.html>отдельной заметке</a>):</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>./test_i.sh
+<article>
 
-<span class=go>Test (()) =&gt; 0 PASSED</span>
-<span class=go>Test ()() =&gt; 0 PASSED</span>
-<span class=go>Test ((( =&gt; 3 PASSED</span>
-<span class=go>Test (()(()( =&gt; 3 PASSED</span>
-<span class=go>Test ))((((( =&gt; 3 PASSED</span>
-<span class=go>Test ()) =&gt; -1 PASSED</span>
-<span class=go>Test ))( =&gt; -1 PASSED</span>
-<span class=go>Test ))) =&gt; -3 PASSED</span>
-<span class=go>Test )())()) =&gt; -3 PASSED</span>
-<span class=go>All tests are completed and passed!</span>
-<span class=go>Answer for input: 232</span>
-</code></pre></div> <p>Получаем ответ 232. Advent of Code говорит, что это верно.</p> <h2 id=вторая-часть>Вторая часть</h2> <p>Задачи на Advent of Code состоят из двух частей. Вторая часть появляется только после успешного решения первой. Парафразирую вторую часть задачи:</p> <p>Имея те же инструкции, нужно найти позицию символа, который указывает Санте войти в подвал (этаж -1). Первый символ в инструкциях имеет позицию 1, второй – 2, и т.д.</p> <p>Примеры:</p> <ul> <li>) приведёт в подвал на позиции 1.</li> <li>()()) приведёт в подвал на позиции 5.</li> </ul> <p>Символ на <strong>какой позиции</strong> приведёт Санту в подвал?</p> <h2 id=изменения-в-исходном-решении>Изменения в исходном решении</h2> <p>Постановка задачи немного расширена, включено новое условие про вхождение в подвал. Это условие раннего терминирования программы. Как только мы с ним столкнёмся, нужно сразу же завершить исполнение алгоритма и программы.</p> <p>Для демонстрации изменений будем пользоваться <code>diff</code>. Этот инструмент наглядно покажет построчные изменения (новые аннотацией <code>+</code>, а удалённые аннотацией <code>-</code>).</p> <p>Посмотрим на <code>diff -u part_{i,ii}.c</code>:</p> <div class=highlight><pre><span></span><code><span class=gd>--- part_i.c    2025-03-13 10:21:39.845917592 +0300</span>
-<span class=gi>+++ part_ii.c   2025-03-11 12:11:49.409125231 +0300</span>
-<span class=gu>@@ -13,13 +13,18 @@</span>
-<span class=w> </span>        }
-<span class=w> </span>}
+<header id="title-block-header">
+<h1 class="title">Advent of Code 2015, день 1</h1>
+</header>
 
-<span class=gd>-static int what_floor(FILE *stream)</span>
-<span class=gi>+static int basement_enter(FILE *stream)</span>
-<span class=w> </span>{
-<span class=w> </span>        int floor = 0;
-<span class=gi>+        int position = 1;</span>
-<span class=w> </span>        int ch = 0;
+<figure>
+<img src="res/advent-of-code-2015-day-01.webp" alt="Две первые звезды получены" />
+<figcaption aria-hidden="true">Две первые звезды получены</figcaption>
+</figure>
+<p>Сегодня разберём <a href="https://adventofcode.com/2015/day/1">задачу первого дня</a> из Advent of Code 2015. Постановка довольно интересная. Вот вольный перевод для упрощения понимания.</p>
+<h2 id="задача">Задача</h2>
+<p>Санта должен доставить подарки в большом здании, но не может найти нужный этаж. Он начинает на этаже 0 и следует указаниям, куда двигаться дальше по этажам. Санта перемещается согласно одному символу за раз.</p>
+<p>Открывающая скобка ( означает Санта должен двигаться на один этаж вверх. Закрывающая скобка ) – движение на один этаж вниз.</p>
+<p>Здание такое большое, что ни дна, ни крыши у него нет.</p>
+<p>Примеры:</p>
+<ul>
+<li>(()) и ()() приведут на этаж 0.</li>
+<li>((( и (()(()( приведут на этаж 3.</li>
+<li>))((((( тоже приведёт на 3-й этаж.</li>
+<li>()) и ))( приведут на этаж -1 (первый уровень подвала).</li>
+<li>))) и )())()) приведут на этаж -3.</li>
+</ul>
+<p>На <strong>какой этаж</strong> приведут Санту инструкции?</p>
+<h2 id="код-программы-на-си">Код программы на Си</h2>
+<p>Рассмотрим по кусочкам исходный код программы на Си в файле <code>part_i.c</code>.</p>
+<p>В описании задачи есть указание того, как скобки будут отражаться на направлении движения. Любые иные символы игнорируем. Достаточно примитивной функции-маппера с единственной задачей: конвертировать символ в направление движения.</p>
+<div class="highlight"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">char_to_movement</span><span class="p">(</span><span class="kt">char</span><span class="w"> </span><span class="n">ch</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">        </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">ch</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="sc">&#39;(&#39;</span><span class="p">:</span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="sc">&#39;)&#39;</span><span class="p">:</span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span>
+<span class="w">        </span><span class="k">default</span><span class="o">:</span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
 
-<span class=w> </span>        while ((ch = fgetc(stream)) != EOF) {
-<span class=w> </span>                floor += char_to_movement((char)ch);
-<span class=gi>+                if (floor &lt; 0) {</span>
-<span class=gi>+                        return position;</span>
-<span class=gi>+                }</span>
-<span class=gi>+                position++;</span>
-<span class=w> </span>        }
+<p>Дальше в задачке есть указание на последовательное чтение символов-команд. Используя <code>fgetc</code>, можно последовательно считать поток из <code>FILE*</code>. В случае ошибки считывания потока нужно прекратить работу программы, предварительно отобразив ошибку в STDERR с помощью <code>perror</code>.</p>
+<p>Проверка <code>!feof(stream)</code> после получения <code>EOF</code> от <code>fgetc(stream)</code> выглядит, на первый взгляд, странно. Тонкость в том, что результат <code>EOF</code> у <code>fgetc</code> отвечает не только за истинный <code>EOF</code>, но и за ситуации общих ошибок. Поэтому проверка <code>!feof</code> подчёркивает: если файл не закончился, а мы уже вышли из <code>while</code> – точно произошла какая-то значимая ошибка считывания.</p>
+<div class="highlight"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">what_floor</span><span class="p">(</span><span class="kt">FILE</span><span class="w"> </span><span class="o">*</span><span class="n">stream</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">floor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">ch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
-<span class=w> </span>        if (!feof(stream)) {
-<span class=gu>@@ -27,12 +32,12 @@</span>
-<span class=w> </span>                exit(EXIT_FAILURE);
-<span class=w> </span>        }
+<span class="w">        </span><span class="k">while</span><span class="w"> </span><span class="p">((</span><span class="n">ch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fgetc</span><span class="p">(</span><span class="n">stream</span><span class="p">))</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">EOF</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">floor</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">char_to_movement</span><span class="p">((</span><span class="kt">char</span><span class="p">)</span><span class="n">ch</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
 
-<span class=gd>-        return floor;</span>
-<span class=gi>+        return -1;</span>
-<span class=w> </span>}
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">feof</span><span class="p">(</span><span class="n">stream</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">perror</span><span class="p">(</span><span class="s">&quot;Failed to fgetc&quot;</span><span class="p">);</span>
+<span class="w">                </span><span class="n">exit</span><span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
 
-<span class=w> </span>int main(int argc, char *argv[])
-<span class=w> </span>{
-<span class=gd>-        int floor = 0;</span>
-<span class=gi>+        int position = 0;</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">floor</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
 
-<span class=w> </span>        if (argc &gt; 1) {
-<span class=w> </span>                (void)fprintf(stderr,
-<span class=gu>@@ -42,8 +47,12 @@</span>
-<span class=w> </span>                return EXIT_FAILURE;
-<span class=w> </span>        }
+<p>Завершающий элемент – <code>main</code>. Он предельно простой, делегирует работу <code>what_floor</code> и только отображает результат с помощью <code>printf</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">argv</span><span class="p">[])</span>
+<span class="p">{</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">floor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
-<span class=gd>-        floor = what_floor(stdin);</span>
-<span class=gd>-        (void)printf(&quot;%d\n&quot;, floor);</span>
-<span class=gi>+        position = basement_enter(stdin);</span>
-<span class=gi>+        if (position &lt; 0) {</span>
-<span class=gi>+                (void)puts(&quot;Santa has not visited the basement&quot;);</span>
-<span class=gi>+                return EXIT_FAILURE;</span>
-<span class=gi>+        }</span>
-<span class=gi>+        (void)printf(&quot;%d\n&quot;, position);</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">argc</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span>
+<span class="w">                              </span><span class="s">&quot;No arguments are accepted!</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="w">                              </span><span class="s">&quot;Use IO redirection: %s &lt; input</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span>
+<span class="w">                              </span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="n">EXIT_FAILURE</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
 
-<span class=w> </span>        return EXIT_SUCCESS;
-<span class=w> </span>}
-</code></pre></div> <p>Пройдёмся по изменениям в коде функции <code>what_floor</code>. Она будет называться <code>basement_enter</code>. Функция теперь будет считать позицию символа, на которой сейчас находится считывание. После каждого обновления <code>floor</code> теперь есть проверка – не пришёл ли Санта в подвал. Если пришёл, мы просто вернём позицию.</p> <p>Если Санта никогда не заходил в подвал, возвращаем позицию <code>-1</code>.</p> <p>Ну а в <code>main</code> просто обработаем результаты, включая тот случай, когда Санта вообще не приходил в подвал. Просто выведем ошибку и вернём <code>EXIT_FAILURE</code>.</p> <p>Запускаем тесты и проверяем вывод:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>./test_ii.sh
+<span class="w">        </span><span class="n">floor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">what_floor</span><span class="p">(</span><span class="n">stdin</span><span class="p">);</span>
+<span class="w">        </span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;%d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">floor</span><span class="p">);</span>
 
-<span class=go>Test ) =&gt; 1 PASSED</span>
-<span class=go>Test ()()) =&gt; 5 PASSED</span>
-<span class=go>All tests are completed and passed!</span>
-<span class=go>Answer for input: 1783</span>
-</code></pre></div> <p>Advent of Code ответ 1783 на вторую часть принимает, задача решена.</p> <p>Решения задачек можно найти в <a href=https://github.com/tsb99x/solutions>репозитории</a> на GitHub.</p> <time datetime=2025-03-05T15:25:17+03:00>5 марта 2025 г.</time> <div class=changelog> <h4>Журнал изменений</h4> <p><b>14 марта 2025 г.</b>: привёл заметку в формат, соответствующий остальным решениям.</p> <p><b>2 января 2026 г.</b>: перенёс исходный код на GitHub.</p> </div> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">EXIT_SUCCESS</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Отдельно отметим приведение к <code>(void)</code>. Смысл этой конструкции в том, чтобы дать компилятору или линтеру понять, что мы что-то сознательно игнорируем. В данном случае такое приведение нужно для <code>printf</code> и <code>fprintf</code>, т.к. мы не обрабатываем результат, который возвращают эти функции. На это будет ругаться Clang с флагом <code>-Weverything</code> или Cppcheck с параметром <code>--addon=misra</code>.</p>
+<p>Запускаем тесты (подробнее про скрипт тестирования в <a href="/notes/bash-script-for-solutions.html">отдельной заметке</a>):</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>./test_i.sh
+
+<span class="go">Test (()) =&gt; 0 PASSED</span>
+<span class="go">Test ()() =&gt; 0 PASSED</span>
+<span class="go">Test ((( =&gt; 3 PASSED</span>
+<span class="go">Test (()(()( =&gt; 3 PASSED</span>
+<span class="go">Test ))((((( =&gt; 3 PASSED</span>
+<span class="go">Test ()) =&gt; -1 PASSED</span>
+<span class="go">Test ))( =&gt; -1 PASSED</span>
+<span class="go">Test ))) =&gt; -3 PASSED</span>
+<span class="go">Test )())()) =&gt; -3 PASSED</span>
+<span class="go">All tests are completed and passed!</span>
+<span class="go">Answer for input: 232</span>
+</code></pre></div>
+
+<p>Получаем ответ 232. Advent of Code говорит, что это верно.</p>
+<h2 id="вторая-часть">Вторая часть</h2>
+<p>Задачи на Advent of Code состоят из двух частей. Вторая часть появляется только после успешного решения первой. Парафразирую вторую часть задачи:</p>
+<p>Имея те же инструкции, нужно найти позицию символа, который указывает Санте войти в подвал (этаж -1). Первый символ в инструкциях имеет позицию 1, второй – 2, и т.д.</p>
+<p>Примеры:</p>
+<ul>
+<li>) приведёт в подвал на позиции 1.</li>
+<li>()()) приведёт в подвал на позиции 5.</li>
+</ul>
+<p>Символ на <strong>какой позиции</strong> приведёт Санту в подвал?</p>
+<h2 id="изменения-в-исходном-решении">Изменения в исходном решении</h2>
+<p>Постановка задачи немного расширена, включено новое условие про вхождение в подвал. Это условие раннего терминирования программы. Как только мы с ним столкнёмся, нужно сразу же завершить исполнение алгоритма и программы.</p>
+<p>Для демонстрации изменений будем пользоваться <code>diff</code>. Этот инструмент наглядно покажет построчные изменения (новые аннотацией <code>+</code>, а удалённые аннотацией <code>-</code>).</p>
+<p>Посмотрим на <code>diff -u part_{i,ii}.c</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="gd">--- part_i.c    2025-03-13 10:21:39.845917592 +0300</span>
+<span class="gi">+++ part_ii.c   2025-03-11 12:11:49.409125231 +0300</span>
+<span class="gu">@@ -13,13 +13,18 @@</span>
+<span class="w"> </span>        }
+<span class="w"> </span>}
+
+<span class="gd">-static int what_floor(FILE *stream)</span>
+<span class="gi">+static int basement_enter(FILE *stream)</span>
+<span class="w"> </span>{
+<span class="w"> </span>        int floor = 0;
+<span class="gi">+        int position = 1;</span>
+<span class="w"> </span>        int ch = 0;
+
+<span class="w"> </span>        while ((ch = fgetc(stream)) != EOF) {
+<span class="w"> </span>                floor += char_to_movement((char)ch);
+<span class="gi">+                if (floor &lt; 0) {</span>
+<span class="gi">+                        return position;</span>
+<span class="gi">+                }</span>
+<span class="gi">+                position++;</span>
+<span class="w"> </span>        }
+
+<span class="w"> </span>        if (!feof(stream)) {
+<span class="gu">@@ -27,12 +32,12 @@</span>
+<span class="w"> </span>                exit(EXIT_FAILURE);
+<span class="w"> </span>        }
+
+<span class="gd">-        return floor;</span>
+<span class="gi">+        return -1;</span>
+<span class="w"> </span>}
+
+<span class="w"> </span>int main(int argc, char *argv[])
+<span class="w"> </span>{
+<span class="gd">-        int floor = 0;</span>
+<span class="gi">+        int position = 0;</span>
+
+<span class="w"> </span>        if (argc &gt; 1) {
+<span class="w"> </span>                (void)fprintf(stderr,
+<span class="gu">@@ -42,8 +47,12 @@</span>
+<span class="w"> </span>                return EXIT_FAILURE;
+<span class="w"> </span>        }
+
+<span class="gd">-        floor = what_floor(stdin);</span>
+<span class="gd">-        (void)printf(&quot;%d\n&quot;, floor);</span>
+<span class="gi">+        position = basement_enter(stdin);</span>
+<span class="gi">+        if (position &lt; 0) {</span>
+<span class="gi">+                (void)puts(&quot;Santa has not visited the basement&quot;);</span>
+<span class="gi">+                return EXIT_FAILURE;</span>
+<span class="gi">+        }</span>
+<span class="gi">+        (void)printf(&quot;%d\n&quot;, position);</span>
+
+<span class="w"> </span>        return EXIT_SUCCESS;
+<span class="w"> </span>}
+</code></pre></div>
+
+<p>Пройдёмся по изменениям в коде функции <code>what_floor</code>. Она будет называться <code>basement_enter</code>. Функция теперь будет считать позицию символа, на которой сейчас находится считывание. После каждого обновления <code>floor</code> теперь есть проверка – не пришёл ли Санта в подвал. Если пришёл, мы просто вернём позицию.</p>
+<p>Если Санта никогда не заходил в подвал, возвращаем позицию <code>-1</code>.</p>
+<p>Ну а в <code>main</code> просто обработаем результаты, включая тот случай, когда Санта вообще не приходил в подвал. Просто выведем ошибку и вернём <code>EXIT_FAILURE</code>.</p>
+<p>Запускаем тесты и проверяем вывод:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>./test_ii.sh
+
+<span class="go">Test ) =&gt; 1 PASSED</span>
+<span class="go">Test ()()) =&gt; 5 PASSED</span>
+<span class="go">All tests are completed and passed!</span>
+<span class="go">Answer for input: 1783</span>
+</code></pre></div>
+
+<p>Advent of Code ответ 1783 на вторую часть принимает, задача решена.</p>
+<p>Решения задачек можно найти в <a href="https://github.com/tsb99x/solutions">репозитории</a> на GitHub.</p>
+
+<time datetime="2025-03-05T15:25:17+03:00">5 марта 2025 г.</time>
+
+<div class="changelog">
+<h4>Журнал изменений</h4>
+<p><b>14 марта 2025 г.</b>: привёл заметку в формат, соответствующий остальным решениям.</p>
+<p><b>2 января 2026 г.</b>: перенёс исходный код на GitHub.</p>
+</div>
+
+</article>
+
+<address class="contacts">
+    Если Вы хотите обсудить содержание заметки, задать вопросы или
+    предложить изменения, то со мной можно связаться в
+    <a href="https://t.me/tsb99x">Telegram</a>
+</address>
+
+<footer>
+    <span class="copyright">© 2019-2026</span> |
+    <a rel="license"
+        href="https://creativecommons.org/licenses/by/4.0/deed.ru">
+        CC BY 4.0
+    </a>
+</footer>
+
+</body>
+</html>

@@ -1,37 +1,121 @@
-<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2024-10-04T17:34:40+03:00><meta name=description content="Монтирование образов с offset"><meta property=og:url content=https://tsb99x.github.io/notes/vdi-data-extraction.html><meta property=og:type content=article><meta property=og:title content="Вытаскиваем данные из VDI"><meta property=og:description content="Монтирование образов с offset"><meta property=og:image content=https://tsb99x.github.io/res/avatar-512x512.png><title>Вытаскиваем данные из VDI</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.github.io/notes/vdi-data-extraction.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> </nav> <article> <header id=title-block-header> <h1 class=title>Вытаскиваем данные из VDI</h1> </header> <p>Подчищая старые виртуалки, споткнулся о проблему запуска виртуальной машины с Windows XP на Virt-Manager. Создавалась эта виртуалка с помощью VirtualBox. В прошлом я делал <a href=/notes/vdi-to-qcow2.html>конвертацию VDI в QCOW2</a>. Но на этот раз ВМ не загружалась.</p> <p>Основной целью запустить виртуалку было простое желание вытащить из неё полезные данные и удалить, чтобы она не занимала лишнего места. Диск у ВМ не шифровался. Логичная мысль – нужно просто вытащить данные с образа диска без запуска ВМ.</p> <p>Первым шагом конвертирую VDI в RAW, т.к. <code>.img</code> можно будет смонтировать.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>qemu-img<span class=w> </span>convert<span class=w> </span>XP.vdi<span class=w> </span>-O<span class=w> </span>raw<span class=w> </span>XP.img
-<span class=gp>$ </span>qemu-img<span class=w> </span>info<span class=w> </span>XP.img
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru" prefix="og: https://ogp.me/ns#">
 
-<span class=go>image: XP.img</span>
-<span class=go>file format: raw</span>
-<span class=go>virtual size: 32 GiB (34359738368 bytes)</span>
-<span class=go>disk size: 22.3 GiB</span>
-</code></pre></div> <p>Конвертация успешна, можно даже посмотреть таблицу разделов.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>fdisk<span class=w> </span>-l<span class=w> </span>XP.img
+<head>
 
-<span class=go>Disk XP.img: 32 GiB, 34359738368 bytes, 67108864 sectors</span>
-<span class=go>Units: sectors of 1 * 512 = 512 bytes</span>
-<span class=go>Sector size (logical/physical): 512 bytes / 512 bytes</span>
-<span class=go>I/O size (minimum/optimal): 512 bytes / 512 bytes</span>
-<span class=go>Disklabel type: dos</span>
-<span class=go>Disk identifier: 0xa941a941</span>
+<meta charset="utf-8">
+<meta name="generator" content="pandoc">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Антон Муравьев">
+<meta name="dcterms.date" content="2024-10-04T17:34:40+03:00">
+<meta name="description" content="Монтирование образов с offset">
+<meta property="og:url" content="https://tsb99x.github.io/notes/vdi-data-extraction.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Вытаскиваем данные из VDI">
+<meta property="og:description" content="Монтирование образов с offset">
+<meta property="og:image" content="https://tsb99x.github.io/res/avatar-512x512.png">
+<title>Вытаскиваем данные из VDI</title>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/normalize.css">
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/pygments.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="canonical" href="https://tsb99x.github.io/notes/vdi-data-extraction.html">
 
-<span class=go>Device     Boot Start      End  Sectors Size Id Type</span>
-<span class=go>XP.img1    *       63 67087439 67087377  32G  7 HPFS/NTFS/exFAT</span>
-</code></pre></div> <p>Но если попробовать смонтировать образ “в лоб”, то получаю ошибку.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>mkdir<span class=w> </span>/tmp/XP-mount
-<span class=gp>$ </span>sudo<span class=w> </span>mount<span class=w> </span>XP.img<span class=w> </span>/tmp/XP-mount/
+</head>
 
-<span class=go>mount: /tmp/XP-mount: wrong fs type, bad option, bad superblock on /dev/loop0, missing codepage or helper program, or other error.</span>
-<span class=go>       dmesg(1) may have more information after failed mount system call.</span>
-</code></pre></div> <p><a href=https://askubuntu.com/questions/483009/mounting-disk-image-in-raw-format>Подсказка на AskUbuntu</a> поможет собрать головоломку с помощью <code>offset</code>. Идея в том, чтобы смонтировать не весь <code>.img</code>, а только часть, пропустив секторы.</p> <p>Чтобы посчитать, какой нужен <code>offset</code>, смотрим на вывод <code>fdisk -l</code>. Размер сектора установлен как 512 байт. Первый раздел стартует с 63 сектора. Путём перемножения получаем 63 * 512 = 32256 байт. Такое значение и устанавливаю.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>mount<span class=w> </span>-o<span class=w> </span><span class=nv>offset</span><span class=o>=</span><span class=m>32256</span><span class=w> </span>XP.img<span class=w> </span>/tmp/XP-mount/
-</code></pre></div> <p>У такого подхода есть плюс в виде универсальности, но считать <code>offset</code> вручную неудобно. Кроме того, в образе может быть множество разделов.</p> <p>В прошлом я искал способы монтирования <code>.iso</code> образов без root-прав. Основная альтернатива для <code>mount</code> там <code>udisksctl</code>. Тут он тоже применим, попробуем.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>udisksctl<span class=w> </span>loop-setup<span class=w> </span>-f<span class=w> </span>XP.img
+<body>
 
-<span class=go>Mapped file XP.img as /dev/loop0.</span>
+<nav>
+    <a href="/">Обо мне</a>
+    <a href="/notes/">Заметки</a>
+</nav>
 
-<span class=gp>$ </span>udisksctl<span class=w> </span>mount<span class=w> </span>-b<span class=w> </span>/dev/loop0p1
+<article>
 
-<span class=go>Mounted /dev/loop0p1 at /media/user/96380D99380D798F</span>
-</code></pre></div> <p>Отмечу отдельно: никакой необходимости пользоваться <code>sudo</code> нет. При монтировании достаточно указать нужный раздел с помощью суффикса <code>p1</code> для устройства <code>loop0</code>. А ещё не требуется создавать папку для точки монтирования. Чтобы размонтировать:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>udisksctl<span class=w> </span>unmount<span class=w> </span>-b<span class=w> </span>/dev/loop0p1
+<header id="title-block-header">
+<h1 class="title">Вытаскиваем данные из VDI</h1>
+</header>
 
-<span class=go>Unmounted /dev/loop0p1.</span>
+<p>Подчищая старые виртуалки, споткнулся о проблему запуска виртуальной машины с Windows XP на Virt-Manager. Создавалась эта виртуалка с помощью VirtualBox. В прошлом я делал <a href="/notes/vdi-to-qcow2.html">конвертацию VDI в QCOW2</a>. Но на этот раз ВМ не загружалась.</p>
+<p>Основной целью запустить виртуалку было простое желание вытащить из неё полезные данные и удалить, чтобы она не занимала лишнего места. Диск у ВМ не шифровался. Логичная мысль – нужно просто вытащить данные с образа диска без запуска ВМ.</p>
+<p>Первым шагом конвертирую VDI в RAW, т.к. <code>.img</code> можно будет смонтировать.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>qemu-img<span class="w"> </span>convert<span class="w"> </span>XP.vdi<span class="w"> </span>-O<span class="w"> </span>raw<span class="w"> </span>XP.img
+<span class="gp">$ </span>qemu-img<span class="w"> </span>info<span class="w"> </span>XP.img
 
-<span class=gp>$ </span>udisksctl<span class=w> </span>loop-delete<span class=w> </span>-b<span class=w> </span>/dev/loop0
-</code></pre></div> <p>Во всех вариантах монтирования я увидел ФС бывшей XP. Запаковал нужные данные, а после размонтировал <code>.img</code> и удалил вместе с исходным VDI. В будущем буду знать и пользоваться <code>udisksctl</code>, если придётся монтировать RAW образы виртуалок.</p> <time datetime=2024-10-04T17:34:40+03:00>4 октября 2024 г.</time> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 
+<span class="go">image: XP.img</span>
+<span class="go">file format: raw</span>
+<span class="go">virtual size: 32 GiB (34359738368 bytes)</span>
+<span class="go">disk size: 22.3 GiB</span>
+</code></pre></div>
+
+<p>Конвертация успешна, можно даже посмотреть таблицу разделов.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>fdisk<span class="w"> </span>-l<span class="w"> </span>XP.img
+
+<span class="go">Disk XP.img: 32 GiB, 34359738368 bytes, 67108864 sectors</span>
+<span class="go">Units: sectors of 1 * 512 = 512 bytes</span>
+<span class="go">Sector size (logical/physical): 512 bytes / 512 bytes</span>
+<span class="go">I/O size (minimum/optimal): 512 bytes / 512 bytes</span>
+<span class="go">Disklabel type: dos</span>
+<span class="go">Disk identifier: 0xa941a941</span>
+
+<span class="go">Device     Boot Start      End  Sectors Size Id Type</span>
+<span class="go">XP.img1    *       63 67087439 67087377  32G  7 HPFS/NTFS/exFAT</span>
+</code></pre></div>
+
+<p>Но если попробовать смонтировать образ “в лоб”, то получаю ошибку.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>mkdir<span class="w"> </span>/tmp/XP-mount
+<span class="gp">$ </span>sudo<span class="w"> </span>mount<span class="w"> </span>XP.img<span class="w"> </span>/tmp/XP-mount/
+
+<span class="go">mount: /tmp/XP-mount: wrong fs type, bad option, bad superblock on /dev/loop0, missing codepage or helper program, or other error.</span>
+<span class="go">       dmesg(1) may have more information after failed mount system call.</span>
+</code></pre></div>
+
+<p><a href="https://askubuntu.com/questions/483009/mounting-disk-image-in-raw-format">Подсказка на AskUbuntu</a> поможет собрать головоломку с помощью <code>offset</code>. Идея в том, чтобы смонтировать не весь <code>.img</code>, а только часть, пропустив секторы.</p>
+<p>Чтобы посчитать, какой нужен <code>offset</code>, смотрим на вывод <code>fdisk -l</code>. Размер сектора установлен как 512 байт. Первый раздел стартует с 63 сектора. Путём перемножения получаем 63 * 512 = 32256 байт. Такое значение и устанавливаю.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>mount<span class="w"> </span>-o<span class="w"> </span><span class="nv">offset</span><span class="o">=</span><span class="m">32256</span><span class="w"> </span>XP.img<span class="w"> </span>/tmp/XP-mount/
+</code></pre></div>
+
+<p>У такого подхода есть плюс в виде универсальности, но считать <code>offset</code> вручную неудобно. Кроме того, в образе может быть множество разделов.</p>
+<p>В прошлом я искал способы монтирования <code>.iso</code> образов без root-прав. Основная альтернатива для <code>mount</code> там <code>udisksctl</code>. Тут он тоже применим, попробуем.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>udisksctl<span class="w"> </span>loop-setup<span class="w"> </span>-f<span class="w"> </span>XP.img
+
+<span class="go">Mapped file XP.img as /dev/loop0.</span>
+
+<span class="gp">$ </span>udisksctl<span class="w"> </span>mount<span class="w"> </span>-b<span class="w"> </span>/dev/loop0p1
+
+<span class="go">Mounted /dev/loop0p1 at /media/user/96380D99380D798F</span>
+</code></pre></div>
+
+<p>Отмечу отдельно: никакой необходимости пользоваться <code>sudo</code> нет. При монтировании достаточно указать нужный раздел с помощью суффикса <code>p1</code> для устройства <code>loop0</code>. А ещё не требуется создавать папку для точки монтирования. Чтобы размонтировать:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>udisksctl<span class="w"> </span>unmount<span class="w"> </span>-b<span class="w"> </span>/dev/loop0p1
+
+<span class="go">Unmounted /dev/loop0p1.</span>
+
+<span class="gp">$ </span>udisksctl<span class="w"> </span>loop-delete<span class="w"> </span>-b<span class="w"> </span>/dev/loop0
+</code></pre></div>
+
+<p>Во всех вариантах монтирования я увидел ФС бывшей XP. Запаковал нужные данные, а после размонтировал <code>.img</code> и удалил вместе с исходным VDI. В будущем буду знать и пользоваться <code>udisksctl</code>, если придётся монтировать RAW образы виртуалок.</p>
+
+<time datetime="2024-10-04T17:34:40+03:00">4 октября 2024 г.</time>
+
+
+</article>
+
+<address class="contacts">
+    Если Вы хотите обсудить содержание заметки, задать вопросы или
+    предложить изменения, то со мной можно связаться в
+    <a href="https://t.me/tsb99x">Telegram</a>
+</address>
+
+<footer>
+    <span class="copyright">© 2019-2026</span> |
+    <a rel="license"
+        href="https://creativecommons.org/licenses/by/4.0/deed.ru">
+        CC BY 4.0
+    </a>
+</footer>
+
+</body>
+</html>

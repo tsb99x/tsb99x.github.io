@@ -1,21 +1,118 @@
-<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2024-11-06T13:58:52+03:00><meta name=description content="Проверка для unicode-range"><meta property=og:url content=https://tsb99x.github.io/notes/utf8-range-checker.html><meta property=og:type content=article><meta property=og:title content="Утилита UTF8 Range Checker"><meta property=og:description content="Проверка для unicode-range"><meta property=og:image content=https://tsb99x.github.io/res/avatar-512x512.png><title>Утилита UTF8 Range Checker</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.github.io/notes/utf8-range-checker.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> </nav> <article> <header id=title-block-header> <h1 class=title>Утилита UTF8 Range Checker</h1> </header> <p>Современный web – удивительная вещь. С одной стороны, есть большое количество стандартизованных API для CSS и JavaScript. С другой – до сих пор нет единого стандарта на набор шрифтов.</p> <p>Каждая ОС будет поставляться со своими шрифтами. Из-за этого один и тот же сайт на двух разных устройствах может выглядеть по-разному.</p> <p>Решение достаточно простое – взять отдельный шрифт и использовать именно его. Нужно только добавить <code>font-face</code> в CSS-стиль, указав Regular версию шрифта.</p> <p>Как пример, можно взять шрифт <a href=https://www.jetbrains.com/lp/mono/ >JetBrains Mono</a>, я использую на сайте именно его. Базовый шрифт будет весить около 90К. Достаточно много, но приемлемо.</p> <p>К сожалению, этого недостаточно. Дополнительную проблему создаёт разница в движках рендеринга шрифтов. Firefox куда более плавно делает шрифт “жирным”. Основанный на Chromium-браузеры изменяют толщину куда более резко, ступенчато.</p> <p>В результате Chrome и Firefox рендерят большую часть страницы нормально, но те места, где есть выделенный жирно текст, они рендерят совсем по-разному.</p> <p>Решение для этого также простое – взять Bold версию шрифта. Но это ещё плюс 90К к загрузке у клиента. Нужно учесть, что большинство страниц у меня на сайте содержат меньше контента в байтах. Не пойдёт.</p> <p>Один из плюсов <code>font-face</code> в CSS – возможность указать <code>unicode-range</code>. Эта опция подскажет браузеру, какой шрифт нужно загрузить для какого интервала Unicode символов. Если <code>font-face</code> содержит интервал, символы которого не встречаются на странице, то это <code>font-face</code> не будет загружен.</p> <p>Фактически это значит: можно распилить один большой шрифт на множество маленьких по логическим группам (латиница, кириллица и т.д.). Поскольку я не умею писать на греческом языке, то символы для него мне не нужны совсем и можно сэкономить объём загружаемых данных для клиента.</p> <p>Распилить символы из исходных <code>woff2</code> на логические группы Unicode можно с помощью утилиты <code>pyftsubset</code>. Вот пример для группы символов Basic Latin.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>pyftsubset<span class=w> </span>JetBrainsMono-Regular.woff2<span class=w> </span><span class=se>\</span>
-<span class=w>    </span>--unicodes<span class=o>=</span><span class=s1>&#39;U+0000-007F&#39;</span><span class=w> </span><span class=se>\</span>
-<span class=w>    </span>--layout-features<span class=o>=</span><span class=s1>&#39;&#39;</span><span class=w> </span><span class=se>\</span>
-<span class=w>    </span>--flavor<span class=o>=</span><span class=s1>&#39;woff2&#39;</span><span class=w> </span><span class=se>\</span>
-<span class=w>    </span>--output-file<span class=o>=</span>JetBrainsMono-Basic-Latin-Regular.woff2
-</code></pre></div> <p>В результате получим файл всего в 8К. Описать в CSS полученный шрифт можно так:</p> <div class=highlight><pre><span></span><code><span class=p>@</span><span class=k>font-face</span><span class=w> </span><span class=p>{</span>
-<span class=w>    </span><span class=nt>font-family</span><span class=o>:</span><span class=w> </span><span class=s1>&#39;JetBrains Mono&#39;</span><span class=o>;</span>
-<span class=w>    </span><span class=nt>src</span><span class=o>:</span><span class=w> </span><span class=nt>local</span><span class=o>(</span><span class=s1>&#39;JetBrains Mono&#39;</span><span class=o>),</span><span class=w> </span><span class=nt>url</span><span class=o>(</span><span class=s1>&#39;JetBrainsMono-Basic-Latin-Regular.woff2&#39;</span><span class=o>);</span>
-<span class=w>    </span><span class=nt>font-weight</span><span class=o>:</span><span class=w> </span><span class=nt>400</span><span class=o>;</span>
-<span class=w>    </span><span class=nt>font-style</span><span class=o>:</span><span class=w> </span><span class=nt>normal</span><span class=o>;</span>
-<span class=w>    </span><span class=nt>font-display</span><span class=o>:</span><span class=w> </span><span class=nt>swap</span><span class=o>;</span>
-<span class=w>    </span><span class=nt>unicode-range</span><span class=o>:</span><span class=w> </span><span class=nt>U</span><span class=o>+</span><span class=nt>0000-007F</span><span class=o>;</span>
-<span class=p>}</span>
-</code></pre></div> <p>Конечно, для каждого полученного из <code>pyftsubset</code> шрифта в формате <code>woff2</code> нужно сделать соответствующий блок <code>font-face</code>.</p> <p>Перечислять таким образом все логические блоки не слишком удобно. Во-первых, это сделает объём CSS намного больше. Во-вторых, это просто неудобная ручная работа.</p> <p>Теперь встаёт самый сложный вопрос. Как можно понять, какие именно символы используются на ваших страницах? Ведь, если у браузера не будет ни одного подходящего <code>unicode-range</code> для символа, то он не сможет отобразить символ “правильно”. Да, что-то будет отражено, но как – вопрос открытый.</p> <p>Представим, что я <em>думал</em>, что мне не нужен греческий сабсет, но по глупости и наивности вставил формулу. Она содержит греческие символы. Как мне валидировать набор символов на страницах сайта? Как понять, что где-то будет неопределённость в рендеринге?</p> <p>Я не нашёл простого и удобного инструмента, поэтому написал простенькую утилиту [UTF8 Range Checker] для решения этой проблемы.</p> <p>Смысл программы предельно просто. На вход в виде аргументов можно передать несколько интервалов Unicode символов, которые Вы уже описали в <code>font-face</code>. UTF-8 текст для проверки передаётся как STDIN.</p> <p>Отмечу отдельно – программа рассчитана <strong>только</strong> на UTF-8!</p> <p>В результате работы программа ответит, все ли UTF-8 символы в STDIN входят в указанные интервалы Unicode символов. Если нет и в наличии неучтённые символы, то checker выведет их код и скажет сколько всего символов было вне интервалов.</p> <p>Проще всего продемонстрировать работу, чем пытаться её объяснить. Проверим, что в файле <code>index.html</code> содержаться только символы базовой латиницы и кириллицы:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>cat<span class=w> </span>www/index.html<span class=w> </span><span class=se>\</span>
-<span class=w>    </span><span class=p>|</span><span class=w> </span>./utf8-range-checker<span class=w> </span>U+0000-007F<span class=w> </span>U+0400-04FF<span class=w> </span><span class=se>\</span>
-<span class=w>    </span><span class=p>|</span><span class=w> </span>sort<span class=w> </span>-u
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru" prefix="og: https://ogp.me/ns#">
 
-<span class=go>U+2014</span>
-<span class=go>U+00A9</span>
-<span class=go>total code points outside of specified ranges: 2</span>
-</code></pre></div> <p>Наглядно видим, сколько всего символов есть вне интервалов и их коды, супер!</p> <p>Естественно, программу можно использовать для скриптинга, т.к. она возвращает релевантные статус коды. Я подключил её в свой Makefile и проверяю все страницы сайта перед публикацией, дабы не получить артефакты рендеринга у браузеров.</p> <p>Есть ещё один вариант использования. Чтобы узнать коды всех символов, которые использованы в файле, можно запустить программу <strong>без</strong> указания интервалов.</p> <p>Подводя итоги работы по “распиливанию” шрифтов, могу сказать, что результат меня приятно порадовал. В прошлом, для просмотра этой страницы, нужно было загрузить минимум 180К только шрифтов. Теперь нужно загрузить <strong>всего</strong> 74К. И это не только шрифты, но и CSS, HTML и SVG изображения. Успех!</p> <p>Данные о лицензии, моих флагах компиляции, вариантах использования и граничных условиях можно найти в <a href=https://github.com/tsb99x/utf8-range-checker>репозитории</a> на GitHub.</p> <p>На этом всё, надеюсь такая программа может Вам пригодиться!</p> <time datetime=2024-11-06T13:58:52+03:00>6 ноября 2024 г.</time> <div class=changelog> <h4>Журнал изменений</h4> <p><b>1 января 2026 г.</b>: перенёс исходники на GitHub.</p> </div> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 
+<head>
+
+<meta charset="utf-8">
+<meta name="generator" content="pandoc">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Антон Муравьев">
+<meta name="dcterms.date" content="2024-11-06T13:58:52+03:00">
+<meta name="description" content="Проверка для unicode-range">
+<meta property="og:url" content="https://tsb99x.github.io/notes/utf8-range-checker.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Утилита UTF8 Range Checker">
+<meta property="og:description" content="Проверка для unicode-range">
+<meta property="og:image" content="https://tsb99x.github.io/res/avatar-512x512.png">
+<title>Утилита UTF8 Range Checker</title>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/normalize.css">
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/pygments.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="canonical" href="https://tsb99x.github.io/notes/utf8-range-checker.html">
+
+</head>
+
+<body>
+
+<nav>
+    <a href="/">Обо мне</a>
+    <a href="/notes/">Заметки</a>
+</nav>
+
+<article>
+
+<header id="title-block-header">
+<h1 class="title">Утилита UTF8 Range Checker</h1>
+</header>
+
+<p>Современный web – удивительная вещь. С одной стороны, есть большое количество стандартизованных API для CSS и JavaScript. С другой – до сих пор нет единого стандарта на набор шрифтов.</p>
+<p>Каждая ОС будет поставляться со своими шрифтами. Из-за этого один и тот же сайт на двух разных устройствах может выглядеть по-разному.</p>
+<p>Решение достаточно простое – взять отдельный шрифт и использовать именно его. Нужно только добавить <code>font-face</code> в CSS-стиль, указав Regular версию шрифта.</p>
+<p>Как пример, можно взять шрифт <a href="https://www.jetbrains.com/lp/mono/">JetBrains Mono</a>, я использую на сайте именно его. Базовый шрифт будет весить около 90К. Достаточно много, но приемлемо.</p>
+<p>К сожалению, этого недостаточно. Дополнительную проблему создаёт разница в движках рендеринга шрифтов. Firefox куда более плавно делает шрифт “жирным”. Основанный на Chromium-браузеры изменяют толщину куда более резко, ступенчато.</p>
+<p>В результате Chrome и Firefox рендерят большую часть страницы нормально, но те места, где есть выделенный жирно текст, они рендерят совсем по-разному.</p>
+<p>Решение для этого также простое – взять Bold версию шрифта. Но это ещё плюс 90К к загрузке у клиента. Нужно учесть, что большинство страниц у меня на сайте содержат меньше контента в байтах. Не пойдёт.</p>
+<p>Один из плюсов <code>font-face</code> в CSS – возможность указать <code>unicode-range</code>. Эта опция подскажет браузеру, какой шрифт нужно загрузить для какого интервала Unicode символов. Если <code>font-face</code> содержит интервал, символы которого не встречаются на странице, то это <code>font-face</code> не будет загружен.</p>
+<p>Фактически это значит: можно распилить один большой шрифт на множество маленьких по логическим группам (латиница, кириллица и т.д.). Поскольку я не умею писать на греческом языке, то символы для него мне не нужны совсем и можно сэкономить объём загружаемых данных для клиента.</p>
+<p>Распилить символы из исходных <code>woff2</code> на логические группы Unicode можно с помощью утилиты <code>pyftsubset</code>. Вот пример для группы символов Basic Latin.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>pyftsubset<span class="w"> </span>JetBrainsMono-Regular.woff2<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--unicodes<span class="o">=</span><span class="s1">&#39;U+0000-007F&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--layout-features<span class="o">=</span><span class="s1">&#39;&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--flavor<span class="o">=</span><span class="s1">&#39;woff2&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--output-file<span class="o">=</span>JetBrainsMono-Basic-Latin-Regular.woff2
+</code></pre></div>
+
+<p>В результате получим файл всего в 8К. Описать в CSS полученный шрифт можно так:</p>
+<div class="highlight"><pre><span></span><code><span class="p">@</span><span class="k">font-face</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">font-family</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;JetBrains Mono&#39;</span><span class="o">;</span>
+<span class="w">    </span><span class="nt">src</span><span class="o">:</span><span class="w"> </span><span class="nt">local</span><span class="o">(</span><span class="s1">&#39;JetBrains Mono&#39;</span><span class="o">),</span><span class="w"> </span><span class="nt">url</span><span class="o">(</span><span class="s1">&#39;JetBrainsMono-Basic-Latin-Regular.woff2&#39;</span><span class="o">);</span>
+<span class="w">    </span><span class="nt">font-weight</span><span class="o">:</span><span class="w"> </span><span class="nt">400</span><span class="o">;</span>
+<span class="w">    </span><span class="nt">font-style</span><span class="o">:</span><span class="w"> </span><span class="nt">normal</span><span class="o">;</span>
+<span class="w">    </span><span class="nt">font-display</span><span class="o">:</span><span class="w"> </span><span class="nt">swap</span><span class="o">;</span>
+<span class="w">    </span><span class="nt">unicode-range</span><span class="o">:</span><span class="w"> </span><span class="nt">U</span><span class="o">+</span><span class="nt">0000-007F</span><span class="o">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Конечно, для каждого полученного из <code>pyftsubset</code> шрифта в формате <code>woff2</code> нужно сделать соответствующий блок <code>font-face</code>.</p>
+<p>Перечислять таким образом все логические блоки не слишком удобно. Во-первых, это сделает объём CSS намного больше. Во-вторых, это просто неудобная ручная работа.</p>
+<p>Теперь встаёт самый сложный вопрос. Как можно понять, какие именно символы используются на ваших страницах? Ведь, если у браузера не будет ни одного подходящего <code>unicode-range</code> для символа, то он не сможет отобразить символ “правильно”. Да, что-то будет отражено, но как – вопрос открытый.</p>
+<p>Представим, что я <em>думал</em>, что мне не нужен греческий сабсет, но по глупости и наивности вставил формулу. Она содержит греческие символы. Как мне валидировать набор символов на страницах сайта? Как понять, что где-то будет неопределённость в рендеринге?</p>
+<p>Я не нашёл простого и удобного инструмента, поэтому написал простенькую утилиту [UTF8 Range Checker] для решения этой проблемы.</p>
+<p>Смысл программы предельно просто. На вход в виде аргументов можно передать несколько интервалов Unicode символов, которые Вы уже описали в <code>font-face</code>. UTF-8 текст для проверки передаётся как STDIN.</p>
+<p>Отмечу отдельно – программа рассчитана <strong>только</strong> на UTF-8!</p>
+<p>В результате работы программа ответит, все ли UTF-8 символы в STDIN входят в указанные интервалы Unicode символов. Если нет и в наличии неучтённые символы, то checker выведет их код и скажет сколько всего символов было вне интервалов.</p>
+<p>Проще всего продемонстрировать работу, чем пытаться её объяснить. Проверим, что в файле <code>index.html</code> содержаться только символы базовой латиницы и кириллицы:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>cat<span class="w"> </span>www/index.html<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="p">|</span><span class="w"> </span>./utf8-range-checker<span class="w"> </span>U+0000-007F<span class="w"> </span>U+0400-04FF<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="p">|</span><span class="w"> </span>sort<span class="w"> </span>-u
+
+<span class="go">U+2014</span>
+<span class="go">U+00A9</span>
+<span class="go">total code points outside of specified ranges: 2</span>
+</code></pre></div>
+
+<p>Наглядно видим, сколько всего символов есть вне интервалов и их коды, супер!</p>
+<p>Естественно, программу можно использовать для скриптинга, т.к. она возвращает релевантные статус коды. Я подключил её в свой Makefile и проверяю все страницы сайта перед публикацией, дабы не получить артефакты рендеринга у браузеров.</p>
+<p>Есть ещё один вариант использования. Чтобы узнать коды всех символов, которые использованы в файле, можно запустить программу <strong>без</strong> указания интервалов.</p>
+<p>Подводя итоги работы по “распиливанию” шрифтов, могу сказать, что результат меня приятно порадовал. В прошлом, для просмотра этой страницы, нужно было загрузить минимум 180К только шрифтов. Теперь нужно загрузить <strong>всего</strong> 74К. И это не только шрифты, но и CSS, HTML и SVG изображения. Успех!</p>
+<p>Данные о лицензии, моих флагах компиляции, вариантах использования и граничных условиях можно найти в <a href="https://github.com/tsb99x/utf8-range-checker">репозитории</a> на GitHub.</p>
+<p>На этом всё, надеюсь такая программа может Вам пригодиться!</p>
+
+<time datetime="2024-11-06T13:58:52+03:00">6 ноября 2024 г.</time>
+
+<div class="changelog">
+<h4>Журнал изменений</h4>
+<p><b>1 января 2026 г.</b>: перенёс исходники на GitHub.</p>
+</div>
+
+</article>
+
+<address class="contacts">
+    Если Вы хотите обсудить содержание заметки, задать вопросы или
+    предложить изменения, то со мной можно связаться в
+    <a href="https://t.me/tsb99x">Telegram</a>
+</address>
+
+<footer>
+    <span class="copyright">© 2019-2026</span> |
+    <a rel="license"
+        href="https://creativecommons.org/licenses/by/4.0/deed.ru">
+        CC BY 4.0
+    </a>
+</footer>
+
+</body>
+</html>

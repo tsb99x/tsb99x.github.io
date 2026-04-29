@@ -1,51 +1,133 @@
-<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2025-07-21T16:11:41+03:00><meta name=description content="Современный GUI для Ollama"><meta property=og:url content=https://tsb99x.github.io/notes/open-webui-in-podman.html><meta property=og:type content=article><meta property=og:title content="Open WebUI в Podman"><meta property=og:description content="Современный GUI для Ollama"><meta property=og:image content=https://tsb99x.github.io/res/avatar-512x512.png><title>Open WebUI в Podman</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.github.io/notes/open-webui-in-podman.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> </nav> <article> <header id=title-block-header> <h1 class=title>Open WebUI в Podman</h1> </header> <p>В <a href=/notes/ollama-in-podman.html>предыдущей заметке</a> мы уже запустили Ollama в Podman. Но, CLI от Ollama не даст использовать многие плюсы моделей, вроде распознания образов с картинок. Кроме того, банально неудобно смотреть на вывод без подсветки синтаксиса и т.п.</p> <p>Как бы это не было странно, среди Open Source и Self Hosted решений в этой стезе не так много продуктов. Самый популярный – <a href=https://github.com/open-webui/open-webui>Open WebUI</a>, запустим его в Podman.</p> <p>Первым шагом забираем свежий image с хостинга GitHub (ghcr.io).</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>podman<span class=w> </span>pull<span class=w> </span>ghcr.io/open-webui/open-webui:main
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru" prefix="og: https://ogp.me/ns#">
 
-<span class=go>Trying to pull ghcr.io/open-webui/open-webui:main...</span>
-<span class=go>Getting image source signatures</span>
-<span class=go>Copying blob 4f4fb700ef54 skipped: already exists</span>
-<span class=go>Copying blob 483d0dd37518 skipped: already exists</span>
-<span class=go>Copying blob 471797cdda8c skipped: already exists</span>
-<span class=go>Copying blob 02a5d22e0d6f skipped: already exists</span>
-<span class=go>Copying blob d735c6810219 skipped: already exists</span>
-<span class=go>Copying blob eb54bd960342 skipped: already exists</span>
-<span class=go>Copying blob 1e80ef81ce95 skipped: already exists</span>
-<span class=go>Copying blob 3da95a905ed5 skipped: already exists</span>
-<span class=go>Copying blob dc06c47d3f8d skipped: already exists</span>
-<span class=go>Copying blob ea7e6d3e0aef skipped: already exists</span>
-<span class=go>Copying blob bbb7d449cf1f done</span>
-<span class=go>Copying blob b60ff2a71e86 done</span>
-<span class=go>Copying blob 838a5ef21014 done</span>
-<span class=go>Copying blob 72b8ccfd4120 done</span>
-<span class=go>Copying blob 4f4fb700ef54 skipped: already exists</span>
-<span class=go>Copying blob 01c7ca3659de done</span>
-<span class=go>Copying config 21bb7e0892 done</span>
-<span class=go>Writing manifest to image destination</span>
-<span class=go>Storing signatures</span>
-<span class=go>21bb7e0892cfbfaa64f9bc67ee83be1d79b1e062e946394396fded7f03a54987</span>
+<head>
 
-<span class=gp>$ </span>podman<span class=w> </span>image<span class=w> </span>ls
+<meta charset="utf-8">
+<meta name="generator" content="pandoc">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Антон Муравьев">
+<meta name="dcterms.date" content="2025-07-21T16:11:41+03:00">
+<meta name="description" content="Современный GUI для Ollama">
+<meta property="og:url" content="https://tsb99x.github.io/notes/open-webui-in-podman.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Open WebUI в Podman">
+<meta property="og:description" content="Современный GUI для Ollama">
+<meta property="og:image" content="https://tsb99x.github.io/res/avatar-512x512.png">
+<title>Open WebUI в Podman</title>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/normalize.css">
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/pygments.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="canonical" href="https://tsb99x.github.io/notes/open-webui-in-podman.html">
 
-<span class=go>REPOSITORY                     TAG         IMAGE ID      CREATED       SIZE</span>
-<span class=go>ghcr.io/open-webui/open-webui  main        21bb7e0892cf  42 hours ago  4.84 GB</span>
-<span class=go>docker.io/ollama/ollama        rocm        d466fc07e32e  12 days ago   6.42 GB</span>
-</code></pre></div> <p>И в очередной раз, довольно большой образ. Но что поделать… Для первого запуска контейнера, пользуемся немного модифицированной командой. Я убрал из команды в доках <code>--restart always</code> и добавил порт локальной Ollama (11434). Да, к слову, для полноценного использования обязательно нужно запустить и Ollama!</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>podman<span class=w> </span>start<span class=w> </span>ollama
+</head>
 
-<span class=go>ollama</span>
+<body>
 
-<span class=gp>$ </span>podman<span class=w> </span>run<span class=w> </span>-d<span class=w> </span><span class=se>\</span>
-<span class=w>    </span>-p<span class=w> </span><span class=m>3000</span>:8080<span class=w> </span><span class=se>\</span>
-<span class=w>    </span>-e<span class=w> </span><span class=s1>&#39;OLLAMA_BASE_URL=http://host.containers.internal:11434&#39;</span><span class=w> </span><span class=se>\</span>
-<span class=w>    </span>-v<span class=w> </span>open-webui:/app/backend/data<span class=w> </span><span class=se>\</span>
-<span class=w>    </span>--name<span class=w> </span>open-webui<span class=w> </span><span class=se>\</span>
-<span class=w>    </span>ghcr.io/open-webui/open-webui:main
+<nav>
+    <a href="/">Обо мне</a>
+    <a href="/notes/">Заметки</a>
+</nav>
 
-<span class=go>270f23c5c172b1debc64c1a86de58b6a263c0a11c98fb30f8f1ff5c4a89a8f02</span>
-</code></pre></div> <p>Заходим на <a href=http://localhost:3000>localhost:3000</a> и видим там интерфейс настройки. Заполнив все поля, создаём аккаунт администратора. Заполнять реальный E-mail вовсе не обязательно, можно придумать любой. Я просто пользуюсь форматом <code>user@hostname.local</code>. Создав администратора, попадаем в простой промт-интерфейс.</p> <figure> <img src=res/open-webui-in-podman.webp alt="Интерфейс Open WebUI"> <figcaption aria-hidden=true>Интерфейс Open WebUI</figcaption> </figure> <p>Дальше я рекомендую самостоятельно покопаться в UI. Описать всё мне будет тяжело и это – однозначно лишнее для фокуса этой заметки.</p> <p>Чтобы остановить Open WebUI, пользуемся <code>podman stop</code>. Не забывайте про Ollama!</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>podman<span class=w> </span>stop<span class=w> </span>open-webui<span class=w> </span>ollama
+<article>
 
-<span class=go>open-webui</span>
-<span class=go>ollama</span>
-</code></pre></div> <p>Чтобы запустить снова, пользуемся <code>podman start</code>. Стартуем вместе с Ollama.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>podman<span class=w> </span>start<span class=w> </span>ollama<span class=w> </span>open-webui
+<header id="title-block-header">
+<h1 class="title">Open WebUI в Podman</h1>
+</header>
 
-<span class=go>ollama</span>
-<span class=go>open-webui</span>
-</code></pre></div> <p>На этом всё, Ollama и Open WebUI работают, промптим! :)</p> <time datetime=2025-07-21T16:11:41+03:00>21 июля 2025 г.</time> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 
+<p>В <a href="/notes/ollama-in-podman.html">предыдущей заметке</a> мы уже запустили Ollama в Podman. Но, CLI от Ollama не даст использовать многие плюсы моделей, вроде распознания образов с картинок. Кроме того, банально неудобно смотреть на вывод без подсветки синтаксиса и т.п.</p>
+<p>Как бы это не было странно, среди Open Source и Self Hosted решений в этой стезе не так много продуктов. Самый популярный – <a href="https://github.com/open-webui/open-webui">Open WebUI</a>, запустим его в Podman.</p>
+<p>Первым шагом забираем свежий image с хостинга GitHub (ghcr.io).</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>podman<span class="w"> </span>pull<span class="w"> </span>ghcr.io/open-webui/open-webui:main
+
+<span class="go">Trying to pull ghcr.io/open-webui/open-webui:main...</span>
+<span class="go">Getting image source signatures</span>
+<span class="go">Copying blob 4f4fb700ef54 skipped: already exists</span>
+<span class="go">Copying blob 483d0dd37518 skipped: already exists</span>
+<span class="go">Copying blob 471797cdda8c skipped: already exists</span>
+<span class="go">Copying blob 02a5d22e0d6f skipped: already exists</span>
+<span class="go">Copying blob d735c6810219 skipped: already exists</span>
+<span class="go">Copying blob eb54bd960342 skipped: already exists</span>
+<span class="go">Copying blob 1e80ef81ce95 skipped: already exists</span>
+<span class="go">Copying blob 3da95a905ed5 skipped: already exists</span>
+<span class="go">Copying blob dc06c47d3f8d skipped: already exists</span>
+<span class="go">Copying blob ea7e6d3e0aef skipped: already exists</span>
+<span class="go">Copying blob bbb7d449cf1f done</span>
+<span class="go">Copying blob b60ff2a71e86 done</span>
+<span class="go">Copying blob 838a5ef21014 done</span>
+<span class="go">Copying blob 72b8ccfd4120 done</span>
+<span class="go">Copying blob 4f4fb700ef54 skipped: already exists</span>
+<span class="go">Copying blob 01c7ca3659de done</span>
+<span class="go">Copying config 21bb7e0892 done</span>
+<span class="go">Writing manifest to image destination</span>
+<span class="go">Storing signatures</span>
+<span class="go">21bb7e0892cfbfaa64f9bc67ee83be1d79b1e062e946394396fded7f03a54987</span>
+
+<span class="gp">$ </span>podman<span class="w"> </span>image<span class="w"> </span>ls
+
+<span class="go">REPOSITORY                     TAG         IMAGE ID      CREATED       SIZE</span>
+<span class="go">ghcr.io/open-webui/open-webui  main        21bb7e0892cf  42 hours ago  4.84 GB</span>
+<span class="go">docker.io/ollama/ollama        rocm        d466fc07e32e  12 days ago   6.42 GB</span>
+</code></pre></div>
+
+<p>И в очередной раз, довольно большой образ. Но что поделать… Для первого запуска контейнера, пользуемся немного модифицированной командой. Я убрал из команды в доках <code>--restart always</code> и добавил порт локальной Ollama (11434). Да, к слову, для полноценного использования обязательно нужно запустить и Ollama!</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>podman<span class="w"> </span>start<span class="w"> </span>ollama
+
+<span class="go">ollama</span>
+
+<span class="gp">$ </span>podman<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-p<span class="w"> </span><span class="m">3000</span>:8080<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="s1">&#39;OLLAMA_BASE_URL=http://host.containers.internal:11434&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-v<span class="w"> </span>open-webui:/app/backend/data<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--name<span class="w"> </span>open-webui<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>ghcr.io/open-webui/open-webui:main
+
+<span class="go">270f23c5c172b1debc64c1a86de58b6a263c0a11c98fb30f8f1ff5c4a89a8f02</span>
+</code></pre></div>
+
+<p>Заходим на <a href="http://localhost:3000">localhost:3000</a> и видим там интерфейс настройки. Заполнив все поля, создаём аккаунт администратора. Заполнять реальный E-mail вовсе не обязательно, можно придумать любой. Я просто пользуюсь форматом <code>user@hostname.local</code>. Создав администратора, попадаем в простой промт-интерфейс.</p>
+<figure>
+<img src="res/open-webui-in-podman.webp" alt="Интерфейс Open WebUI" />
+<figcaption aria-hidden="true">Интерфейс Open WebUI</figcaption>
+</figure>
+<p>Дальше я рекомендую самостоятельно покопаться в UI. Описать всё мне будет тяжело и это – однозначно лишнее для фокуса этой заметки.</p>
+<p>Чтобы остановить Open WebUI, пользуемся <code>podman stop</code>. Не забывайте про Ollama!</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>podman<span class="w"> </span>stop<span class="w"> </span>open-webui<span class="w"> </span>ollama
+
+<span class="go">open-webui</span>
+<span class="go">ollama</span>
+</code></pre></div>
+
+<p>Чтобы запустить снова, пользуемся <code>podman start</code>. Стартуем вместе с Ollama.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>podman<span class="w"> </span>start<span class="w"> </span>ollama<span class="w"> </span>open-webui
+
+<span class="go">ollama</span>
+<span class="go">open-webui</span>
+</code></pre></div>
+
+<p>На этом всё, Ollama и Open WebUI работают, промптим! :)</p>
+
+<time datetime="2025-07-21T16:11:41+03:00">21 июля 2025 г.</time>
+
+
+</article>
+
+<address class="contacts">
+    Если Вы хотите обсудить содержание заметки, задать вопросы или
+    предложить изменения, то со мной можно связаться в
+    <a href="https://t.me/tsb99x">Telegram</a>
+</address>
+
+<footer>
+    <span class="copyright">© 2019-2026</span> |
+    <a rel="license"
+        href="https://creativecommons.org/licenses/by/4.0/deed.ru">
+        CC BY 4.0
+    </a>
+</footer>
+
+</body>
+</html>

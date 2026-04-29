@@ -1,103 +1,246 @@
-<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2024-06-10T09:28:44+03:00><meta name=description content="Базовые сценарии использования"><meta property=og:url content=https://tsb99x.github.io/notes/uncomplicated-firewall.html><meta property=og:type content=article><meta property=og:title content="UFW или Uncomplicated Firewall"><meta property=og:description content="Базовые сценарии использования"><meta property=og:image content=https://tsb99x.github.io/res/avatar-512x512.png><title>UFW или Uncomplicated Firewall</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.github.io/notes/uncomplicated-firewall.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> </nav> <article> <header id=title-block-header> <h1 class=title>UFW или Uncomplicated Firewall</h1> </header> <p>Некоторые дистрибутивы Linux поставляются без включенного брандмауэра. С одной стороны, можно спорить, что это удобно и не нужно заморачиваться с настройкой. С другой стороны, это может привести к нежелательному доступу к локальным сервисам.</p> <p>Как бы там ни было, моя политика предельно проста – брандмауэр должен быть и должен по-умолчанию блокировать входящие соединения, т.е. работаем по модели whitelist. Исходящие соединения представляют значительно больше сложности в настройке и предпочтительный режим работы – blacklist. Маршрутизация трафика терминальным ПК должна быть запрещена.</p> <p>Для Debian есть несколько актуальных решений, включая Uncomplicated Firewall (UFW) и графическую утилиту для настройки под названием GUFW. Хотя в прошлом мне казалось хорошей идеей дать пользователям GUI для настройки, со временем я понял, что это не имеет большого смысла. Сам UFW крайне прост в настройке и без GUI. Первый шаг – установка из стандартных репозиториев.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>apt<span class=w> </span>install<span class=w> </span>ufw
-</code></pre></div> <p>После установки можем проверить статус UFW.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>ufw<span class=w> </span>status
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru" prefix="og: https://ogp.me/ns#">
 
-<span class=go>Status: inactive</span>
-</code></pre></div> <p>После установки UFW будет выключен. Что же, давайте включим его.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>ufw<span class=w> </span><span class=nb>enable</span>
+<head>
 
-<span class=go>Command may disrupt existing ssh connections. Proceed with operation (y|n)? n</span>
-</code></pre></div> <p>Стоп. Не забудьте добавить SSH-соединения в исключения. Разработчики услужливо добавили логичный вопрос хотим ли мы продолжить, ведь SSH-соединение будет прервано. Это неприемлемо для удалённых серверов к которым нет физического доступа. Давайте разрешим входящие соединения по протоколу SSH.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>ufw<span class=w> </span>allow<span class=w> </span>ssh
+<meta charset="utf-8">
+<meta name="generator" content="pandoc">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Антон Муравьев">
+<meta name="dcterms.date" content="2024-06-10T09:28:44+03:00">
+<meta name="description" content="Базовые сценарии использования">
+<meta property="og:url" content="https://tsb99x.github.io/notes/uncomplicated-firewall.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="UFW или Uncomplicated Firewall">
+<meta property="og:description" content="Базовые сценарии использования">
+<meta property="og:image" content="https://tsb99x.github.io/res/avatar-512x512.png">
+<title>UFW или Uncomplicated Firewall</title>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/normalize.css">
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/pygments.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="canonical" href="https://tsb99x.github.io/notes/uncomplicated-firewall.html">
 
-<span class=go>Rules updated</span>
-<span class=go>Rules updated (v6)</span>
-</code></pre></div> <p>Видим, что добавились 2 вида правил. Правило без <code>(v6)</code> относятся к IPv4, а с <code>(v6)</code> уже к IPv6. Поскольку SSH-подключения разрешены, то можем активировать Firewall.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>ufw<span class=w> </span><span class=nb>enable</span>
+</head>
 
-<span class=go>Command may disrupt existing ssh connections. Proceed with operation (y|n)? y</span>
-<span class=go>Firewall is active and enabled on system startup</span>
-</code></pre></div> <p>Firewall включен и мы можем проверить его подробный статус.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>ufw<span class=w> </span>status<span class=w> </span>verbose
+<body>
 
-<span class=go>Status: active</span>
-<span class=go>Logging: on (low)</span>
-<span class=go>Default: deny (incoming), allow (outgoing), disabled (routed)</span>
-<span class=go>New profiles: skip</span>
+<nav>
+    <a href="/">Обо мне</a>
+    <a href="/notes/">Заметки</a>
+</nav>
 
-<span class=go>To                         Action      From</span>
-<span class=go>--                         ------      ----</span>
-<span class=go>22/tcp                     ALLOW IN    Anywhere</span>
-<span class=go>22/tcp (v6)                ALLOW IN    Anywhere (v6)</span>
-</code></pre></div> <p>Видим в выводе 2 правила касательно SSH (22/tcp) в версии IPv4 и IPv6. Также видим политики по-умолчанию. Они полностью соответствуют моим предпочтениям, что радует.</p> <p>То, как добавлен доступ к <code>sshd</code> путём <code>allow ssh</code> не подойдет для любых приложений. Есть набор предопределённых правил для известных сервисов, но они не содержат <strong>всех</strong> приложений, поэтому посмотрим на альтернативные механизмы того, как понять и добавлять новые правила для нужных адресов и портов.</p> <p>Иногда для проверки того, на каких портах приложение слушает соединения, полезно использовать утилиту <code>ss</code>. Она входит в стандартную поставку Debian.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>ss<span class=w> </span>-tulpn
+<article>
 
-<span class=go>Netid  State   Recv-Q  Send-Q  Local Address:Port  Peer Address:Port  Process</span>
-<span class=go>udp    UNCONN  0       0             0.0.0.0:68         0.0.0.0:*      users:((&quot;dhclient&quot;,pid=543,fd=7))</span>
-<span class=go>tcp    LISTEN  0       128           0.0.0.0:22         0.0.0.0:*      users:((&quot;sshd&quot;,pid=569,fd=3))</span>
-<span class=go>tcp    LISTEN  0       128              [::]:22            [::]:*      users:((&quot;sshd&quot;,pid=569,fd=4))</span>
-</code></pre></div> <p>Видим 3 порта. Один из них UDP и принадлежит <code>dhclient</code>, два TCP принадлежат <code>sshd</code>. Один из TCP портов с адресом IPv4 <code>0.0.0.0</code>, а другой IPv6 <code>[::]</code>. С помощью такой интроспекции можно достаточно просто настроить нужные правила.</p> <p>Я иногда предпочитаю и другой способ. Он может быть чуть более утомительным, но имеет большую степень точности. UFW журналирует сообщения о блокировках входящих соединений. Достаточно включить режим отображения <code>journalctl</code> с обновлением в реальном времени (следования) и следить за блокировками.</p> <p>К примеру, запустим на компьютере с включенным UFW сервер HTTP на python.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>python3<span class=w> </span>-m<span class=w> </span>http.server
+<header id="title-block-header">
+<h1 class="title">UFW или Uncomplicated Firewall</h1>
+</header>
 
-<span class=go>Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ...</span>
-</code></pre></div> <p>После запуска сервера в другом терминале этого же ПК запускаем следование за журналом и оставим только сообщения от UFW.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>journalctl<span class=w> </span>-f<span class=w> </span><span class=p>|</span><span class=w> </span>grep<span class=w> </span>UFW
-</code></pre></div> <p>Теперь с <strong>другого</strong> компьютера запустим <code>wget</code>. Представим, что устройство с HTTP сервером имеет адрес <code>192.168.122.9</code> (у меня это виртуальная машина).</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>wget<span class=w> </span>--server-response<span class=w> </span>--spider<span class=w> </span>--tries<span class=w> </span><span class=m>1</span><span class=w> </span>--timeout<span class=w> </span><span class=m>3</span><span class=w> </span><span class=m>192</span>.168.122.9:8000
+<p>Некоторые дистрибутивы Linux поставляются без включенного брандмауэра. С одной стороны, можно спорить, что это удобно и не нужно заморачиваться с настройкой. С другой стороны, это может привести к нежелательному доступу к локальным сервисам.</p>
+<p>Как бы там ни было, моя политика предельно проста – брандмауэр должен быть и должен по-умолчанию блокировать входящие соединения, т.е. работаем по модели whitelist. Исходящие соединения представляют значительно больше сложности в настройке и предпочтительный режим работы – blacklist. Маршрутизация трафика терминальным ПК должна быть запрещена.</p>
+<p>Для Debian есть несколько актуальных решений, включая Uncomplicated Firewall (UFW) и графическую утилиту для настройки под названием GUFW. Хотя в прошлом мне казалось хорошей идеей дать пользователям GUI для настройки, со временем я понял, что это не имеет большого смысла. Сам UFW крайне прост в настройке и без GUI. Первый шаг – установка из стандартных репозиториев.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>ufw
+</code></pre></div>
 
-<span class=go>--2024-06-09 14:32:23--  http://192.168.122.9:8000/</span>
-<span class=go>Connecting to 192.168.122.9:8000... failed: Connection timed out.</span>
-<span class=go>Giving up.</span>
-</code></pre></div> <p>Так, UFW нас отфутболил, идём смотреть логи <code>journalctl</code> на <strong>сервер</strong>. Там увидим строчку по аналогии с приведённой ниже.</p> <pre><code>Jun 09 14:32:23 debian kernel: [UFW BLOCK]
+<p>После установки можем проверить статус UFW.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>ufw<span class="w"> </span>status
+
+<span class="go">Status: inactive</span>
+</code></pre></div>
+
+<p>После установки UFW будет выключен. Что же, давайте включим его.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>ufw<span class="w"> </span><span class="nb">enable</span>
+
+<span class="go">Command may disrupt existing ssh connections. Proceed with operation (y|n)? n</span>
+</code></pre></div>
+
+<p>Стоп. Не забудьте добавить SSH-соединения в исключения. Разработчики услужливо добавили логичный вопрос хотим ли мы продолжить, ведь SSH-соединение будет прервано. Это неприемлемо для удалённых серверов к которым нет физического доступа. Давайте разрешим входящие соединения по протоколу SSH.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>ufw<span class="w"> </span>allow<span class="w"> </span>ssh
+
+<span class="go">Rules updated</span>
+<span class="go">Rules updated (v6)</span>
+</code></pre></div>
+
+<p>Видим, что добавились 2 вида правил. Правило без <code>(v6)</code> относятся к IPv4, а с <code>(v6)</code> уже к IPv6. Поскольку SSH-подключения разрешены, то можем активировать Firewall.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>ufw<span class="w"> </span><span class="nb">enable</span>
+
+<span class="go">Command may disrupt existing ssh connections. Proceed with operation (y|n)? y</span>
+<span class="go">Firewall is active and enabled on system startup</span>
+</code></pre></div>
+
+<p>Firewall включен и мы можем проверить его подробный статус.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>ufw<span class="w"> </span>status<span class="w"> </span>verbose
+
+<span class="go">Status: active</span>
+<span class="go">Logging: on (low)</span>
+<span class="go">Default: deny (incoming), allow (outgoing), disabled (routed)</span>
+<span class="go">New profiles: skip</span>
+
+<span class="go">To                         Action      From</span>
+<span class="go">--                         ------      ----</span>
+<span class="go">22/tcp                     ALLOW IN    Anywhere</span>
+<span class="go">22/tcp (v6)                ALLOW IN    Anywhere (v6)</span>
+</code></pre></div>
+
+<p>Видим в выводе 2 правила касательно SSH (22/tcp) в версии IPv4 и IPv6. Также видим политики по-умолчанию. Они полностью соответствуют моим предпочтениям, что радует.</p>
+<p>То, как добавлен доступ к <code>sshd</code> путём <code>allow ssh</code> не подойдет для любых приложений. Есть набор предопределённых правил для известных сервисов, но они не содержат <strong>всех</strong> приложений, поэтому посмотрим на альтернативные механизмы того, как понять и добавлять новые правила для нужных адресов и портов.</p>
+<p>Иногда для проверки того, на каких портах приложение слушает соединения, полезно использовать утилиту <code>ss</code>. Она входит в стандартную поставку Debian.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>ss<span class="w"> </span>-tulpn
+
+<span class="go">Netid  State   Recv-Q  Send-Q  Local Address:Port  Peer Address:Port  Process</span>
+<span class="go">udp    UNCONN  0       0             0.0.0.0:68         0.0.0.0:*      users:((&quot;dhclient&quot;,pid=543,fd=7))</span>
+<span class="go">tcp    LISTEN  0       128           0.0.0.0:22         0.0.0.0:*      users:((&quot;sshd&quot;,pid=569,fd=3))</span>
+<span class="go">tcp    LISTEN  0       128              [::]:22            [::]:*      users:((&quot;sshd&quot;,pid=569,fd=4))</span>
+</code></pre></div>
+
+<p>Видим 3 порта. Один из них UDP и принадлежит <code>dhclient</code>, два TCP принадлежат <code>sshd</code>. Один из TCP портов с адресом IPv4 <code>0.0.0.0</code>, а другой IPv6 <code>[::]</code>. С помощью такой интроспекции можно достаточно просто настроить нужные правила.</p>
+<p>Я иногда предпочитаю и другой способ. Он может быть чуть более утомительным, но имеет большую степень точности. UFW журналирует сообщения о блокировках входящих соединений. Достаточно включить режим отображения <code>journalctl</code> с обновлением в реальном времени (следования) и следить за блокировками.</p>
+<p>К примеру, запустим на компьютере с включенным UFW сервер HTTP на python.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>python3<span class="w"> </span>-m<span class="w"> </span>http.server
+
+<span class="go">Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ...</span>
+</code></pre></div>
+
+<p>После запуска сервера в другом терминале этого же ПК запускаем следование за журналом и оставим только сообщения от UFW.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>journalctl<span class="w"> </span>-f<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>UFW
+</code></pre></div>
+
+<p>Теперь с <strong>другого</strong> компьютера запустим <code>wget</code>. Представим, что устройство с HTTP сервером имеет адрес <code>192.168.122.9</code> (у меня это виртуальная машина).</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>wget<span class="w"> </span>--server-response<span class="w"> </span>--spider<span class="w"> </span>--tries<span class="w"> </span><span class="m">1</span><span class="w"> </span>--timeout<span class="w"> </span><span class="m">3</span><span class="w"> </span><span class="m">192</span>.168.122.9:8000
+
+<span class="go">--2024-06-09 14:32:23--  http://192.168.122.9:8000/</span>
+<span class="go">Connecting to 192.168.122.9:8000... failed: Connection timed out.</span>
+<span class="go">Giving up.</span>
+</code></pre></div>
+
+<p>Так, UFW нас отфутболил, идём смотреть логи <code>journalctl</code> на <strong>сервер</strong>. Там увидим строчку по аналогии с приведённой ниже.</p>
+<pre><code>Jun 09 14:32:23 debian kernel: [UFW BLOCK]
     IN=enp1s0 OUT=
     MAC=52:54:00:4d:25:4f:52:54:00:96:02:67:08:00
     SRC=192.168.122.1 DST=192.168.122.9
     LEN=60 TOS=0x00 PREC=0x00 TTL=64 ID=4717
     DF PROTO=TCP SPT=59620 DPT=8000
-    WINDOW=32120 RES=0x00 SYN URGP=0</code></pre> <p>Выделим важные части, чтобы понять, что нам можно использовать в UFW правилах.</p> <ul> <li>IN <code>enp1s0</code> и пустой OUT – имена сетевых интерфейсов.</li> <li>Совмещенное поле MAC для указания: <ul> <li>MAC-адреса источника сообщения <code>52:54:00:4d:25:4f</code></li> <li>MAC-адреса цели сообщения <code>52:54:00:96:02:67</code></li> <li>Указания <a href=https://en.wikipedia.org/wiki/EtherType>EtherType</a> <code>08:00</code> – это значит IPv4.</li> </ul></li> <li>IP-адрес источника SRC <code>192.168.122.1</code></li> <li>IP-адрес цели DST <code>192.168.122.9</code></li> <li>Протокол соединения PROTO <code>TCP</code></li> <li>SPT <code>59620</code> – с какого порта отправили сообщение</li> <li>DPT <code>8000</code> – на какой порт отправили сообщение</li> </ul> <p>Остальные параметры нам не нужны и, обычно, имеют интерес для других задач.</p> <p>Давайте добавим новое правило, чтобы разрешить доступ к HTTP серверу.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>ufw<span class=w> </span>allow<span class=w> </span><span class=se>\</span>
-<span class=w>    </span>from<span class=w> </span><span class=m>192</span>.168.122.0/24<span class=w> </span>to<span class=w> </span><span class=m>192</span>.168.122.9<span class=w> </span><span class=se>\</span>
-<span class=w>    </span>port<span class=w> </span><span class=m>8000</span><span class=w> </span>proto<span class=w> </span>tcp<span class=w> </span><span class=se>\</span>
-<span class=w>    </span>comment<span class=w> </span><span class=s1>&#39;VM network access to Python HTTP Server&#39;</span>
+    WINDOW=32120 RES=0x00 SYN URGP=0</code></pre>
+<p>Выделим важные части, чтобы понять, что нам можно использовать в UFW правилах.</p>
+<ul>
+<li>IN <code>enp1s0</code> и пустой OUT – имена сетевых интерфейсов.</li>
+<li>Совмещенное поле MAC для указания:
+<ul>
+<li>MAC-адреса источника сообщения <code>52:54:00:4d:25:4f</code></li>
+<li>MAC-адреса цели сообщения <code>52:54:00:96:02:67</code></li>
+<li>Указания <a href="https://en.wikipedia.org/wiki/EtherType">EtherType</a> <code>08:00</code> – это значит IPv4.</li>
+</ul></li>
+<li>IP-адрес источника SRC <code>192.168.122.1</code></li>
+<li>IP-адрес цели DST <code>192.168.122.9</code></li>
+<li>Протокол соединения PROTO <code>TCP</code></li>
+<li>SPT <code>59620</code> – с какого порта отправили сообщение</li>
+<li>DPT <code>8000</code> – на какой порт отправили сообщение</li>
+</ul>
+<p>Остальные параметры нам не нужны и, обычно, имеют интерес для других задач.</p>
+<p>Давайте добавим новое правило, чтобы разрешить доступ к HTTP серверу.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>ufw<span class="w"> </span>allow<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>from<span class="w"> </span><span class="m">192</span>.168.122.0/24<span class="w"> </span>to<span class="w"> </span><span class="m">192</span>.168.122.9<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>port<span class="w"> </span><span class="m">8000</span><span class="w"> </span>proto<span class="w"> </span>tcp<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>comment<span class="w"> </span><span class="s1">&#39;VM network access to Python HTTP Server&#39;</span>
 
-<span class=go>Rule added</span>
-</code></pre></div> <p>Тут мы указываем, что хотим разрешить соединение (<code>allow</code>) из сети <code>192.168.122.0</code> с маской <code>/24</code> к порту <code>8000</code> нашего IP <code>192.168.122.9</code> по протоколу <code>tcp</code>. Чтобы потом не забыть, что это за правило, добавляем релевантный <code>comment</code>.</p> <p>Это очень понятный текстовый формат, что и отличает UFW от других инструментов. Части правила можно просто опустить. К примеру, приведённая выше команда может не включать часть <code>from 192.168.122.0/24</code>. Это будет равнозначно описанию <code>from any</code>, т.е. принимаем сообщения от <strong>любого</strong> IP. То же можно проделать и с <code>to</code>, <code>port</code>, <code>proto</code> и <code>comment</code>, но эти эксперименты оставлю на усмотрение читателя. Какие-то комбинации будут обязательны к заполнению, но UFW расскажет, что именно ему не хватает.</p> <p>Посмотрим, как это правило выглядит в расширенном статусе.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>ufw<span class=w> </span>status<span class=w> </span>verbose
+<span class="go">Rule added</span>
+</code></pre></div>
 
-<span class=go>Status: active</span>
-<span class=go>Logging: on (low)</span>
-<span class=go>Default: deny (incoming), allow (outgoing), disabled (routed)</span>
-<span class=go>New profiles: skip</span>
+<p>Тут мы указываем, что хотим разрешить соединение (<code>allow</code>) из сети <code>192.168.122.0</code> с маской <code>/24</code> к порту <code>8000</code> нашего IP <code>192.168.122.9</code> по протоколу <code>tcp</code>. Чтобы потом не забыть, что это за правило, добавляем релевантный <code>comment</code>.</p>
+<p>Это очень понятный текстовый формат, что и отличает UFW от других инструментов. Части правила можно просто опустить. К примеру, приведённая выше команда может не включать часть <code>from 192.168.122.0/24</code>. Это будет равнозначно описанию <code>from any</code>, т.е. принимаем сообщения от <strong>любого</strong> IP. То же можно проделать и с <code>to</code>, <code>port</code>, <code>proto</code> и <code>comment</code>, но эти эксперименты оставлю на усмотрение читателя. Какие-то комбинации будут обязательны к заполнению, но UFW расскажет, что именно ему не хватает.</p>
+<p>Посмотрим, как это правило выглядит в расширенном статусе.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>ufw<span class="w"> </span>status<span class="w"> </span>verbose
 
-<span class=go>To                        Action      From</span>
-<span class=go>--                        ------      ----</span>
-<span class=go>22/tcp                    ALLOW IN    Anywhere</span>
-<span class=go>192.168.122.9 8000/tcp    ALLOW IN    192.168.122.0/24    # HTTP server access for VM network</span>
-<span class=go>22/tcp (v6)               ALLOW IN    Anywhere (v6)</span>
-</code></pre></div> <p>Новое правило появилось. Проверим, что оно заработало. С другого устройства опять запустим <code>wget</code>.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>wget<span class=w> </span>--server-response<span class=w> </span>--spider<span class=w> </span>--tries<span class=w> </span><span class=m>1</span><span class=w> </span>--timeout<span class=w> </span><span class=m>3</span><span class=w> </span><span class=m>192</span>.168.122.9:8000
+<span class="go">Status: active</span>
+<span class="go">Logging: on (low)</span>
+<span class="go">Default: deny (incoming), allow (outgoing), disabled (routed)</span>
+<span class="go">New profiles: skip</span>
 
-<span class=go>Spider mode enabled. Check if remote file exists.</span>
-<span class=go>--2024-06-09 15:20:46--  http://192.168.122.9:8000/</span>
-<span class=go>Connecting to 192.168.122.9:8000... connected.</span>
-<span class=go>HTTP request sent, awaiting response...</span>
-<span class=go>  HTTP/1.0 200 OK</span>
-<span class=go>  Server: SimpleHTTP/0.6 Python/3.11.2</span>
-<span class=go>  Date: Sun, 09 Jun 2024 12:20:46 GMT</span>
-<span class=go>  Content-type: text/html; charset=utf-8</span>
-<span class=go>  Content-Length: 518</span>
-<span class=go>Length: 518 [text/html]</span>
-<span class=go>Remote file exists and could contain further links,</span>
-<span class=go>but recursion is disabled -- not retrieving.</span>
-</code></pre></div> <p>Теперь HTTP сервер отвечает на запрос ровно так, как и ожидается, а UFW уже пропускает соединения в соответствии с изменёнными правилами. Если правила не применились, то можно использовать <code>sudo ufw reload</code> для перезагрузки UFW.</p> <p>Исходный вид команды для добавления правила в UFW можно добыть командой <code>show</code></p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>ufw<span class=w> </span>show<span class=w> </span>added
+<span class="go">To                        Action      From</span>
+<span class="go">--                        ------      ----</span>
+<span class="go">22/tcp                    ALLOW IN    Anywhere</span>
+<span class="go">192.168.122.9 8000/tcp    ALLOW IN    192.168.122.0/24    # HTTP server access for VM network</span>
+<span class="go">22/tcp (v6)               ALLOW IN    Anywhere (v6)</span>
+</code></pre></div>
 
-<span class=go>Added user rules (see &#39;ufw status&#39; for running firewall):</span>
-<span class=go>ufw allow 22/tcp</span>
-<span class=go>ufw allow from 192.168.122.0/24 to 192.168.122.9 port 8000 proto tcp comment &#39;VM network access to Python HTTP Server&#39;</span>
-</code></pre></div> <p>Таким образом можно перенести правила между системами или сохранить их перед модификацией. Кстати о модификации. Если правила требуется удалить, то можно запросить нумерованный список правил.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>ufw<span class=w> </span>status<span class=w> </span>numbered
+<p>Новое правило появилось. Проверим, что оно заработало. С другого устройства опять запустим <code>wget</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>wget<span class="w"> </span>--server-response<span class="w"> </span>--spider<span class="w"> </span>--tries<span class="w"> </span><span class="m">1</span><span class="w"> </span>--timeout<span class="w"> </span><span class="m">3</span><span class="w"> </span><span class="m">192</span>.168.122.9:8000
 
-<span class=go>Status: active</span>
+<span class="go">Spider mode enabled. Check if remote file exists.</span>
+<span class="go">--2024-06-09 15:20:46--  http://192.168.122.9:8000/</span>
+<span class="go">Connecting to 192.168.122.9:8000... connected.</span>
+<span class="go">HTTP request sent, awaiting response...</span>
+<span class="go">  HTTP/1.0 200 OK</span>
+<span class="go">  Server: SimpleHTTP/0.6 Python/3.11.2</span>
+<span class="go">  Date: Sun, 09 Jun 2024 12:20:46 GMT</span>
+<span class="go">  Content-type: text/html; charset=utf-8</span>
+<span class="go">  Content-Length: 518</span>
+<span class="go">Length: 518 [text/html]</span>
+<span class="go">Remote file exists and could contain further links,</span>
+<span class="go">but recursion is disabled -- not retrieving.</span>
+</code></pre></div>
 
-<span class=go>     To                        Action      From</span>
-<span class=go>     --                        ------      ----</span>
-<span class=go>[ 1] 22/tcp                    ALLOW IN    Anywhere</span>
-<span class=go>[ 2] 192.168.122.9 8000/tcp    ALLOW IN    192.168.122.0/24    # HTTP server access for VM network</span>
-<span class=go>[ 3] 22/tcp (v6)               ALLOW IN    Anywhere (v6)</span>
-</code></pre></div> <p>Теперь, зная номер правила, можно его удалить.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>ufw<span class=w> </span>delete<span class=w> </span><span class=m>2</span>
+<p>Теперь HTTP сервер отвечает на запрос ровно так, как и ожидается, а UFW уже пропускает соединения в соответствии с изменёнными правилами. Если правила не применились, то можно использовать <code>sudo ufw reload</code> для перезагрузки UFW.</p>
+<p>Исходный вид команды для добавления правила в UFW можно добыть командой <code>show</code></p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>ufw<span class="w"> </span>show<span class="w"> </span>added
 
-<span class=go>Deleting:</span>
-<span class=go> allow from 192.168.122.0/24 to 192.168.122.9 port 8000 proto tcp comment &#39;HTTP server access for VM network&#39;</span>
-<span class=go>Proceed with operation (y|n)? y</span>
-<span class=go>Rule deleted</span>
-</code></pre></div> <p>Если понадобится совсем выключить Firewall, то используйте <code>ufw disable</code>. Это может пригодиться для отладки. Главное – не забыть включить обратно!</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>ufw<span class=w> </span>disable
+<span class="go">Added user rules (see &#39;ufw status&#39; for running firewall):</span>
+<span class="go">ufw allow 22/tcp</span>
+<span class="go">ufw allow from 192.168.122.0/24 to 192.168.122.9 port 8000 proto tcp comment &#39;VM network access to Python HTTP Server&#39;</span>
+</code></pre></div>
 
-<span class=go>Firewall stopped and disabled on system startup</span>
-</code></pre></div> <p>В остальном, у UFW ещё есть пару трюков в рукаве. Конечно, их нужно изучить и столь мелкая заметка не включит всю информацию из <code>man ufw</code>. Советую почитать man самостоятельно. Там есть другие примеры и объяснения как работать с UFW.</p> <p>Как видно, UFW действует на достаточно низком уровне сетевых соединений и транспортных потоков. Через UFW не получится добавить правила для одного конкретного приложения, речь идёт только о работе с IP-адресами и портами.</p> <p>Кому-то может показаться такая гранулярность контроля слишком крупной. Если Вам требуются инструменты для работы с мелкой гранулярностью, вплоть до определения какие приложения могут делать подключения куда, то я могу порекомендовать Вам инструмент под названием <a href=https://github.com/evilsocket/opensnitch>OpenSnitch</a>.</p> <p>Он всё это позволяет и даже находится в стандартных репозиториях Debian, хотя, я бы посоветовал достать более свежую версию с GitHub. Этот open-source аналог <a href=https://www.obdev.at/products/littlesnitch/index.html>Little Snitch</a> для MacOS и аналог <a href=https://github.com/henrypp/simplewall>simplewall</a> для Windows.</p> <time datetime=2024-06-10T09:28:44+03:00>10 июня 2024 г.</time> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 
+<p>Таким образом можно перенести правила между системами или сохранить их перед модификацией. Кстати о модификации. Если правила требуется удалить, то можно запросить нумерованный список правил.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>ufw<span class="w"> </span>status<span class="w"> </span>numbered
+
+<span class="go">Status: active</span>
+
+<span class="go">     To                        Action      From</span>
+<span class="go">     --                        ------      ----</span>
+<span class="go">[ 1] 22/tcp                    ALLOW IN    Anywhere</span>
+<span class="go">[ 2] 192.168.122.9 8000/tcp    ALLOW IN    192.168.122.0/24    # HTTP server access for VM network</span>
+<span class="go">[ 3] 22/tcp (v6)               ALLOW IN    Anywhere (v6)</span>
+</code></pre></div>
+
+<p>Теперь, зная номер правила, можно его удалить.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>ufw<span class="w"> </span>delete<span class="w"> </span><span class="m">2</span>
+
+<span class="go">Deleting:</span>
+<span class="go"> allow from 192.168.122.0/24 to 192.168.122.9 port 8000 proto tcp comment &#39;HTTP server access for VM network&#39;</span>
+<span class="go">Proceed with operation (y|n)? y</span>
+<span class="go">Rule deleted</span>
+</code></pre></div>
+
+<p>Если понадобится совсем выключить Firewall, то используйте <code>ufw disable</code>. Это может пригодиться для отладки. Главное – не забыть включить обратно!</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>ufw<span class="w"> </span>disable
+
+<span class="go">Firewall stopped and disabled on system startup</span>
+</code></pre></div>
+
+<p>В остальном, у UFW ещё есть пару трюков в рукаве. Конечно, их нужно изучить и столь мелкая заметка не включит всю информацию из <code>man ufw</code>. Советую почитать man самостоятельно. Там есть другие примеры и объяснения как работать с UFW.</p>
+<p>Как видно, UFW действует на достаточно низком уровне сетевых соединений и транспортных потоков. Через UFW не получится добавить правила для одного конкретного приложения, речь идёт только о работе с IP-адресами и портами.</p>
+<p>Кому-то может показаться такая гранулярность контроля слишком крупной. Если Вам требуются инструменты для работы с мелкой гранулярностью, вплоть до определения какие приложения могут делать подключения куда, то я могу порекомендовать Вам инструмент под названием <a href="https://github.com/evilsocket/opensnitch">OpenSnitch</a>.</p>
+<p>Он всё это позволяет и даже находится в стандартных репозиториях Debian, хотя, я бы посоветовал достать более свежую версию с GitHub. Этот open-source аналог <a href="https://www.obdev.at/products/littlesnitch/index.html">Little Snitch</a> для MacOS и аналог <a href="https://github.com/henrypp/simplewall">simplewall</a> для Windows.</p>
+
+<time datetime="2024-06-10T09:28:44+03:00">10 июня 2024 г.</time>
+
+
+</article>
+
+<address class="contacts">
+    Если Вы хотите обсудить содержание заметки, задать вопросы или
+    предложить изменения, то со мной можно связаться в
+    <a href="https://t.me/tsb99x">Telegram</a>
+</address>
+
+<footer>
+    <span class="copyright">© 2019-2026</span> |
+    <a rel="license"
+        href="https://creativecommons.org/licenses/by/4.0/deed.ru">
+        CC BY 4.0
+    </a>
+</footer>
+
+</body>
+</html>

@@ -1,30 +1,111 @@
-<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2024-04-21T19:38:17+03:00><meta name=description content="Проблема в Grub после обновления BIOS"><meta property=og:url content=https://tsb99x.github.io/notes/shim_lock-protocol-not-found.html><meta property=og:type content=article><meta property=og:title content="Протокол shim_lock не найден"><meta property=og:description content="Проблема в Grub после обновления BIOS"><meta property=og:image content=https://tsb99x.github.io/res/avatar-512x512.png><title>Протокол shim_lock не найден</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.github.io/notes/shim_lock-protocol-not-found.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> </nav> <article> <header id=title-block-header> <h1 class=title>Протокол shim_lock не найден</h1> </header> <p>Очередное обновление BIOS от MSI вместе с успешным обновлением AGESA снесло мне все настройки, включая настройки Secure Boot. При первом запуске после установки я увидел довольно необычные строки в GRUB:</p> <pre><code>Loading Linux 6.6.13+bpo-amd64 ...
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru" prefix="og: https://ogp.me/ns#">
+
+<head>
+
+<meta charset="utf-8">
+<meta name="generator" content="pandoc">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Антон Муравьев">
+<meta name="dcterms.date" content="2024-04-21T19:38:17+03:00">
+<meta name="description" content="Проблема в Grub после обновления BIOS">
+<meta property="og:url" content="https://tsb99x.github.io/notes/shim_lock-protocol-not-found.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Протокол shim_lock не найден">
+<meta property="og:description" content="Проблема в Grub после обновления BIOS">
+<meta property="og:image" content="https://tsb99x.github.io/res/avatar-512x512.png">
+<title>Протокол shim_lock не найден</title>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/normalize.css">
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/pygments.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="canonical" href="https://tsb99x.github.io/notes/shim_lock-protocol-not-found.html">
+
+</head>
+
+<body>
+
+<nav>
+    <a href="/">Обо мне</a>
+    <a href="/notes/">Заметки</a>
+</nav>
+
+<article>
+
+<header id="title-block-header">
+<h1 class="title">Протокол shim_lock не найден</h1>
+</header>
+
+<p>Очередное обновление BIOS от MSI вместе с успешным обновлением AGESA снесло мне все настройки, включая настройки Secure Boot. При первом запуске после установки я увидел довольно необычные строки в GRUB:</p>
+<pre><code>Loading Linux 6.6.13+bpo-amd64 ...
 error: shim_lock protocol not found.
 Loading initial ramdisk ...
 error: you need to load the kernel first.
 
-Press any key to continue...</code></pre> <p>Обычно очистка ключей для Secure Boot выражается другими ошибками. Тем не менее отключение Secure Boot в BIOS позволяет загрузиться в систему. Попробовал решить проблему путём добавления <code>shimx64.efi</code> и <code>grubx64.efi</code> как доверенных файлов для исполнения, но это не сработало, та же ошибка.</p> <p>Поискал и наткнулся на интересный <a href=https://askubuntu.com/questions/1473389/error-shim-lock-protocol-not-found-in-grub-while-secure-boot-is-enabled#comment2652071_1473390>вопрос на AskUbuntu</a> о проблеме <code>shim_lock</code>. Ответы на вопрос навели на мысль, что есть проблемы именно с порядком загрузки, ведь сообщение об ошибке явно говорит “you need to load the kernel first”. Возможно, <code>shimx64.efi</code> не загружается вовсе? Проверим опции загрузки:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>efibootmgr<span class=w> </span>-v
+Press any key to continue...</code></pre>
+<p>Обычно очистка ключей для Secure Boot выражается другими ошибками. Тем не менее отключение Secure Boot в BIOS позволяет загрузиться в систему. Попробовал решить проблему путём добавления <code>shimx64.efi</code> и <code>grubx64.efi</code> как доверенных файлов для исполнения, но это не сработало, та же ошибка.</p>
+<p>Поискал и наткнулся на интересный <a href="https://askubuntu.com/questions/1473389/error-shim-lock-protocol-not-found-in-grub-while-secure-boot-is-enabled#comment2652071_1473390">вопрос на AskUbuntu</a> о проблеме <code>shim_lock</code>. Ответы на вопрос навели на мысль, что есть проблемы именно с порядком загрузки, ведь сообщение об ошибке явно говорит “you need to load the kernel first”. Возможно, <code>shimx64.efi</code> не загружается вовсе? Проверим опции загрузки:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>efibootmgr<span class="w"> </span>-v
 
-<span class=go>BootCurrent: 0001</span>
-<span class=go>Timeout: 1 seconds</span>
-<span class=go>BootOrder: 0001</span>
-<span class=go>Boot0001* debian        HD(1,GPT,f3fca44d-3df9-42f9-b351-a868c5830d9a,0x1000,0x96000)/File(\EFI\DEBIAN\GRUBX64.EFI)</span>
-</code></pre></div> <p>Интересно, <code>shimx64.efi</code> действительно нет в очереди загрузки. Давайте попробуем переконфигурировать <code>shim-signed</code> для добавления <code>shimx64.efi</code> в очередь загрузки EFI:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>dpkg-reconfigure<span class=w> </span>-f<span class=w> </span>noninteractive<span class=w> </span>shim-signed
+<span class="go">BootCurrent: 0001</span>
+<span class="go">Timeout: 1 seconds</span>
+<span class="go">BootOrder: 0001</span>
+<span class="go">Boot0001* debian        HD(1,GPT,f3fca44d-3df9-42f9-b351-a868c5830d9a,0x1000,0x96000)/File(\EFI\DEBIAN\GRUBX64.EFI)</span>
+</code></pre></div>
 
-<span class=go>Installing for x86_64-efi platform.</span>
-<span class=go>Installation finished. No error reported.</span>
-</code></pre></div> <p>Посмотрим на опции и порядок загрузки после реконфигурации:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>efibootmgr<span class=w> </span>-v
+<p>Интересно, <code>shimx64.efi</code> действительно нет в очереди загрузки. Давайте попробуем переконфигурировать <code>shim-signed</code> для добавления <code>shimx64.efi</code> в очередь загрузки EFI:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>dpkg-reconfigure<span class="w"> </span>-f<span class="w"> </span>noninteractive<span class="w"> </span>shim-signed
 
-<span class=go>BootCurrent: 0001</span>
-<span class=go>Timeout: 1 seconds</span>
-<span class=go>BootOrder: 0001</span>
-<span class=go>Boot0001* debian        HD(1,GPT,f3fca44d-3df9-42f9-b351-a868c5830d9a,0x1000,0x96000)/File(\EFI\debian\shimx64.efi)</span>
-</code></pre></div> <p>Отлично, перезагружаемся в BIOS и включаем Secure Boot. Успешно загружаемся в систему без ошибки с <code>shim_lock</code>. Посмотрим на вывод <code>efibootmgr</code> ради праздного интереса:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>efibootmgr<span class=w> </span>-v
+<span class="go">Installing for x86_64-efi platform.</span>
+<span class="go">Installation finished. No error reported.</span>
+</code></pre></div>
 
-<span class=go>BootCurrent: 0001</span>
-<span class=go>Timeout: 1 seconds</span>
-<span class=go>BootOrder: 0001,0002</span>
-<span class=go>Boot0001* debian        HD(1,GPT,f3fca44d-3df9-42f9-b351-a868c5830d9a,0x1000,0x96000)/File(\EFI\DEBIAN\SHIMX64.EFI)</span>
-<span class=go>Boot0002* debian        HD(1,GPT,f3fca44d-3df9-42f9-b351-a868c5830d9a,0x1000,0x96000)/File(\EFI\DEBIAN\GRUBX64.EFI)..BO</span>
-</code></pre></div> <p>Ага, значит дело было действительно в отсутствии <code>shimx64.efi</code> в очереди загрузки <em>перед</em> <code>grubx64.efi</code>. Если Вам не помогло и это, то имеет смысл переустановить Grub целиком:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>apt<span class=w> </span>reinstall<span class=w> </span>grub-efi-amd64
-</code></pre></div> <p>Это не только переустановит Grub, но и обновит все доступные опции загрузки и сконфигурирует все зависимости, включая <code>shim-signed</code>.</p> <p>Кроме порядка загрузки обновление BIOS сбросило и ключи, которые я использовал для подписи сторонних модулей ядра. Эх, будем добавлять снова. Но это совсем другая история…</p> <time datetime=2024-04-21T19:38:17+03:00>21 апреля 2024 г.</time> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 
+<p>Посмотрим на опции и порядок загрузки после реконфигурации:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>efibootmgr<span class="w"> </span>-v
+
+<span class="go">BootCurrent: 0001</span>
+<span class="go">Timeout: 1 seconds</span>
+<span class="go">BootOrder: 0001</span>
+<span class="go">Boot0001* debian        HD(1,GPT,f3fca44d-3df9-42f9-b351-a868c5830d9a,0x1000,0x96000)/File(\EFI\debian\shimx64.efi)</span>
+</code></pre></div>
+
+<p>Отлично, перезагружаемся в BIOS и включаем Secure Boot. Успешно загружаемся в систему без ошибки с <code>shim_lock</code>. Посмотрим на вывод <code>efibootmgr</code> ради праздного интереса:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>efibootmgr<span class="w"> </span>-v
+
+<span class="go">BootCurrent: 0001</span>
+<span class="go">Timeout: 1 seconds</span>
+<span class="go">BootOrder: 0001,0002</span>
+<span class="go">Boot0001* debian        HD(1,GPT,f3fca44d-3df9-42f9-b351-a868c5830d9a,0x1000,0x96000)/File(\EFI\DEBIAN\SHIMX64.EFI)</span>
+<span class="go">Boot0002* debian        HD(1,GPT,f3fca44d-3df9-42f9-b351-a868c5830d9a,0x1000,0x96000)/File(\EFI\DEBIAN\GRUBX64.EFI)..BO</span>
+</code></pre></div>
+
+<p>Ага, значит дело было действительно в отсутствии <code>shimx64.efi</code> в очереди загрузки <em>перед</em> <code>grubx64.efi</code>. Если Вам не помогло и это, то имеет смысл переустановить Grub целиком:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>apt<span class="w"> </span>reinstall<span class="w"> </span>grub-efi-amd64
+</code></pre></div>
+
+<p>Это не только переустановит Grub, но и обновит все доступные опции загрузки и сконфигурирует все зависимости, включая <code>shim-signed</code>.</p>
+<p>Кроме порядка загрузки обновление BIOS сбросило и ключи, которые я использовал для подписи сторонних модулей ядра. Эх, будем добавлять снова. Но это совсем другая история…</p>
+
+<time datetime="2024-04-21T19:38:17+03:00">21 апреля 2024 г.</time>
+
+
+</article>
+
+<address class="contacts">
+    Если Вы хотите обсудить содержание заметки, задать вопросы или
+    предложить изменения, то со мной можно связаться в
+    <a href="https://t.me/tsb99x">Telegram</a>
+</address>
+
+<footer>
+    <span class="copyright">© 2019-2026</span> |
+    <a rel="license"
+        href="https://creativecommons.org/licenses/by/4.0/deed.ru">
+        CC BY 4.0
+    </a>
+</footer>
+
+</body>
+</html>

@@ -1,1 +1,71 @@
-<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2025-03-15T17:02:47+03:00><meta name=description content="Учимся грееть космос"><meta property=og:url content=https://tsb99x.github.io/notes/podman-ollama-deepseek-r1.html><meta property=og:type content=article><meta property=og:title content="Podman, Ollama и DeepSeek R1"><meta property=og:description content="Учимся грееть космос"><meta property=og:image content=https://tsb99x.github.io/res/avatar-512x512.png><title>Podman, Ollama и DeepSeek R1</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.github.io/notes/podman-ollama-deepseek-r1.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> </nav> <article> <header id=title-block-header> <h1 class=title>Podman, Ollama и DeepSeek R1</h1> </header> <figure> <img src=res/ollama-podman-deepseek-r1-terminal.jpg alt="Ollama в Podman греет космос"> <figcaption aria-hidden=true>Ollama в Podman греет космос</figcaption> </figure> <p>Поиграл полдня в промптера. Запустил локально Ollama в Podman и загрузил там deepseek-r1:32b. Что важно, с поддержкой GPU!</p> <p>Хорошо работает как обогреватель комнаты, видеокарта греется вплоть до 105°C при долгой нагрузке. Жрёт больше 300W при работе.</p> <p>А ответы… Ну ответы варьируются. На что-то гуманитарное и базовое ответит приемлемо. Нормальные кусочки кода, напротив, даёт через раз. Каждый второй пример просто не собирается. Галлюцинирует не слишком критично при настройках по-умолчанию, но тоже бывает.</p> <p>И всё же, ответы на мои вопросы выглядят лучше, чем у LLaMA. Попросил DeepSeek R1 переписать несколько Сишных программ на Rust. Некоторые варианты очень логичные вышли. Не скажу, что я стал бы так писать программу, но узнать, что такие функции в принципе есть в Rust — очень хороший для меня опыт.</p> <p>Резюмируя — типичная модель, ничего сверхъестественного нет, но на 32b уже видна определённая стабильность без сильных галлюцинаций. Как-то так.</p> <time datetime=2025-03-15T17:02:47+03:00>15 марта 2025 г.</time> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru" prefix="og: https://ogp.me/ns#">
+
+<head>
+
+<meta charset="utf-8">
+<meta name="generator" content="pandoc">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Антон Муравьев">
+<meta name="dcterms.date" content="2025-03-15T17:02:47+03:00">
+<meta name="description" content="Учимся грееть космос">
+<meta property="og:url" content="https://tsb99x.github.io/notes/podman-ollama-deepseek-r1.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Podman, Ollama и DeepSeek R1">
+<meta property="og:description" content="Учимся грееть космос">
+<meta property="og:image" content="https://tsb99x.github.io/res/avatar-512x512.png">
+<title>Podman, Ollama и DeepSeek R1</title>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/normalize.css">
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/pygments.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="canonical" href="https://tsb99x.github.io/notes/podman-ollama-deepseek-r1.html">
+
+</head>
+
+<body>
+
+<nav>
+    <a href="/">Обо мне</a>
+    <a href="/notes/">Заметки</a>
+</nav>
+
+<article>
+
+<header id="title-block-header">
+<h1 class="title">Podman, Ollama и DeepSeek R1</h1>
+</header>
+
+<figure>
+<img src="res/ollama-podman-deepseek-r1-terminal.jpg" alt="Ollama в Podman греет космос" />
+<figcaption aria-hidden="true">Ollama в Podman греет космос</figcaption>
+</figure>
+<p>Поиграл полдня в промптера. Запустил локально Ollama в Podman и загрузил там deepseek-r1:32b. Что важно, с поддержкой GPU!</p>
+<p>Хорошо работает как обогреватель комнаты, видеокарта греется вплоть до 105°C при долгой нагрузке. Жрёт больше 300W при работе.</p>
+<p>А ответы… Ну ответы варьируются. На что-то гуманитарное и базовое ответит приемлемо. Нормальные кусочки кода, напротив, даёт через раз. Каждый второй пример просто не собирается. Галлюцинирует не слишком критично при настройках по-умолчанию, но тоже бывает.</p>
+<p>И всё же, ответы на мои вопросы выглядят лучше, чем у LLaMA. Попросил DeepSeek R1 переписать несколько Сишных программ на Rust. Некоторые варианты очень логичные вышли. Не скажу, что я стал бы так писать программу, но узнать, что такие функции в принципе есть в Rust — очень хороший для меня опыт.</p>
+<p>Резюмируя — типичная модель, ничего сверхъестественного нет, но на 32b уже видна определённая стабильность без сильных галлюцинаций. Как-то так.</p>
+
+<time datetime="2025-03-15T17:02:47+03:00">15 марта 2025 г.</time>
+
+
+</article>
+
+<address class="contacts">
+    Если Вы хотите обсудить содержание заметки, задать вопросы или
+    предложить изменения, то со мной можно связаться в
+    <a href="https://t.me/tsb99x">Telegram</a>
+</address>
+
+<footer>
+    <span class="copyright">© 2019-2026</span> |
+    <a rel="license"
+        href="https://creativecommons.org/licenses/by/4.0/deed.ru">
+        CC BY 4.0
+    </a>
+</footer>
+
+</body>
+</html>

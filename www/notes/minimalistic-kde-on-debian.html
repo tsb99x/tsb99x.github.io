@@ -1,48 +1,188 @@
-<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2024-03-10T19:12:22+03:00><meta name=description content="Установка обезжиренного мета-пакета"><meta property=og:url content=https://tsb99x.github.io/notes/minimalistic-kde-on-debian.html><meta property=og:type content=article><meta property=og:title content="Минималистичный KDE на Debian"><meta property=og:description content="Установка обезжиренного мета-пакета"><meta property=og:image content=https://tsb99x.github.io/res/avatar-512x512.png><title>Минималистичный KDE на Debian</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.github.io/notes/minimalistic-kde-on-debian.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> </nav> <article> <header id=title-block-header> <h1 class=title>Минималистичный KDE на Debian</h1> </header> <p>Стандартная поставка KDE на Debian не всегда мне подходит. К сожалению, при установке с Live DVD, система будет включать в себя не только много лишних программ (KDE Connect, Konqueror, Akregator, Golden Dict, Juk, IBus, etc.), но и локализации к ним.</p> <p>К примеру, Firefox ESR, на Live DVD, идёт в комплекте со всеми пакетами <code>l10n</code>. Это значит, что вместе с обновлениями Firefox придётся загружать и обновления соответствующих <code>l10n</code>. То же касается LibreOffice.</p> <p>Особняком стоит странный набор пакетов, устанавливаемых Live DVD. Например, по каким-то причинам, туда не включён ни один клиент синхронизации NTP! А ещё не включен <code>bash-completion</code> по умолчанию…</p> <p>Live DVD имеет свои преимущества для начинающих, но, если Вы уже имеете опыт работы с Linux, имеет смысл посмотреть на альтернативные способы установки системы, нежели простейшую установку посредством Calamares.</p> <p>Я понял, что самый эффективный и минималистичный способ установки Debian с KDE заключается в установке “голой” ОС с базовым набором пакетов и последующей ручной установкой минимального мета-пакета <code>plasma-desktop</code>.</p> <p>На Live DVD невозможно выбрать список программного обеспечения для установки, поэтому потребуется достать другой образ. Как альтернативу можно взять <a href=https://www.debian.org/CD/netinst/ >netinst</a>.</p> <p>Запускаем установку. В загрузчике выбираем пункт меню Graphical Install.</p> <figure> <img src=res/minimalistic-kde-on-debian-0-graphical-selection.webp alt="Graphical Install в загрузчике"> <figcaption aria-hidden=true>Graphical Install в загрузчике</figcaption> </figure> <p>Все настройки можно оставить как Вам нравится, за исключением шага выбора программного обеспечения (Software Selection). На этом шаге необходимо отключить все графические среды, как на скриншоте ниже. Достаточно оставить только стандартные системные утилиты (standard system utilities).</p> <figure> <img src=res/minimalistic-kde-on-debian-1-software-selection.webp alt="Шаг выбора программного обеспечения для установки"> <figcaption aria-hidden=true>Шаг выбора программного обеспечения для установки</figcaption> </figure> <p>После успешной установки перезагружаемся, как и предлагает установщик. После перезагрузки нас приветствует терминальный login, а не графический. Входим с созданным в процессе установки пользователем.</p> <figure> <img src=res/minimalistic-kde-on-debian-2-tty-login.webp alt="TTY Login"> <figcaption aria-hidden=true>TTY Login</figcaption> </figure> <p>На “чистой” системе увидим всего 324 установленных пакета.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>apt<span class=w> </span>-qq<span class=w> </span>list<span class=w> </span>--installed<span class=w> </span><span class=p>|</span><span class=w> </span>wc<span class=w> </span>-l
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru" prefix="og: https://ogp.me/ns#">
 
-<span class=go>WARNING: apt does not have a stable CLI interface. Use with caution in scripts.</span>
+<head>
 
-<span class=go>324</span>
-</code></pre></div> <p>И 1.1G использованного пространства на диске.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>df<span class=w> </span>-h
+<meta charset="utf-8">
+<meta name="generator" content="pandoc">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Антон Муравьев">
+<meta name="dcterms.date" content="2024-03-10T19:12:22+03:00">
+<meta name="description" content="Установка обезжиренного мета-пакета">
+<meta property="og:url" content="https://tsb99x.github.io/notes/minimalistic-kde-on-debian.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Минималистичный KDE на Debian">
+<meta property="og:description" content="Установка обезжиренного мета-пакета">
+<meta property="og:image" content="https://tsb99x.github.io/res/avatar-512x512.png">
+<title>Минималистичный KDE на Debian</title>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/normalize.css">
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/pygments.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="canonical" href="https://tsb99x.github.io/notes/minimalistic-kde-on-debian.html">
 
-<span class=go>Filesystem      Size  Used Avail Use% Mounted on</span>
-<span class=go>udev            462M     0  462M   0% /dev</span>
-<span class=go>tmpfs            97M  600K   96M   1% /run</span>
-<span class=go>/dev/vda1        19G  1.1G   17G   7% /</span>
-<span class=go>tmpfs           481M     0  481M   0% /dev/shm</span>
-<span class=go>tmpfs           5.0M     0  5.0M   0% /run/lock</span>
-<span class=go>tmpfs            97M     0   97M   0% /run/user/1000</span>
-</code></pre></div> <p>Наконец-то можно установить мета-пакет <code>plasma-desktop</code>. Он достаточно увесист, но исключать из него рекомендуемые пакеты я не могу. В таком случае, система будет “сломана” после установки. Не будет работать меню Plasma, включая главное меню.</p> <p>Изначально я использовал полноценный <code>kde-plasma-desktop</code>, но меня смущала такая зависимость, как <a href=https://packages.debian.org/bookworm/kde-baseapps>пакет kde-baseapps</a>. Через него “затягиваются” зависимости типа <code>konqueror</code> и <code>kwrite</code>, которыми я никогда не пользуюсь. Вот этот <a href=https://www.reddit.com/r/kde/comments/6ulr5q/how_do_i_install_kde_without_all_the_bloatware/ >тред на Reddit</a> содержит хороший рецепт из 3-ех пакетов, который я теперь использую:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>apt<span class=w> </span>install<span class=w> </span>sddm<span class=w> </span>plasma-desktop<span class=w> </span>konsole
-</code></pre></div> <p>Стоит отметить, для меня <code>konsole</code> – обязательный пакет для установки на этом этапе. Без него мета-пакет <code>plasma-desktop</code> может выбрать за Вас какой-нибудь другой эмулятор терминала, к примеру <code>deepin-terminal</code> или <code>zutty</code>.</p> <figure> <img src=res/minimalistic-kde-on-debian-3-plasma-desktop.webp alt="Вывод APT при установке Plasma Desktop"> <figcaption aria-hidden=true>Вывод APT при установке Plasma Desktop</figcaption> </figure> <p>Установка мета-пакета с рекомендациями – хороший баланс между количеством ручных действий и минимализмом результирующей системы. После установки перезагружаемся.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>reboot
-</code></pre></div> <p>Логин на этот раз произойдёт через SDDM, который услужливо выберет Plasma Wayland как основную графическую сессию.</p> <figure> <img src=res/minimalistic-kde-on-debian-4-sddm-login.webp alt="SDDM Login"> <figcaption aria-hidden=true>SDDM Login</figcaption> </figure> <p>На этом этапе можно удалить лишние пакеты от <a href=https://kdeconnect.kde.org/ >KDE Connect</a>.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>apt<span class=w> </span>purge<span class=w> </span>kdeconnect<span class=w> </span>--auto-remove
-</code></pre></div> <p>Проверим количество пакетов и занятого пространства:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>apt<span class=w> </span>-qq<span class=w> </span>list<span class=w> </span>--installed<span class=w> </span><span class=p>|</span><span class=w> </span>wc<span class=w> </span>-l
+</head>
 
-<span class=go>WARNING: apt does not have a stable CLI interface. Use with caution in scripts.</span>
+<body>
 
-<span class=go>1430</span>
+<nav>
+    <a href="/">Обо мне</a>
+    <a href="/notes/">Заметки</a>
+</nav>
 
-<span class=gp>$ </span>df<span class=w> </span>-h
+<article>
 
-<span class=go>Filesystem      Size  Used Avail Use% Mounted on</span>
-<span class=go>udev            453M     0  453M   0% /dev</span>
-<span class=go>tmpfs            97M  1.1M   96M   2% /run</span>
-<span class=go>/dev/vda1        19G  4.1G   14G  24% /</span>
-<span class=go>tmpfs           481M     0  481M   0% /dev/shm</span>
-<span class=go>tmpfs           5.0M     0  5.0M   0% /run/lock</span>
-<span class=go>tmpfs            97M   48K   96M   1% /run/user/1000</span>
-</code></pre></div> <p>После установки минимального мета-пакета не будет даже веб-браузера и файлового менеджера, поэтому можно сразу установить, к примеру, Firefox ESR и Dolphin.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>apt<span class=w> </span>install<span class=w> </span>firefox-esr<span class=w> </span>dolphin
-</code></pre></div> <p>Можем даже установить Neofetch и поделиться результатом.</p> <figure> <img src=res/minimalistic-kde-on-debian-5-neofetch.webp alt=Neofetch> <figcaption aria-hidden=true>Neofetch</figcaption> </figure> <p>1477 пакетов. Получившаяся система занимает всего 4.4G на диске.</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>df<span class=w> </span>-h
+<header id="title-block-header">
+<h1 class="title">Минималистичный KDE на Debian</h1>
+</header>
 
-<span class=go>Filesystem      Size  Used Avail Use% Mounted on</span>
-<span class=go>udev            453M     0  453M   0% /dev</span>
-<span class=go>tmpfs            97M  1.1M   96M   2% /run</span>
-<span class=go>/dev/vda1        19G  4.4G   14G  25% /</span>
-<span class=go>tmpfs           481M     0  481M   0% /dev/shm</span>
-<span class=go>tmpfs           5.0M     0  5.0M   0% /run/lock</span>
-<span class=go>tmpfs            97M   48K   96M   1% /run/user/1000</span>
-</code></pre></div> <p>Да, не мало, но это полноценная система без “лишних” пакетов. Для сравнения, Live DVD установит Debian с 2650 пакетами! Занимая 9.5G на диске!</p> <p>Если Вы стремитесь к меньшим значениям, Вам стоит посмотреть в сторону сборки своего рабочего окружения на основе WM вроде Sway, т.к. тюнинг системы дальше будет требовать непропорциональных результатам трудозатрат.</p> <p>В общем, всё! У Вас есть минимальная система без лишних пакетов, но уже с привычным графическим окружением KDE и веб-браузером. Дальше кастомизировать по Вашему вкусу. Имеет смысл настроить локаль, точки монтирования и много другое…</p> <hr> <p>В большинстве конфигураций, после установки, у Вас не будет списка сетей при нажатии на иконку <code>Networks</code> в трее. Так происходит у меня при установке Debian Bookworm на VM с DLBD образа. Соединение с интернетом, как ни странно, есть.</p> <p>Это признак того, что в <code>/etc/network/interfaces</code> есть настройки для сетевых интерфейсов, про это есть информационное сообщение в логе установки:</p> <figure> <img src=res/minimalistic-kde-on-debian-6-network-interfaces-info.webp alt="Информация от NetworkManager"> <figcaption aria-hidden=true>Информация от NetworkManager</figcaption> </figure> <p>По умолчанию NetworkManager будет игнорировать управление такими интерфейсами. Вот один из способов убрать все настройки интерфейсов из файла <code>/etc/network/interfaces</code>:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>cat<span class=w> </span>&lt;&lt;EOF<span class=w> </span><span class=p>|</span><span class=w> </span>sudo<span class=w> </span>tee<span class=w> </span>/etc/network/interfaces
-<span class=gp># </span>interfaces<span class=o>(</span><span class=m>5</span><span class=o>)</span><span class=w> </span>file<span class=w> </span>used<span class=w> </span>by<span class=w> </span>ifup<span class=o>(</span><span class=m>8</span><span class=o>)</span><span class=w> </span>and<span class=w> </span>ifdown<span class=o>(</span><span class=m>8</span><span class=o>)</span>
-<span class=gp># </span>Include<span class=w> </span>files<span class=w> </span>from<span class=w> </span>/etc/network/interfaces.d:
-<span class=go>source /etc/network/interfaces.d/*</span>
-<span class=go>EOF</span>
-</code></pre></div> <p>Перезагружаемся. Настройки адаптеров и сетей будут доступны через <code>nmcli</code> и <code>nmtui</code>. Сами сетевые подключения появятся в списке при клике на иконку <code>Networks</code> в трее.</p> <time datetime=2024-03-10T19:12:22+03:00>10 марта 2024 г.</time> <div class=changelog> <h4>Журнал изменений</h4> <p><b>30 августа 2024 г.</b>: заменил <code>kde-plasma-desktop</code> на <code>sddm plasma-desktop konsole</code>.</p> </div> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 
+<p>Стандартная поставка KDE на Debian не всегда мне подходит. К сожалению, при установке с Live DVD, система будет включать в себя не только много лишних программ (KDE Connect, Konqueror, Akregator, Golden Dict, Juk, IBus, etc.), но и локализации к ним.</p>
+<p>К примеру, Firefox ESR, на Live DVD, идёт в комплекте со всеми пакетами <code>l10n</code>. Это значит, что вместе с обновлениями Firefox придётся загружать и обновления соответствующих <code>l10n</code>. То же касается LibreOffice.</p>
+<p>Особняком стоит странный набор пакетов, устанавливаемых Live DVD. Например, по каким-то причинам, туда не включён ни один клиент синхронизации NTP! А ещё не включен <code>bash-completion</code> по умолчанию…</p>
+<p>Live DVD имеет свои преимущества для начинающих, но, если Вы уже имеете опыт работы с Linux, имеет смысл посмотреть на альтернативные способы установки системы, нежели простейшую установку посредством Calamares.</p>
+<p>Я понял, что самый эффективный и минималистичный способ установки Debian с KDE заключается в установке “голой” ОС с базовым набором пакетов и последующей ручной установкой минимального мета-пакета <code>plasma-desktop</code>.</p>
+<p>На Live DVD невозможно выбрать список программного обеспечения для установки, поэтому потребуется достать другой образ. Как альтернативу можно взять <a href="https://www.debian.org/CD/netinst/">netinst</a>.</p>
+<p>Запускаем установку. В загрузчике выбираем пункт меню Graphical Install.</p>
+<figure>
+<img src="res/minimalistic-kde-on-debian-0-graphical-selection.webp" alt="Graphical Install в загрузчике" />
+<figcaption aria-hidden="true">Graphical Install в загрузчике</figcaption>
+</figure>
+<p>Все настройки можно оставить как Вам нравится, за исключением шага выбора программного обеспечения (Software Selection). На этом шаге необходимо отключить все графические среды, как на скриншоте ниже. Достаточно оставить только стандартные системные утилиты (standard system utilities).</p>
+<figure>
+<img src="res/minimalistic-kde-on-debian-1-software-selection.webp" alt="Шаг выбора программного обеспечения для установки" />
+<figcaption aria-hidden="true">Шаг выбора программного обеспечения для установки</figcaption>
+</figure>
+<p>После успешной установки перезагружаемся, как и предлагает установщик. После перезагрузки нас приветствует терминальный login, а не графический. Входим с созданным в процессе установки пользователем.</p>
+<figure>
+<img src="res/minimalistic-kde-on-debian-2-tty-login.webp" alt="TTY Login" />
+<figcaption aria-hidden="true">TTY Login</figcaption>
+</figure>
+<p>На “чистой” системе увидим всего 324 установленных пакета.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>apt<span class="w"> </span>-qq<span class="w"> </span>list<span class="w"> </span>--installed<span class="w"> </span><span class="p">|</span><span class="w"> </span>wc<span class="w"> </span>-l
+
+<span class="go">WARNING: apt does not have a stable CLI interface. Use with caution in scripts.</span>
+
+<span class="go">324</span>
+</code></pre></div>
+
+<p>И 1.1G использованного пространства на диске.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>df<span class="w"> </span>-h
+
+<span class="go">Filesystem      Size  Used Avail Use% Mounted on</span>
+<span class="go">udev            462M     0  462M   0% /dev</span>
+<span class="go">tmpfs            97M  600K   96M   1% /run</span>
+<span class="go">/dev/vda1        19G  1.1G   17G   7% /</span>
+<span class="go">tmpfs           481M     0  481M   0% /dev/shm</span>
+<span class="go">tmpfs           5.0M     0  5.0M   0% /run/lock</span>
+<span class="go">tmpfs            97M     0   97M   0% /run/user/1000</span>
+</code></pre></div>
+
+<p>Наконец-то можно установить мета-пакет <code>plasma-desktop</code>. Он достаточно увесист, но исключать из него рекомендуемые пакеты я не могу. В таком случае, система будет “сломана” после установки. Не будет работать меню Plasma, включая главное меню.</p>
+<p>Изначально я использовал полноценный <code>kde-plasma-desktop</code>, но меня смущала такая зависимость, как <a href="https://packages.debian.org/bookworm/kde-baseapps">пакет kde-baseapps</a>. Через него “затягиваются” зависимости типа <code>konqueror</code> и <code>kwrite</code>, которыми я никогда не пользуюсь. Вот этот <a href="https://www.reddit.com/r/kde/comments/6ulr5q/how_do_i_install_kde_without_all_the_bloatware/">тред на Reddit</a> содержит хороший рецепт из 3-ех пакетов, который я теперь использую:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>sddm<span class="w"> </span>plasma-desktop<span class="w"> </span>konsole
+</code></pre></div>
+
+<p>Стоит отметить, для меня <code>konsole</code> – обязательный пакет для установки на этом этапе. Без него мета-пакет <code>plasma-desktop</code> может выбрать за Вас какой-нибудь другой эмулятор терминала, к примеру <code>deepin-terminal</code> или <code>zutty</code>.</p>
+<figure>
+<img src="res/minimalistic-kde-on-debian-3-plasma-desktop.webp" alt="Вывод APT при установке Plasma Desktop" />
+<figcaption aria-hidden="true">Вывод APT при установке Plasma Desktop</figcaption>
+</figure>
+<p>Установка мета-пакета с рекомендациями – хороший баланс между количеством ручных действий и минимализмом результирующей системы. После установки перезагружаемся.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>reboot
+</code></pre></div>
+
+<p>Логин на этот раз произойдёт через SDDM, который услужливо выберет Plasma Wayland как основную графическую сессию.</p>
+<figure>
+<img src="res/minimalistic-kde-on-debian-4-sddm-login.webp" alt="SDDM Login" />
+<figcaption aria-hidden="true">SDDM Login</figcaption>
+</figure>
+<p>На этом этапе можно удалить лишние пакеты от <a href="https://kdeconnect.kde.org/">KDE Connect</a>.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>apt<span class="w"> </span>purge<span class="w"> </span>kdeconnect<span class="w"> </span>--auto-remove
+</code></pre></div>
+
+<p>Проверим количество пакетов и занятого пространства:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>apt<span class="w"> </span>-qq<span class="w"> </span>list<span class="w"> </span>--installed<span class="w"> </span><span class="p">|</span><span class="w"> </span>wc<span class="w"> </span>-l
+
+<span class="go">WARNING: apt does not have a stable CLI interface. Use with caution in scripts.</span>
+
+<span class="go">1430</span>
+
+<span class="gp">$ </span>df<span class="w"> </span>-h
+
+<span class="go">Filesystem      Size  Used Avail Use% Mounted on</span>
+<span class="go">udev            453M     0  453M   0% /dev</span>
+<span class="go">tmpfs            97M  1.1M   96M   2% /run</span>
+<span class="go">/dev/vda1        19G  4.1G   14G  24% /</span>
+<span class="go">tmpfs           481M     0  481M   0% /dev/shm</span>
+<span class="go">tmpfs           5.0M     0  5.0M   0% /run/lock</span>
+<span class="go">tmpfs            97M   48K   96M   1% /run/user/1000</span>
+</code></pre></div>
+
+<p>После установки минимального мета-пакета не будет даже веб-браузера и файлового менеджера, поэтому можно сразу установить, к примеру, Firefox ESR и Dolphin.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>firefox-esr<span class="w"> </span>dolphin
+</code></pre></div>
+
+<p>Можем даже установить Neofetch и поделиться результатом.</p>
+<figure>
+<img src="res/minimalistic-kde-on-debian-5-neofetch.webp" alt="Neofetch" />
+<figcaption aria-hidden="true">Neofetch</figcaption>
+</figure>
+<p>1477 пакетов. Получившаяся система занимает всего 4.4G на диске.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>df<span class="w"> </span>-h
+
+<span class="go">Filesystem      Size  Used Avail Use% Mounted on</span>
+<span class="go">udev            453M     0  453M   0% /dev</span>
+<span class="go">tmpfs            97M  1.1M   96M   2% /run</span>
+<span class="go">/dev/vda1        19G  4.4G   14G  25% /</span>
+<span class="go">tmpfs           481M     0  481M   0% /dev/shm</span>
+<span class="go">tmpfs           5.0M     0  5.0M   0% /run/lock</span>
+<span class="go">tmpfs            97M   48K   96M   1% /run/user/1000</span>
+</code></pre></div>
+
+<p>Да, не мало, но это полноценная система без “лишних” пакетов. Для сравнения, Live DVD установит Debian с 2650 пакетами! Занимая 9.5G на диске!</p>
+<p>Если Вы стремитесь к меньшим значениям, Вам стоит посмотреть в сторону сборки своего рабочего окружения на основе WM вроде Sway, т.к. тюнинг системы дальше будет требовать непропорциональных результатам трудозатрат.</p>
+<p>В общем, всё! У Вас есть минимальная система без лишних пакетов, но уже с привычным графическим окружением KDE и веб-браузером. Дальше кастомизировать по Вашему вкусу. Имеет смысл настроить локаль, точки монтирования и много другое…</p>
+<hr />
+<p>В большинстве конфигураций, после установки, у Вас не будет списка сетей при нажатии на иконку <code>Networks</code> в трее. Так происходит у меня при установке Debian Bookworm на VM с DLBD образа. Соединение с интернетом, как ни странно, есть.</p>
+<p>Это признак того, что в <code>/etc/network/interfaces</code> есть настройки для сетевых интерфейсов, про это есть информационное сообщение в логе установки:</p>
+<figure>
+<img src="res/minimalistic-kde-on-debian-6-network-interfaces-info.webp" alt="Информация от NetworkManager" />
+<figcaption aria-hidden="true">Информация от NetworkManager</figcaption>
+</figure>
+<p>По умолчанию NetworkManager будет игнорировать управление такими интерфейсами. Вот один из способов убрать все настройки интерфейсов из файла <code>/etc/network/interfaces</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>cat<span class="w"> </span>&lt;&lt;EOF<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/network/interfaces
+<span class="gp"># </span>interfaces<span class="o">(</span><span class="m">5</span><span class="o">)</span><span class="w"> </span>file<span class="w"> </span>used<span class="w"> </span>by<span class="w"> </span>ifup<span class="o">(</span><span class="m">8</span><span class="o">)</span><span class="w"> </span>and<span class="w"> </span>ifdown<span class="o">(</span><span class="m">8</span><span class="o">)</span>
+<span class="gp"># </span>Include<span class="w"> </span>files<span class="w"> </span>from<span class="w"> </span>/etc/network/interfaces.d:
+<span class="go">source /etc/network/interfaces.d/*</span>
+<span class="go">EOF</span>
+</code></pre></div>
+
+<p>Перезагружаемся. Настройки адаптеров и сетей будут доступны через <code>nmcli</code> и <code>nmtui</code>. Сами сетевые подключения появятся в списке при клике на иконку <code>Networks</code> в трее.</p>
+
+<time datetime="2024-03-10T19:12:22+03:00">10 марта 2024 г.</time>
+
+<div class="changelog">
+<h4>Журнал изменений</h4>
+<p><b>30 августа 2024 г.</b>: заменил <code>kde-plasma-desktop</code> на <code>sddm plasma-desktop konsole</code>.</p>
+</div>
+
+</article>
+
+<address class="contacts">
+    Если Вы хотите обсудить содержание заметки, задать вопросы или
+    предложить изменения, то со мной можно связаться в
+    <a href="https://t.me/tsb99x">Telegram</a>
+</address>
+
+<footer>
+    <span class="copyright">© 2019-2026</span> |
+    <a rel="license"
+        href="https://creativecommons.org/licenses/by/4.0/deed.ru">
+        CC BY 4.0
+    </a>
+</footer>
+
+</body>
+</html>

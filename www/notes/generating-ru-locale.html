@@ -1,35 +1,119 @@
-<!DOCTYPE html><html xmlns=http://www.w3.org/1999/xhtml lang=ru xml:lang=ru prefix="og: https://ogp.me/ns#"> <head><meta charset=utf-8><meta name=generator content=pandoc><meta name=viewport content="width=device-width, initial-scale=1.0, user-scalable=yes"><meta name=author content="Антон Муравьев"><meta name=dcterms.date content=2024-09-10T19:15:20+03:00><meta name=description content="Артефакты при работе с SSH"><meta property=og:url content=https://tsb99x.github.io/notes/generating-ru-locale.html><meta property=og:type content=article><meta property=og:title content="Генерация локали ru"><meta property=og:description content="Артефакты при работе с SSH"><meta property=og:image content=https://tsb99x.github.io/res/avatar-512x512.png><title>Генерация локали ru</title><link rel=icon href=/favicon.ico type=image/x-icon><link rel=icon href=/favicon.svg type=image/svg+xml><link rel=stylesheet href=/normalize.css><link rel=stylesheet href=/fonts.css><link rel=stylesheet href=/pygments.css><link rel=stylesheet href=/style.css><link rel=canonical href=https://tsb99x.github.io/notes/generating-ru-locale.html></head> <body> <nav> <a href=/ >Обо мне</a> <a href=/notes/ >Заметки</a> </nav> <article> <header id=title-block-header> <h1 class=title>Генерация локали <code>ru</code></h1> </header> <p>При установке Debian я оставляю настройки локали по-умолчанию, т.к. всё равно потом занимаюсь тонкой настройкой. При таком подходе после установки ОС на VM можно увидеть интересные артефакты отсутствующей локали <code>ru</code>. Вот, например, после подключения через SSH я могу создать файл с кириллицей в имени:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>touch<span class=w> </span>very_important_file
-<span class=gp>$ </span>touch<span class=w> </span>очень_важный_файл
-</code></pre></div> <p>Локаль и отображение кириллицы на клиентской машине уже есть, поэтому создать файл никаких проблем нет. Но вот при запросе <code>ls</code> в ответ приходит “мусор”:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>ls<span class=w> </span>-1
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru" prefix="og: https://ogp.me/ns#">
 
-<span class=go>very_important_file</span>
-<span class=go>&#39;&#39;$&#39;\320\276\321\207\320\265\320\275\321\214&#39;&#39;_&#39;$&#39;\320\262\320\260\320\266\320\275\321\213\320\271&#39;&#39;_&#39;$&#39;\321\204\320\260\320\271\320\273&#39;</span>
-</code></pre></div> <p>Если Вы видите такое для уже существующих файлов, то пугаться сразу не стоит.</p> <p>Дело в отсутствующей локали на сервере (на VM). Локаль <code>ru</code> не скомпилирована и сервер просто не знает как ему правильно кодировать имя файла. Проверим список доступных локалей на сервере, чтобы не быть голословными:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>localectl<span class=w> </span>list-locales
+<head>
 
-<span class=go>C.UTF-8</span>
-<span class=go>en_US.UTF-8</span>
-</code></pre></div> <p>Из доступных есть только <code>C</code> и <code>en_US</code>, это настройки по-умолчанию. Документацию по генерации локалей можно найти в <a href=https://manpages.debian.org/bookworm/locales/locale-gen.8.en.html>man locale.gen</a>. Проверим, какие локали <code>ru</code> доступны в файле <code>locale.gen</code>, который можно найти в директории <code>/etc/</code>:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>cat<span class=w> </span>/etc/locale.gen<span class=w> </span><span class=p>|</span><span class=w> </span>grep<span class=w> </span>ru_RU
+<meta charset="utf-8">
+<meta name="generator" content="pandoc">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Антон Муравьев">
+<meta name="dcterms.date" content="2024-09-10T19:15:20+03:00">
+<meta name="description" content="Артефакты при работе с SSH">
+<meta property="og:url" content="https://tsb99x.github.io/notes/generating-ru-locale.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Генерация локали ru">
+<meta property="og:description" content="Артефакты при работе с SSH">
+<meta property="og:image" content="https://tsb99x.github.io/res/avatar-512x512.png">
+<title>Генерация локали ru</title>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/normalize.css">
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/pygments.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="canonical" href="https://tsb99x.github.io/notes/generating-ru-locale.html">
 
-<span class=gp># </span>ru_RU<span class=w> </span>ISO-8859-5
-<span class=gp># </span>ru_RU.CP1251<span class=w> </span>CP1251
-<span class=gp># </span>ru_RU.KOI8-R<span class=w> </span>KOI8-R
-<span class=gp># </span>ru_RU.UTF-8<span class=w> </span>UTF-8
-</code></pre></div> <p>Из этих вариантов в современном мире с UTF-8 меня интересует, конечно же, только <code>ru_RU.UTF-8 UTF-8</code>. Раскомментирую эту локаль, чтобы её потом скомпилировать:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>sed<span class=w> </span>-i<span class=w> </span><span class=s1>&#39;s/# ru_RU\.UTF-8 UTF-8/ru_RU\.UTF-8 UTF-8/g&#39;</span><span class=w> </span><span class=se>\</span>
-<span class=w>    </span>/etc/locale.gen
-<span class=gp>$ </span>cat<span class=w> </span>/etc/locale.gen<span class=w> </span><span class=p>|</span><span class=w> </span>grep<span class=w> </span>ru_RU
+</head>
 
-<span class=gp># </span>ru_RU<span class=w> </span>ISO-8859-5
-<span class=gp># </span>ru_RU.CP1251<span class=w> </span>CP1251
-<span class=gp># </span>ru_RU.KOI8-R<span class=w> </span>KOI8-R
-<span class=go>ru_RU.UTF-8 UTF-8</span>
-</code></pre></div> <p>Пришло время запустить <code>locale-gen</code>, чтобы он перекомпилировал выбранные локали:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>sudo<span class=w> </span>locale-gen
+<body>
 
-<span class=go>Generating locales (this might take a while)...</span>
-<span class=go>  ru_RU.UTF-8... done</span>
-<span class=go>  en_US.UTF-8... done</span>
-<span class=go>Generation complete.</span>
-</code></pre></div> <p>Отлично, теперь перепроверяю вывод <code>ls</code>, так убежусь, что сервер узнал о <code>ru</code>:</p> <div class=highlight><pre><span></span><code><span class=gp>$ </span>ls<span class=w> </span>-1
+<nav>
+    <a href="/">Обо мне</a>
+    <a href="/notes/">Заметки</a>
+</nav>
 
-<span class=go>very_important_file</span>
-<span class=go>очень_важный_файл</span>
-</code></pre></div> <p>Заработало, значит теперь можно увидеть кириллицу на этой VM с SSH-сервером.</p> <time datetime=2024-09-10T19:15:20+03:00>10 сентября 2024 г.</time> </article> <address class=contacts> Если Вы хотите обсудить содержание заметки, задать вопросы или предложить изменения, то со мной можно связаться в <a href=https://t.me/tsb99x>Telegram</a> </address> <footer> <span class=copyright>© 2019-2026</span> | <a rel=license href=https://creativecommons.org/licenses/by/4.0/deed.ru> CC BY 4.0 </a> </footer> </body> </html> 
+<article>
+
+<header id="title-block-header">
+<h1 class="title">Генерация локали <code>ru</code></h1>
+</header>
+
+<p>При установке Debian я оставляю настройки локали по-умолчанию, т.к. всё равно потом занимаюсь тонкой настройкой. При таком подходе после установки ОС на VM можно увидеть интересные артефакты отсутствующей локали <code>ru</code>. Вот, например, после подключения через SSH я могу создать файл с кириллицей в имени:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>touch<span class="w"> </span>very_important_file
+<span class="gp">$ </span>touch<span class="w"> </span>очень_важный_файл
+</code></pre></div>
+
+<p>Локаль и отображение кириллицы на клиентской машине уже есть, поэтому создать файл никаких проблем нет. Но вот при запросе <code>ls</code> в ответ приходит “мусор”:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>ls<span class="w"> </span>-1
+
+<span class="go">very_important_file</span>
+<span class="go">&#39;&#39;$&#39;\320\276\321\207\320\265\320\275\321\214&#39;&#39;_&#39;$&#39;\320\262\320\260\320\266\320\275\321\213\320\271&#39;&#39;_&#39;$&#39;\321\204\320\260\320\271\320\273&#39;</span>
+</code></pre></div>
+
+<p>Если Вы видите такое для уже существующих файлов, то пугаться сразу не стоит.</p>
+<p>Дело в отсутствующей локали на сервере (на VM). Локаль <code>ru</code> не скомпилирована и сервер просто не знает как ему правильно кодировать имя файла. Проверим список доступных локалей на сервере, чтобы не быть голословными:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>localectl<span class="w"> </span>list-locales
+
+<span class="go">C.UTF-8</span>
+<span class="go">en_US.UTF-8</span>
+</code></pre></div>
+
+<p>Из доступных есть только <code>C</code> и <code>en_US</code>, это настройки по-умолчанию. Документацию по генерации локалей можно найти в <a href="https://manpages.debian.org/bookworm/locales/locale-gen.8.en.html">man locale.gen</a>. Проверим, какие локали <code>ru</code> доступны в файле <code>locale.gen</code>, который можно найти в директории <code>/etc/</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>cat<span class="w"> </span>/etc/locale.gen<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>ru_RU
+
+<span class="gp"># </span>ru_RU<span class="w"> </span>ISO-8859-5
+<span class="gp"># </span>ru_RU.CP1251<span class="w"> </span>CP1251
+<span class="gp"># </span>ru_RU.KOI8-R<span class="w"> </span>KOI8-R
+<span class="gp"># </span>ru_RU.UTF-8<span class="w"> </span>UTF-8
+</code></pre></div>
+
+<p>Из этих вариантов в современном мире с UTF-8 меня интересует, конечно же, только <code>ru_RU.UTF-8 UTF-8</code>. Раскомментирую эту локаль, чтобы её потом скомпилировать:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>sed<span class="w"> </span>-i<span class="w"> </span><span class="s1">&#39;s/# ru_RU\.UTF-8 UTF-8/ru_RU\.UTF-8 UTF-8/g&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>/etc/locale.gen
+<span class="gp">$ </span>cat<span class="w"> </span>/etc/locale.gen<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>ru_RU
+
+<span class="gp"># </span>ru_RU<span class="w"> </span>ISO-8859-5
+<span class="gp"># </span>ru_RU.CP1251<span class="w"> </span>CP1251
+<span class="gp"># </span>ru_RU.KOI8-R<span class="w"> </span>KOI8-R
+<span class="go">ru_RU.UTF-8 UTF-8</span>
+</code></pre></div>
+
+<p>Пришло время запустить <code>locale-gen</code>, чтобы он перекомпилировал выбранные локали:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>locale-gen
+
+<span class="go">Generating locales (this might take a while)...</span>
+<span class="go">  ru_RU.UTF-8... done</span>
+<span class="go">  en_US.UTF-8... done</span>
+<span class="go">Generation complete.</span>
+</code></pre></div>
+
+<p>Отлично, теперь перепроверяю вывод <code>ls</code>, так убежусь, что сервер узнал о <code>ru</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>ls<span class="w"> </span>-1
+
+<span class="go">very_important_file</span>
+<span class="go">очень_важный_файл</span>
+</code></pre></div>
+
+<p>Заработало, значит теперь можно увидеть кириллицу на этой VM с SSH-сервером.</p>
+
+<time datetime="2024-09-10T19:15:20+03:00">10 сентября 2024 г.</time>
+
+
+</article>
+
+<address class="contacts">
+    Если Вы хотите обсудить содержание заметки, задать вопросы или
+    предложить изменения, то со мной можно связаться в
+    <a href="https://t.me/tsb99x">Telegram</a>
+</address>
+
+<footer>
+    <span class="copyright">© 2019-2026</span> |
+    <a rel="license"
+        href="https://creativecommons.org/licenses/by/4.0/deed.ru">
+        CC BY 4.0
+    </a>
+</footer>
+
+</body>
+</html>
