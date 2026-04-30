@@ -94,7 +94,6 @@ article figure {
 }
 
 article img {
-    margin: 0 -1rem;
     width: 100%;
 }
 
@@ -265,7 +264,6 @@ article q {
 
     article img {
         border-radius: 0.2rem;
-        margin: 0;
     }
 
     article video {
