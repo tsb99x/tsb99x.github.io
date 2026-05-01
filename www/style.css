@@ -66,6 +66,10 @@ footer {
     text-align: center;
 }
 
+em, strong {
+    color: #f5e0dc; /* rosewater */
+}
+
 article {
     margin: 2rem 0;
 }
@@ -104,7 +108,6 @@ article video {
 article figcaption {
     font-style: italic;
     margin: 0.5rem 0;
-    text-align: center;
     color: #f5e0dc; /* rosewater */
 }
 
@@ -133,14 +136,6 @@ article pre {
     padding: 1.5rem 1.5rem;
 }
 
-article a::before {
-    content: '[';
-}
-
-article a::after {
-    content: ']';
-}
-
 article .rutube-player {
     width: 100%;
     height: unset;
@@ -154,33 +149,9 @@ p code {
     color: #f5e0dc; /* rosewater */
 }
 
-ul code::before,
-ul code::after,
-p code::before,
-p code::after {
-    content: '`';
-}
-
-em::before,
-em::after {
-    content: '*';
-    color: #313244; /* surface 0 */
-}
-
 .math {
     font-family: Georgia, 'Times New Roman', serif;
     font-size: 1.33rem;
-}
-
-.math em::before,
-.math em::after {
-    content: none;
-}
-
-strong::before,
-strong::after {
-    content: '**';
-    color: #313244; /* surface 0 */
 }
 
 article q {
