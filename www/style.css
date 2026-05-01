@@ -294,10 +294,6 @@ address {
     font-size: 0.9rem;
 }
 
-nav a {
-    margin-right: 0;
-}
-
 @media (min-width: 24rem) {
 
 .whoami {
