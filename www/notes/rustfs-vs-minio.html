@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru" prefix="og: https://ogp.me/ns#">
+
+<head>
+
+<meta charset="utf-8">
+<meta name="generator" content="pandoc">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Антон Муравьев">
+<meta name="dcterms.date" content="2026-01-08T14:28:42+03:00">
+<meta name="description" content="Локальный S3">
+<meta property="og:url" content="https://tsb99x.github.io/notes/rustfs-vs-minio.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RustFS vs Minio">
+<meta property="og:description" content="Локальный S3">
+<meta property="og:image" content="https://tsb99x.github.io/res/avatar-512x512.png">
+<title>RustFS vs Minio</title>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/modern-normalize.css">
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/pygments.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="canonical" href="https://tsb99x.github.io/notes/rustfs-vs-minio.html">
+
+</head>
+
+<body>
+
+<nav>
+    <a href="/">Обо мне</a>
+    <a href="/notes/">Заметки</a>
+</nav>
+
+<article>
+
+<header id="title-block-header">
+<h1 class="title">RustFS vs Minio</h1>
+</header>
+
+<figure>
+<img src="rustfs-vs-minio.webp" alt="Экран входа RustFS" />
+<figcaption aria-hidden="true">Экран входа RustFS</figcaption>
+</figure>
+<p>Раньше много пользовался <a href="https://github.com/minio/minio">Minio</a>, бывало удобно, когда нужно быстро поднять сервис для перекидывания файлов.</p>
+<p>Самая большая проблема у Minio, которая меня преследует в последнее время – жёсткие требования минимального объёма свободного места на диске. Разработчики говорят: нужно минимум 10% свободного места. Неважно абсолютное значение, хоть даже 400T, как в одном из <a href="https://github.com/minio/minio/issues/16534">issues на GitHub</a>.</p>
+<p>На днях нашёл <a href="https://github.com/rustfs/rustfs">RustFS</a>, прямой аналог Minio. RustFS даёт спокойно записать файлы и при 1% свободного места.</p>
+<p>Для домашнего пользования или мини-лабы — самое то!</p>
+
+<time datetime="2026-01-08T14:28:42+03:00">8 января 2026 г.</time>
+
+
+</article>
+
+<address class="contacts">
+    Если Вы хотите обсудить содержание заметки, задать вопросы или
+    предложить изменения, то со мной можно связаться в
+    <a href="https://t.me/tsb99x">Telegram</a>
+</address>
+
+<footer>
+    <span class="copyright">© 2019-2026</span> |
+    <a rel="license"
+        href="https://creativecommons.org/licenses/by/4.0/deed.ru">
+        CC BY 4.0
+    </a>
+</footer>
+
+</body>
+</html>
