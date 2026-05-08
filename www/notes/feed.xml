@@ -7,7 +7,7 @@
 <link>https://tsb99x.github.io/notes/</link>
 <language>ru</language>
 <generator>pandoc</generator>
-<lastBuildDate>Wed, 06 May 2026 22:49:58 +0300</lastBuildDate>
+<lastBuildDate>Fri, 08 May 2026 18:21:40 +0300</lastBuildDate>
 
 <atom:link href="https://tsb99x.github.io/notes/feed.xml" rel="self" type="application/rss+xml" />
 
@@ -94,6 +94,13 @@
     <link>https://tsb99x.github.io/notes/podman-journey-begins.html</link>
     <pubDate>Sat, 03 Jan 2026 20:40:00 +0300</pubDate>
     <guid isPermaLink="false">1ea42b76-1abf-4f8c-ab42-cfbf7a87a5b8</guid>
+</item>
+<item>
+    <title>Закончил выгрузку старых реп</title>
+    <description><![CDATA[Архивные проекты на GitHub]]></description>
+    <link>https://tsb99x.github.io/notes/old-repos-upload.html</link>
+    <pubDate>Fri, 02 Jan 2026 20:24:57 +0300</pubDate>
+    <guid isPermaLink="false">49e774bb-b116-463d-b2e3-702c3a4726f0</guid>
 </item>
 <item>
     <title>Всех с наступающим!</title>
