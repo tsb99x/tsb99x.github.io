@@ -7,7 +7,7 @@
 <link>https://tsb99x.github.io/notes/</link>
 <language>ru</language>
 <generator>pandoc</generator>
-<lastBuildDate>Sat, 09 May 2026 22:30:37 +0300</lastBuildDate>
+<lastBuildDate>Mon, 11 May 2026 16:05:39 +0300</lastBuildDate>
 
 <atom:link href="https://tsb99x.github.io/notes/feed.xml" rel="self" type="application/rss+xml" />
 
@@ -80,6 +80,13 @@
     <link>https://tsb99x.github.io/notes/rustfs-vs-minio.html</link>
     <pubDate>Thu, 08 Jan 2026 14:28:42 +0300</pubDate>
     <guid isPermaLink="false">0703a948-9e73-4ce4-a6e0-19cc822f62bd</guid>
+</item>
+<item>
+    <title>Раздолбайский дух Sanic</title>
+    <description><![CDATA[Забавный артефакт прошлого]]></description>
+    <link>https://tsb99x.github.io/notes/sanic-goofiness.html</link>
+    <pubDate>Thu, 08 Jan 2026 14:27:45 +0300</pubDate>
+    <guid isPermaLink="false">01285e17-4b8c-41ee-b739-9246c72c386f</guid>
 </item>
 <item>
     <title>Podman, OCI и HEALTHCHECK</title>
