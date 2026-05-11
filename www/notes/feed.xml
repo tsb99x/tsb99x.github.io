@@ -7,7 +7,7 @@
 <link>https://tsb99x.github.io/notes/</link>
 <language>ru</language>
 <generator>pandoc</generator>
-<lastBuildDate>Mon, 11 May 2026 16:05:39 +0300</lastBuildDate>
+<lastBuildDate>Mon, 11 May 2026 16:15:26 +0300</lastBuildDate>
 
 <atom:link href="https://tsb99x.github.io/notes/feed.xml" rel="self" type="application/rss+xml" />
 
@@ -115,6 +115,13 @@
     <link>https://tsb99x.github.io/notes/old-repos-upload.html</link>
     <pubDate>Fri, 02 Jan 2026 20:24:57 +0300</pubDate>
     <guid isPermaLink="false">49e774bb-b116-463d-b2e3-702c3a4726f0</guid>
+</item>
+<item>
+    <title>Обновление для 2026 года</title>
+    <description><![CDATA[Небольшой апдейт сайта]]></description>
+    <link>https://tsb99x.github.io/notes/website-update-for-2026.html</link>
+    <pubDate>Thu, 01 Jan 2026 18:03:28 +0300</pubDate>
+    <guid isPermaLink="false">efd6f897-6eec-49a0-ad5f-123b5991ce30</guid>
 </item>
 <item>
     <title>Всех с наступающим!</title>
