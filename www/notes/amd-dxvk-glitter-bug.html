@@ -44,14 +44,14 @@
 <p>На позапрошлой неделе я достал из закромов серию Grand Theft Auto. И тут столкнулся с самым ярким проявлением проблемы за всё время. Экран в процессе игры видно лишь наполовину. Да и то, что видно, невероятно размыто и блочно.</p>
 <p>Открытие MangoHud или запуск через gamescope оказались бессильны. Смена настроек графики, разрешения экрана, запуск из Steam (Proton) или Wine-GE не давали эффекта. Но на этот раз скриншот отлично захватывает представление артефакта. Вот как это выглядит на моём компьютере сейчас:</p>
 <figure>
-<img src="res/amd-dxvk-glitter-bug-00-glitter.jpg" alt="Артефакт в GTA IV" />
+<img src="amd-dxvk-glitter-bug-00-glitter.webp" alt="Артефакт в GTA IV" />
 <figcaption aria-hidden="true">Артефакт в GTA IV</figcaption>
 </figure>
 <p>И тут поиск наконец-то помог докопаться до временного решения проблемы в отличие от предыдущих случаев, а точнее дал наводку на <a href="https://github.com/doitsujin/dxvk/issues/1862">обсуждение бага на GitHub</a>. Один из пользователей DXVK приложил скриншот с аналогичным артефактом.</p>
 <p>Решение на сегодня, как указывали в переписке – попробовать отключить Delta Color Compression (DCC) с помощью установки переменной окружения <code>RADV_DEBUG=nodcc</code>, согласно <a href="https://docs.mesa3d.org/envvars.html">документации Mesa по переменным окружения</a>.</p>
 <p>К большой радости, это решение помогает. Изображение теперь ровно такое, какое и можно ожидать для GTA IV:</p>
 <figure>
-<img src="res/amd-dxvk-glitter-bug-01-no-glitter.jpg" alt="Рендеринг с RADV_DEBUG=nodcc" />
+<img src="amd-dxvk-glitter-bug-01-no-glitter.webp" alt="Рендеринг с RADV_DEBUG=nodcc" />
 <figcaption aria-hidden="true">Рендеринг с RADV_DEBUG=nodcc</figcaption>
 </figure>
 <p>Проверка на Mesa 24 из Flathub показала, что этот баг не решается только лишь обновлением Mesa, дело, похоже, и в драйвере AMD. Свежий linux-firmware не даёт позитивных результатов. Ядро 6.6 видимых изменений также не даёт.</p>
