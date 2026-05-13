@@ -49,27 +49,27 @@
 <h2 id="подготовка-usb-флешки-на-windows">Подготовка USB-флешки на Windows</h2>
 <p>Первым делом отправляемся на <a href="https://memtest.org/">сайт Memtest86+</a>. На главной странице есть раздел Download, в котором находятся файлы загрузки. Нас там интересует вариант <code>Windows USB Installer (32/64 bits)</code>. Загружаем файл по ссылке.</p>
 <figure>
-<img src="res/memtest-00.webp" alt="Загрузки на сайте Memtest86+" />
+<img src="memtest-00.webp" alt="Загрузки на сайте Memtest86+" />
 <figcaption aria-hidden="true">Загрузки на сайте Memtest86+</figcaption>
 </figure>
 <p>Перед запуском приложения находим USB-флешку и вставляем в порт компьютера. Подойдёт практически любая флешка, Memtest86+ не требует много места. У меня, например, для Memtest86+ выделена вот такая старушка на 64M.</p>
 <figure>
-<img src="res/memtest-01.jpg" alt="Старая флешка на 64M" />
+<img src="memtest-01.webp" alt="Старая флешка на 64M" />
 <figcaption aria-hidden="true">Старая флешка на 64M</figcaption>
 </figure>
 <p>Запускаем установщик и соглашаемся с условиями лицензии GNU/GPLv2 кликнув по кнопке <code>I Agree</code>.</p>
 <figure>
-<img src="res/memtest-02.webp" alt="Лицензия GNU/GPLv2" />
+<img src="memtest-02.webp" alt="Лицензия GNU/GPLv2" />
 <figcaption aria-hidden="true">Лицензия GNU/GPLv2</figcaption>
 </figure>
 <p>Выбираем USB-флешку из списка. Если USB-флешка у Вас одна, то вариант будет только один, в моём случае так и есть. Только <code>E:\</code>. Если вариантов всё-же несколько, то перепроверьте букву диска, дабы не стереть нужные файлы.</p>
 <figure>
-<img src="res/memtest-03.webp" alt="Выбор USB-флешки" />
+<img src="memtest-03.webp" alt="Выбор USB-флешки" />
 <figcaption aria-hidden="true">Выбор USB-флешки</figcaption>
 </figure>
 <p>Ставим соответствующую галочку в чекбокс для форматирования флешки.</p>
 <figure>
-<img src="res/memtest-04.webp" alt="Чекбокс для форматирования флешки" />
+<img src="memtest-04.webp" alt="Чекбокс для форматирования флешки" />
 <figcaption aria-hidden="true">Чекбокс для форматирования флешки</figcaption>
 </figure>
 <p>Отдельно подчеркну:</p>
@@ -80,7 +80,7 @@
 </blockquote>
 <p>Нажимаем <code>Create</code> для записи на USB-флешку образа Memtest86+.</p>
 <figure>
-<img src="res/memtest-05.webp" alt="Кнопка для начала записи" />
+<img src="memtest-05.webp" alt="Кнопка для начала записи" />
 <figcaption aria-hidden="true">Кнопка для начала записи</figcaption>
 </figure>
 <blockquote class="warning">
@@ -90,17 +90,17 @@
 </blockquote>
 <p>После окончания записи просто нажимаем <code>Next &gt;</code>.</p>
 <figure>
-<img src="res/memtest-06.webp" alt="Запись завершена" />
+<img src="memtest-06.webp" alt="Запись завершена" />
 <figcaption aria-hidden="true">Запись завершена</figcaption>
 </figure>
 <p>И выходим из установщика, нажав <code>Finish</code>.</p>
 <figure>
-<img src="res/memtest-07.webp" alt="Кнопка выхода" />
+<img src="memtest-07.webp" alt="Кнопка выхода" />
 <figcaption aria-hidden="true">Кнопка выхода</figcaption>
 </figure>
 <p>Не забывайте, что USB-флешки нужно <em>безопасно</em> извлекать. Кликаем правой кнопкой мыши по USB-флешке в проводнике и выбираем <code>Извлечь</code>.</p>
 <figure>
-<img src="res/memtest-08.webp" alt="Безопасное извлечение USB-флешки" />
+<img src="memtest-08.webp" alt="Безопасное извлечение USB-флешки" />
 <figcaption aria-hidden="true">Безопасное извлечение USB-флешки</figcaption>
 </figure>
 <p>Вот и всё! Можно переходить к <a href="#запуск-memtest86-и-интерпретация-результатов">запуску Memtest86+</a>.</p>
@@ -115,7 +115,7 @@
 <h3 id="готовые-live-iso-с-memtest86">Готовые Live ISO с Memtest86+</h3>
 <p>В мире Linux Memtest86+ является определённым стандартом. Таким, что некоторые Live ISO поставляются с Memtest86+ как вариантом загрузки. Вот, например, варианты загрузки для свежего образа Arch.</p>
 <figure>
-<img src="res/memtest-09.webp" alt="Варианты загрузки Live ISO у Arch" />
+<img src="memtest-09.webp" alt="Варианты загрузки Live ISO у Arch" />
 <figcaption aria-hidden="true">Варианты загрузки Live ISO у Arch</figcaption>
 </figure>
 <p>Список ISO образов, которые есть у меня в наличии и имеют Memtest86+ на борту:</p>
@@ -151,7 +151,7 @@
 
 <p>После установки, при загрузке системы, новая опция появится в GRUB. При её выборе, как и в случае с опцией у Live ISO, автоматически запустится Memtest86+.</p>
 <figure>
-<img src="res/memtest-10.webp" alt="Опция Memtest86+ на установленном Debian" />
+<img src="memtest-10.webp" alt="Опция Memtest86+ на установленном Debian" />
 <figcaption aria-hidden="true">Опция Memtest86+ на установленном Debian</figcaption>
 </figure>
 <h3 id="подготовка-usb-флешки-на-linux">Подготовка USB-флешки на Linux</h3>
@@ -165,7 +165,7 @@
 </ul>
 <p>Образы находятся в разделе Download на <a href="https://memtest.org/">сайте Memtest86+</a>.</p>
 <figure>
-<img src="res/memtest-11.webp" alt="32-х битная и 64-х битная опции ISO" />
+<img src="memtest-11.webp" alt="32-х битная и 64-х битная опции ISO" />
 <figcaption aria-hidden="true">32-х битная и 64-х битная опции ISO</figcaption>
 </figure>
 <p>После загрузки вставляем USB-флешку в порт.</p>
@@ -209,28 +209,28 @@
 </blockquote>
 <p>Выключаем компьютер. Если Вы подготавливали USB-флешку, то вставляем её. Запускаем ПК и нажимаем на какую-то кнопку для выбора устройства, с которого будет загружаться система. В моём случае (на MSI, Gigabyte, Asus или HP) работает <code>ESC</code>, <code>F2</code> или <code>F8</code>. Выглядит интерфейс, например, так:</p>
 <figure>
-<img src="res/memtest-12.jpg" alt="Выбор загрузочного устройства на Asus X205TA" />
+<img src="memtest-12.webp" alt="Выбор загрузочного устройства на Asus X205TA" />
 <figcaption aria-hidden="true">Выбор загрузочного устройства на Asus X205TA</figcaption>
 </figure>
 <p>Если в списке устройств для загрузки нет флешки, но её видно в операционной системе, у Вас может быть отключена загрузка с внешних носителей. Тогда нужно зайти в BIOS/UEFI (у меня это кнопка <code>Del</code> при старте или вариант <code>Enter Setup</code> на фото выше) и включить опцию загрузки с USB-флешек. Эта фича обычно оформлена в виде порядка загрузки. На X205TA опции BIOS в разделе <code>Boot</code> выглядят так:</p>
 <figure>
-<img src="res/memtest-13.jpg" alt="Порядок загрузки на Asus X205TA" />
+<img src="memtest-13.webp" alt="Порядок загрузки на Asus X205TA" />
 <figcaption aria-hidden="true">Порядок загрузки на Asus X205TA</figcaption>
 </figure>
 <p>Кроме всех указанных сложностей, часто можно столкнуться с подобным сообщением об ошибке при выборе USB-флешки с Memtest86+ для загрузки:</p>
 <figure>
-<img src="res/memtest-14.jpg" alt="Ошибка Secure Boot" />
+<img src="memtest-14.webp" alt="Ошибка Secure Boot" />
 <figcaption aria-hidden="true">Ошибка Secure Boot</figcaption>
 </figure>
 <p>Решается эта проблема <strong>временным</strong> отключением Secure Boot в настройках BIOS/UEFI. Такая опция находится, обычно, в настройках загрузки или безопасности. После завершения работы с Memtest86+, Secure Boot имеет смысл снова включить. У меня экран с опцией <code>Secure Boot Control</code> находится в разделе <code>Security</code> и выглядит следующим образом:</p>
 <figure>
-<img src="res/memtest-15.jpg" alt="Опция Secure Boot в BIOS" />
+<img src="memtest-15.webp" alt="Опция Secure Boot в BIOS" />
 <figcaption aria-hidden="true">Опция Secure Boot в BIOS</figcaption>
 </figure>
 <p>Иных проблем с запуском я не встречал, поэтому переходим к разбору интерфейса.</p>
 <p>В процессе работы выглядит Memtest86+ следующим образом. Мучить отвратными фото больше не буду, посмотрим на скриншот VM с выделенными точками интереса:</p>
 <figure>
-<img src="res/memtest-16.webp" alt="Скриншот VM с запущенным Memtest86+" />
+<img src="memtest-16.webp" alt="Скриншот VM с запущенным Memtest86+" />
 <figcaption aria-hidden="true">Скриншот VM с запущенным Memtest86+</figcaption>
 </figure>
 <p>Пройдём по порядку:</p>
