@@ -47,7 +47,7 @@
 <p>Для начала решил понять, какая именно плата у меня на руках. Выяснил, что у меня никакой не NodeMCU ESP32, а клон DOIT ESP32 DevKit.</p>
 <p>С подключением оказалось всё достаточно прозаично. По-сути, мне не хватало как раз всей обвязки до SoC ESP32-WROOM32. 1-в-1 обвязка есть на NodeMCU с ESP-12F. То есть, нужно их просто соединить. 3V3 и GND точно нужны для питания.</p>
 <figure>
-<img src="res/programming-esp32-through-nodemcu-01-connection-diagram.webp" alt="Схема подключения DevKit через NodeMCU" />
+<img src="programming-esp32-through-nodemcu-01-connection-diagram.webp" alt="Схема подключения DevKit через NodeMCU" />
 <figcaption aria-hidden="true">Схема подключения DevKit через NodeMCU</figcaption>
 </figure>
 <p>Пара TX и RX – ключевая частью при прошивке, их тоже нужно соединить. Причём никаких кроссов делать не нужно, TX отправляется к TX, а RX к RX.</p>

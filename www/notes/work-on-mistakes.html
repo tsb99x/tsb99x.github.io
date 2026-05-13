@@ -74,7 +74,7 @@
 <p>Обновил и <a href="https://github.com/tsb99x/utf8-range-checker">UTF8 Range Checker</a>. Самая большая боль там – размерность переменной для Unicode codepoint. Такая переменная должна иметь как минимум 32 битный беззнаковый тип. Я же использовал <code>unsigned int</code>. Теоретически это проблема.</p>
 <p>Да-да, я знаю, это неправильно. Стандарт Си гарантирует размерность <code>int</code> не менее 16 бит. То есть, для некоторых платформ невозможно будет получить корректный codepoint, ведь размерность будет меньше 32. Программа выдаст мусор.</p>
 <figure>
-<img src="res/work-on-mistakes-00-turbo-vision.webp" alt="Старый добрый Turbo Vision" />
+<img src="work-on-mistakes-00-turbo-vision.webp" alt="Старый добрый Turbo Vision" />
 <figcaption aria-hidden="true">Старый добрый Turbo Vision</figcaption>
 </figure>
 <p>Ради интереса, постарался найти такую платформу и компилятор. Из тех пар, что пробовал, только <a href="https://github.com/tkchia/gcc-ia16/">i16gcc</a> на <a href="https://www.freedos.org/">FreeDOS</a> 1.3 или <a href="https://en.wikipedia.org/wiki/Turbo_C">Turbo C</a> на <a href="https://www.dosbox.com/">DOSBox</a> показали проблему с битностью. У них <code>int</code> занимает 16 бит, а не 32.</p>

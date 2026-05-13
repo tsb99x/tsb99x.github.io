@@ -46,17 +46,17 @@
 <p>На Live DVD невозможно выбрать список программного обеспечения для установки, поэтому потребуется достать другой образ. Как альтернативу можно взять <a href="https://www.debian.org/CD/netinst/">netinst</a>.</p>
 <p>Запускаем установку. В загрузчике выбираем пункт меню Graphical Install.</p>
 <figure>
-<img src="res/minimalistic-kde-on-debian-0-graphical-selection.webp" alt="Graphical Install в загрузчике" />
+<img src="minimalistic-kde-on-debian-0-graphical-selection.webp" alt="Graphical Install в загрузчике" />
 <figcaption aria-hidden="true">Graphical Install в загрузчике</figcaption>
 </figure>
 <p>Все настройки можно оставить как Вам нравится, за исключением шага выбора программного обеспечения (Software Selection). На этом шаге необходимо отключить все графические среды, как на скриншоте ниже. Достаточно оставить только стандартные системные утилиты (standard system utilities).</p>
 <figure>
-<img src="res/minimalistic-kde-on-debian-1-software-selection.webp" alt="Шаг выбора программного обеспечения для установки" />
+<img src="minimalistic-kde-on-debian-1-software-selection.webp" alt="Шаг выбора программного обеспечения для установки" />
 <figcaption aria-hidden="true">Шаг выбора программного обеспечения для установки</figcaption>
 </figure>
 <p>После успешной установки перезагружаемся, как и предлагает установщик. После перезагрузки нас приветствует терминальный login, а не графический. Входим с созданным в процессе установки пользователем.</p>
 <figure>
-<img src="res/minimalistic-kde-on-debian-2-tty-login.webp" alt="TTY Login" />
+<img src="minimalistic-kde-on-debian-2-tty-login.webp" alt="TTY Login" />
 <figcaption aria-hidden="true">TTY Login</figcaption>
 </figure>
 <p>На “чистой” системе увидим всего 324 установленных пакета.</p>
@@ -86,7 +86,7 @@
 
 <p>Стоит отметить, для меня <code>konsole</code> – обязательный пакет для установки на этом этапе. Без него мета-пакет <code>plasma-desktop</code> может выбрать за Вас какой-нибудь другой эмулятор терминала, к примеру <code>deepin-terminal</code> или <code>zutty</code>.</p>
 <figure>
-<img src="res/minimalistic-kde-on-debian-3-plasma-desktop.webp" alt="Вывод APT при установке Plasma Desktop" />
+<img src="minimalistic-kde-on-debian-3-plasma-desktop.webp" alt="Вывод APT при установке Plasma Desktop" />
 <figcaption aria-hidden="true">Вывод APT при установке Plasma Desktop</figcaption>
 </figure>
 <p>Установка мета-пакета с рекомендациями – хороший баланс между количеством ручных действий и минимализмом результирующей системы. После установки перезагружаемся.</p>
@@ -95,7 +95,7 @@
 
 <p>Логин на этот раз произойдёт через SDDM, который услужливо выберет Plasma Wayland как основную графическую сессию.</p>
 <figure>
-<img src="res/minimalistic-kde-on-debian-4-sddm-login.webp" alt="SDDM Login" />
+<img src="minimalistic-kde-on-debian-4-sddm-login.webp" alt="SDDM Login" />
 <figcaption aria-hidden="true">SDDM Login</figcaption>
 </figure>
 <p>На этом этапе можно удалить лишние пакеты от <a href="https://kdeconnect.kde.org/">KDE Connect</a>.</p>
@@ -126,7 +126,7 @@
 
 <p>Можем даже установить Neofetch и поделиться результатом.</p>
 <figure>
-<img src="res/minimalistic-kde-on-debian-5-neofetch.webp" alt="Neofetch" />
+<img src="minimalistic-kde-on-debian-5-neofetch.webp" alt="Neofetch" />
 <figcaption aria-hidden="true">Neofetch</figcaption>
 </figure>
 <p>1477 пакетов. Получившаяся система занимает всего 4.4G на диске.</p>
@@ -148,7 +148,7 @@
 <p>В большинстве конфигураций, после установки, у Вас не будет списка сетей при нажатии на иконку <code>Networks</code> в трее. Так происходит у меня при установке Debian Bookworm на VM с DLBD образа. Соединение с интернетом, как ни странно, есть.</p>
 <p>Это признак того, что в <code>/etc/network/interfaces</code> есть настройки для сетевых интерфейсов, про это есть информационное сообщение в логе установки:</p>
 <figure>
-<img src="res/minimalistic-kde-on-debian-6-network-interfaces-info.webp" alt="Информация от NetworkManager" />
+<img src="minimalistic-kde-on-debian-6-network-interfaces-info.webp" alt="Информация от NetworkManager" />
 <figcaption aria-hidden="true">Информация от NetworkManager</figcaption>
 </figure>
 <p>По умолчанию NetworkManager будет игнорировать управление такими интерфейсами. Вот один из способов убрать все настройки интерфейсов из файла <code>/etc/network/interfaces</code>:</p>
