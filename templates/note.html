@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru" prefix="og: https://ogp.me/ns#">
+
+<head>
+
+<meta charset="utf-8">
+<meta name="generator" content="pandoc">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="$author-meta$">
+<meta name="dcterms.date" content="$date$">
+<meta name="description" content="$description-meta$">
+<meta property="og:url" content="$base-uri$/notes/$output-filename$">
+<meta property="og:type" content="article">
+<meta property="og:title" content="$pagetitle$">
+<meta property="og:description" content="$description-meta$">
+<meta property="og:image" content="$base-uri$/res/avatar-512x512.png">
+<title>$pagetitle$</title>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/modern-normalize.css">
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/pygments.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="canonical" href="$base-uri$/notes/$output-filename$">
+
+</head>
+
+<body>
+
+$for(include-before)$
+$include-before$
+$endfor$
+
+<article>
+
+$if(title)$
+<header id="title-block-header">
+<h1 class="title">$title$</h1>
+</header>
+$endif$
+
+$body$
+
+<time datetime="$date$">$date-ru$</time>
+
+$if(changelog)$
+<div class="changelog">
+<h4>Журнал изменений</h4>
+$for(changelog)$
+<p><b>$changelog.date-ru$</b>: $changelog.change$</p>
+$endfor$
+</div>
+$endif$
+
+</article>
+
+<address class="contacts">
+    Если Вы хотите обсудить содержание заметки, задать вопросы или
+    предложить изменения, то со мной можно связаться в
+    <a href="https://t.me/tsb99x">Telegram</a>
+</address>
+
+$for(include-after)$
+$include-after$
+$endfor$
+
+</body>
+</html>

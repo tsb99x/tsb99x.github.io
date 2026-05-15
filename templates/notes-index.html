@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru" prefix="og: https://ogp.me/ns#">
+
+<head>
+
+<meta charset="utf-8">
+<meta name="generator" content="pandoc">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="$author-meta$">
+<meta name="description" content="$description-meta$">
+<meta property="og:url" content="$base-uri$/notes/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="$pagetitle$">
+<meta property="og:description" content="$description-meta$">
+<meta property="og:image" content="$base-uri$/res/avatar-512x512.png">
+<title>$pagetitle$</title>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/modern-normalize.css">
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/style.css">
+<link rel="canonical" href="$base-uri$/notes/">
+
+<link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/notes/feed.xml">
+
+</head>
+
+<body>
+
+$for(include-before)$
+$include-before$
+$endfor$
+
+<main class="notes-index">
+
+$if(title)$
+<header id="title-block-header">
+<h1 class="title">$title$ <a class="feed-logo" rel="feed" aria-label="RSS Feed" href="/notes/feed.xml"></a></h1>
+</header>
+$endif$
+
+<ul class="years">
+$for(notes)$
+<li>
+
+    <h2>$notes.year$</h2>
+
+    <ul class="notes">
+$for(notes.articles)$
+    <li>
+        <a href="$notes.articles.file$.html">$notes.articles.title$</a>
+        <p>$notes.articles.description$</p>
+    </li>
+$endfor$
+    </ul>
+
+</li>
+$endfor$
+</ul>
+
+</main>
+
+$for(include-after)$
+$include-after$
+$endfor$
+
+</body>
+</html>
