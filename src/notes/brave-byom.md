@@ -12,6 +12,6 @@ guid: b0d39a13-954f-4f41-a4aa-8a14f8ef5e1a
 настраивать свою установку Ollama как backend для Leo. Тогда открытая
 веб-страница будет контекстом для модели.
 
-В Brave этот подход называют BYOM — Bring Your Own Model.
+В Brave этот подход называют BYOM -- Bring Your Own Model.
 
 Статью о BYOM можно найти [в блоге Brave](https://brave.com/blog/byom-nightly/).

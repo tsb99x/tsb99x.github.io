@@ -8,7 +8,7 @@ guid: ee9e7cdd-cb89-4a8e-8efc-5ee6aad13da5
 
 ![Превью страницы на GitHub](command-and-conquer-in-open-source-github-preview.webp)
 
-Приятная новость на сегодня — EA выложила код некоторых игр серии C&C в открытый
+Приятная новость на сегодня -- EA выложила код некоторых игр серии C&C в открытый
 доступ. Об этом есть [статья на
 Phoronix](https://www.phoronix.com/news/EA-Open-Source-CnC-Red-Alert) и
 [объявление на

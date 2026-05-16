@@ -39,7 +39,7 @@
 </header>
 
 <p>Восстанавливал работоспособность <a href="https://github.com/tsb99x/perfeo">одной репы</a> и столкнулся с забавной особенностью.</p>
-<p>Compose файлы, которые там есть — предельно простые. Есть цепочка сервисов, которые запускаются друг за другом. Первым стартует БД, никаких проблем. Вторым — сервис с API для загрузки данных в БД. Опять никаких проблем. Третьим — контейнер с wrk для нагрузочного тестирования. И вот тут загвоздка. Контейнер зависал в бесконечном состоянии “Created”.</p>
+<p>Compose файлы, которые там есть – предельно простые. Есть цепочка сервисов, которые запускаются друг за другом. Первым стартует БД, никаких проблем. Вторым – сервис с API для загрузки данных в БД. Опять никаких проблем. Третьим – контейнер с wrk для нагрузочного тестирования. И вот тут загвоздка. Контейнер зависал в бесконечном состоянии “Created”.</p>
 <p>Провёл исследование. Оказалось, что при сборке образа API никак не фиксировался HEALTHCHECK! Podman по-умолчанию использует именно OCI спеку контейнеров, а не Docker, и там <em>нет</em> поддержки HEALTHCHECK. Из-за этого не срабатывал <code>condition: service_healthy</code> в Compose-файле, подвешивая контейнер с wrk.</p>
 <p>Чтобы решить эту проблему, нужно явно указать формат спеки как Docker при сборке Dockerfile/Containerfile. Для Podman это выглядит так:</p>
 <div class="highlight"><pre><span></span><code><span class="gp">$ </span>podman<span class="w"> </span>build<span class="w"> </span>--format<span class="w"> </span>docker<span class="w"> </span>.
@@ -49,7 +49,7 @@
 <div class="highlight"><pre><span></span><code><span class="gp">$ </span>podman-compose<span class="w"> </span>--podman-build-args<span class="o">=</span><span class="s1">&#39;--format docker&#39;</span><span class="w"> </span>build
 </code></pre></div>
 
-<p>Альтернативный вариант, если не хочется передавать аргумент каждый раз — установить переменную окружения:</p>
+<p>Альтернативный вариант, если не хочется передавать аргумент каждый раз – установить переменную окружения:</p>
 <div class="highlight"><pre><span></span><code><span class="gp">$ </span><span class="nb">export</span><span class="w"> </span><span class="nv">BUILDAH_FORMAT</span><span class="o">=</span>docker
 </code></pre></div>
 

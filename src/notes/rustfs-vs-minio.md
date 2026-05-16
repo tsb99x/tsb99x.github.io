@@ -19,7 +19,7 @@ guid: 0703a948-9e73-4ce4-a6e0-19cc822f62bd
 На днях нашёл [RustFS], прямой аналог Minio. RustFS даёт спокойно записать файлы
 и при 1% свободного места.
 
-Для домашнего пользования или мини-лабы — самое то!
+Для домашнего пользования или мини-лабы -- самое то!
 
 [Minio]: https://github.com/minio/minio
 [issues на GitHub]: https://github.com/minio/minio/issues/16534
