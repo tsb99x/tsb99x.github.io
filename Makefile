@@ -50,12 +50,6 @@ nginx:
 	podman build -t website .
 	podman run -it -p 8080:80 --rm localhost/website
 
-git-gc:
-	du -sh .git
-	git reflog expire --expire-unreachable=now --all
-	git gc --prune=now
-	du -sh .git
-
 index-cleanup:
 	rm -f src/notes/index.md
 	rm -f www/notes/index.html
