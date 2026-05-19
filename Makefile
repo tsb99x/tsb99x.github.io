@@ -37,7 +37,8 @@ all: scaffold $(CSS) $(NOTES) $(IMAGES) $(FONTS) \
 	www/notes/feed.xml \
 	www/notes/fixgz.zip \
 	www/sitemap.xml \
-	www/res/avatar-512x512.png
+	www/res/avatar-512x512.png \
+	verify-fonts
 
 scaffold:
 	mkdir -p www/notes/res
@@ -45,6 +46,10 @@ scaffold:
 
 serve:
 	python3 -m http.server -d www --bind ::
+
+verify-fonts: utf8-range-checker/utf8-range-checker
+	find www/ -type f -name '*.html' -exec cat {} \; \
+	| $< U+0000-007F U+0080-00FF U+0300-036F U+0400-04FF U+2000-206F U+2200-22FF U+2500-257F U+25A0-25FF U+2580-259F
 
 nginx:
 	podman build -t website .
@@ -57,7 +62,12 @@ index-cleanup:
 	rm -f src/sitemap.md
 	rm -f www/sitemap.xml
 
-.PHONY: all scaffold serve verify-fonts nginx git-gc index-cleanup
+.PHONY: all scaffold serve verify-fonts nginx index-cleanup
+
+utf8-range-checker/utf8-range-checker: utf8-range-checker/utf8-range-checker.c
+	gcc -O2 -std=c90 \
+	-Wall -Wextra -Wpedantic \
+	$< -o $@
 
 src/notes/index.md: $(NOTES_SRC) scripts/build-notes-index.py
 	./scripts/build-notes-index.py > $@

@@ -1,0 +1,3 @@
+[submodule "utf8-range-checker"]
+	path = utf8-range-checker
+	url = https://github.com/tsb99x/utf8-range-checker
