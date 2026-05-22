@@ -1,5 +1,7 @@
 .DELETE_ON_ERROR:
 
+include ./utf8-range-checker/Makefile
+
 BASE_URI := https://tsb99x.github.io
 
 CSS_SRC := $(shell find src/ -type f -name '*.css')
@@ -63,11 +65,6 @@ index-cleanup:
 	rm -f www/sitemap.xml
 
 .PHONY: all scaffold serve verify-fonts nginx index-cleanup
-
-utf8-range-checker/utf8-range-checker: utf8-range-checker/utf8-range-checker.c
-	gcc -O2 -std=c90 \
-	-Wall -Wextra -Wpedantic \
-	$< -o $@
 
 src/notes/index.md: $(NOTES_SRC) scripts/build-notes-index.py
 	./scripts/build-notes-index.py > $@
