@@ -1,4 +1,5 @@
 .DELETE_ON_ERROR:
+.SUFFIXES:
 
 include ./utf8-range-checker/Makefile
 
