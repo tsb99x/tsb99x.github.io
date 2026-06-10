@@ -73,6 +73,8 @@ pages:
   lastmod: 2025-03-10T12:35:35+03:00
 - loc: notes/ddd-and-jpa-entities.html
   lastmod: 2024-02-24T20:08:08+03:00
+- loc: notes/debian-13-is-out-now.html
+  lastmod: 2025-08-29T19:26:19+03:00
 - loc: notes/debian-add-new-user.html
   lastmod: 2024-10-28T19:00:13+03:00
 - loc: notes/debian-backports.html
@@ -132,7 +134,7 @@ pages:
 - loc: notes/increase-vm_max_map_count.html
   lastmod: 2025-09-08T20:54:30+03:00
 - loc: notes/
-  lastmod: '2026-05-12T14:25:23+03:00'
+  lastmod: '2026-06-10T22:44:03+03:00'
 - loc: notes/install-gog-dlc.html
   lastmod: 2025-06-13T17:44:00+03:00
 - loc: notes/install-lutris-in-flatpak.html

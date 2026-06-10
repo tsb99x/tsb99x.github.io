@@ -2,8 +2,8 @@
 title: Заметки
 author: Антон Муравьев
 description: Небольшие заметки о том, что мне интересно
-date: '2026-05-12T14:25:23+03:00'
-date-rfc: Tue, 12 May 2026 14:25:23 +0300
+date: '2026-06-10T22:44:03+03:00'
+date-rfc: Wed, 10 Jun 2026 22:44:03 +0300
 notes:
 - year: 2026
   articles:
@@ -99,6 +99,11 @@ notes:
     date-rfc: Wed, 31 Dec 2025 13:21:21 +0300
     file: year-review-2025
     guid: f95b08a5-764d-4fdb-b911-f566a3d7e5bb
+  - title: Вышел Debian 13!
+    description: Обновил систему
+    date-rfc: Fri, 29 Aug 2025 19:26:19 +0300
+    file: debian-13-is-out-now
+    guid: be57a1fd-db12-487b-88fb-6d3173fdd869
   - title: KOSS Porta Pro
     description: Легендарные наушники
     date-rfc: Sat, 23 Aug 2025 13:12:34 +0300

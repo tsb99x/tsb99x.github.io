@@ -7,7 +7,7 @@
 <link>https://tsb99x.github.io/notes/</link>
 <language>ru</language>
 <generator>pandoc</generator>
-<lastBuildDate>Tue, 12 May 2026 14:25:23 +0300</lastBuildDate>
+<lastBuildDate>Wed, 10 Jun 2026 22:44:03 +0300</lastBuildDate>
 
 <atom:link href="https://tsb99x.github.io/notes/feed.xml" rel="self" type="application/rss+xml" />
 
@@ -136,6 +136,13 @@
     <link>https://tsb99x.github.io/notes/year-review-2025.html</link>
     <pubDate>Wed, 31 Dec 2025 13:21:21 +0300</pubDate>
     <guid isPermaLink="false">f95b08a5-764d-4fdb-b911-f566a3d7e5bb</guid>
+</item>
+<item>
+    <title>Вышел Debian 13!</title>
+    <description><![CDATA[Обновил систему]]></description>
+    <link>https://tsb99x.github.io/notes/debian-13-is-out-now.html</link>
+    <pubDate>Fri, 29 Aug 2025 19:26:19 +0300</pubDate>
+    <guid isPermaLink="false">be57a1fd-db12-487b-88fb-6d3173fdd869</guid>
 </item>
 <item>
     <title>KOSS Porta Pro</title>
