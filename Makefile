@@ -114,13 +114,15 @@ www/notes/index.html: src/notes/index.md templates/notes-index.html templates/he
 	--metadata base-uri="$(BASE_URI)" \
 	$< -o $@
 
-www/notes/feed.xml: src/notes/index.md templates/notes-feed.xml
-	sed '/title:/ s/`//g ; s/<//g ; s/>//g' $< > $<.tmp
+.INTERMEDIATE: src/notes/index.md.tmp
+src/notes/index.md.tmp: src/notes/index.md
+	sed '/title:/ s/`//g ; s/<//g ; s/>//g' $< > $@
+
+www/notes/feed.xml: src/notes/index.md.tmp templates/notes-feed.xml
 	pandoc --fail-if-warnings --wrap=none -f markdown -t html \
 	--template templates/notes-feed.xml \
 	--metadata base-uri="$(BASE_URI)" \
-	$<.tmp -o $@
-	rm $<.tmp
+	$< -o $@
 
 build_font = pyftsubset $< \
 	--unicodes=$(1) \
