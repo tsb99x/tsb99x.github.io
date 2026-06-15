@@ -59,12 +59,13 @@
 <span class="go">docker.io/ollama/ollama  rocm        d466fc07e32e  11 days ago  6.42 GB</span>
 </code></pre></div>
 
-<p>Да, образ толстенький. Теперь его надо запустить. На странице Docker Hub есть команда для запуска на AMD GPU. Немного её модифицируем, добавив права опцией <code>container_runtime_t</code> и сохраняя пользовательские группы опцией <code>keep-groups</code>. Это нужно для Podman, ведь он выдаёт контейнерам меньше прав по-умолчанию.</p>
+<p>Да, образ толстенький. Теперь его надо запустить. На странице Docker Hub есть команда для запуска на AMD GPU. Немного её модифицируем, добавив права опцией <code>container_runtime_t</code> и сохраняя пользовательские группы опцией <code>keep-groups</code>. Это нужно для Podman, ведь он выдаёт контейнерам меньше прав по-умолчанию. Кроме этого добавил переменную окружения <code>OLLAMA_KEEP_ALIVE</code>, чтобы модели автоматически выключались после 30 минут бездействия, а не 5, как обычно.</p>
 <div class="highlight"><pre><span></span><code><span class="gp">$ </span>podman<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--device<span class="w"> </span>/dev/kfd<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--device<span class="w"> </span>/dev/dri<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-v<span class="w"> </span>ollama:/root/.ollama<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-p<span class="w"> </span><span class="m">11434</span>:11434<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">OLLAMA_KEEP_ALIVE</span><span class="o">=</span>30m<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--name<span class="w"> </span>ollama<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--security-opt<span class="w"> </span><span class="nv">label</span><span class="o">=</span>type:container_runtime_t<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--group-add<span class="w"> </span>keep-groups<span class="w"> </span><span class="se">\</span>
@@ -148,6 +149,10 @@
 
 <time datetime="2025-07-20T10:37:42+03:00">20 июля 2025 г.</time>
 
+<div class="changelog">
+<h4>Журнал изменений</h4>
+<p><b>15 июня 2026 г.</b>: Добавил переменную окружения <code>OLLAMA_KEEP_ALIVE</code>.</p>
+</div>
 
 </article>
 

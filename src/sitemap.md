@@ -190,7 +190,7 @@ pages:
 - loc: notes/old-repos-upload.html
   lastmod: 2026-01-02T20:24:57+03:00
 - loc: notes/ollama-in-podman.html
-  lastmod: 2025-07-20T10:37:42+03:00
+  lastmod: 2026-06-15T11:48:15+03:00
 - loc: notes/open-webui-in-podman.html
   lastmod: 2025-07-21T16:11:41+03:00
 - loc: notes/podman-journey-begins.html

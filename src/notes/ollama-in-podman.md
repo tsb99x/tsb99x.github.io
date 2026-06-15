@@ -4,6 +4,9 @@ author: Антон Муравьев
 date: 2025-07-20T10:37:42+03:00
 description: Локальная LLM на Linux
 guid: 288caebd-d8fd-47a5-96bc-64224596aaeb
+changelog:
+- date: 2026-06-15T11:48:15+03:00
+  change: Добавил переменную окружения `OLLAMA_KEEP_ALIVE`.
 ---
 
 Из каждого утюга слышно про LLM. Их нынче называют AI, хотя я сомневаюсь в этом.
@@ -39,6 +42,8 @@ docker.io/ollama/ollama  rocm        d466fc07e32e  11 days ago  6.42 GB
 команда для запуска на AMD GPU. Немного её модифицируем, добавив права опцией
 `container_runtime_t` и сохраняя пользовательские группы опцией `keep-groups`.
 Это нужно для Podman, ведь он выдаёт контейнерам меньше прав по-умолчанию.
+Кроме этого добавил переменную окружения `OLLAMA_KEEP_ALIVE`, чтобы модели
+автоматически выключались после 30 минут бездействия, а не 5, как обычно.
 
 ```shell-session
 $ podman run -d \
@@ -46,6 +51,7 @@ $ podman run -d \
     --device /dev/dri \
     -v ollama:/root/.ollama \
     -p 11434:11434 \
+    -e OLLAMA_KEEP_ALIVE=30m \
     --name ollama \
     --security-opt label=type:container_runtime_t \
     --group-add keep-groups \
