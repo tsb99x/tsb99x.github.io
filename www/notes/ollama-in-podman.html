@@ -59,7 +59,11 @@
 <span class="go">docker.io/ollama/ollama  rocm        d466fc07e32e  11 days ago  6.42 GB</span>
 </code></pre></div>
 
-<p>Да, образ толстенький. Теперь его надо запустить. На странице Docker Hub есть команда для запуска на AMD GPU. Немного её модифицируем, добавив права опцией <code>container_runtime_t</code> и сохраняя пользовательские группы опцией <code>keep-groups</code>. Это нужно для Podman, ведь он выдаёт контейнерам меньше прав по-умолчанию. Кроме этого добавил переменную окружения <code>OLLAMA_KEEP_ALIVE</code>, чтобы модели автоматически выключались после 30 минут бездействия, а не 5, как обычно.</p>
+<p>Да, образ толстенький. Кстати, пока не забыл, ROCm требует, чтобы пользователь находился в группах <code>video</code> и <code>render</code>, так что сразу добавляемся.</p>
+<div class="highlight"><pre><span></span><code><span class="gp">$ </span>sudo<span class="w"> </span>usermod<span class="w"> </span>-aG<span class="w"> </span>video,render<span class="w"> </span><span class="nv">$USER</span>
+</code></pre></div>
+
+<p>Теперь надо запустить образ. На странице Docker Hub есть команда для запуска на AMD GPU. Немного её модифицируем, добавив права опцией <code>container_runtime_t</code> и сохраняя пользовательские группы опцией <code>keep-groups</code>. Это нужно для Podman, ведь он выдаёт контейнерам меньше прав по-умолчанию. Кроме этого добавил переменную окружения <code>OLLAMA_KEEP_ALIVE</code>, чтобы модели автоматически выключались после 30 минут бездействия, а не 5, как обычно.</p>
 <div class="highlight"><pre><span></span><code><span class="gp">$ </span>podman<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--device<span class="w"> </span>/dev/kfd<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--device<span class="w"> </span>/dev/dri<span class="w"> </span><span class="se">\</span>
@@ -152,6 +156,7 @@
 <div class="changelog">
 <h4>Журнал изменений</h4>
 <p><b>15 июня 2026 г.</b>: Добавил переменную окружения <code>OLLAMA_KEEP_ALIVE</code>.</p>
+<p><b>29 июня 2026 г.</b>: Добавил команду для получения групп <code>video</code> и <code>render</code>.</p>
 </div>
 
 </article>
